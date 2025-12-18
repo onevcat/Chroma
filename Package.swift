@@ -17,6 +17,10 @@ let package = Package(
             name: "Chroma",
             targets: ["Chroma"]
         ),
+        .executable(
+            name: "ChromaDemo",
+            targets: ["ChromaDemo"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/onevcat/Rainbow.git", from: "4.2.0"),
@@ -32,6 +36,10 @@ let package = Package(
         ),
         .testTarget(
             name: "ChromaTests",
+            dependencies: ["Chroma"]
+        ),
+        .executableTarget(
+            name: "ChromaDemo",
             dependencies: ["Chroma"]
         ),
     ]

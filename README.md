@@ -29,6 +29,14 @@ let output = try Chroma.highlight(code, language: .swift)
 print(output)
 ```
 
+## Demo
+
+This package includes a small SwiftPM executable target that prints highlighted sample code for multiple languages.
+
+```bash
+swift run ChromaDemo
+```
+
 ### Themes
 
 ```swift
@@ -100,4 +108,3 @@ let output = try highlighter.highlight("let x = 1", language: "my-lang")
 
 - This is an intentionally lightweight, console-focused highlighter.
 - The built-in grammars are best-effort heuristics and will be refined over time.
-
