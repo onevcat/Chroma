@@ -1,0 +1,45 @@
+diff --git a/Sources/Chroma/Tokenizer.swift b/Sources/Chroma/Tokenizer.swift
+index 1111111..2222222 100644
+--- a/Sources/Chroma/Tokenizer.swift
++++ b/Sources/Chroma/Tokenizer.swift
+@@ -1,6 +1,9 @@
+-import Foundation
++import Foundation
++import os.log
++
++private let log = OSLog(subsystem: "Chroma", category: "Tokenizer")
+@@ -15,6 +18,12 @@ final class RegexTokenizer {
+     init(rules: [TokenRule]) {
+         self.rules = rules
+     }
++
++    private func trace(_ message: String) {
++        if #available(macOS 13.0, *) {
++            os_log("%{public}@", log: log, type: .debug, message)
++        }
++    }
+@@ -29,16 +38,20 @@ final class RegexTokenizer {
+-        while location < length {
++        while location < length {
+             var bestMatch: NSTextCheckingResult?
+             var bestRuleIndex: Int?
+@@ -45,7 +58,11 @@ final class RegexTokenizer {
+-            if let bestMatch, let bestRuleIndex {
++            if let bestMatch, let bestRuleIndex {
+                 tokens.append(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
+                 location += bestMatch.range.length
+                 continue
+             }
+@@ -53,6 +70,7 @@ final class RegexTokenizer {
+-            let composed = ns.rangeOfComposedCharacterSequence(at: location)
++            let composed = ns.rangeOfComposedCharacterSequence(at: location)
+             tokens.append(Token(kind: .plain, range: composed))
+             location += composed.length
+         }
+@@ -65,6 +83,10 @@ final class RegexTokenizer {
+-        return coalescingAdjacentTokens(tokens)
++        let result = coalescingAdjacentTokens(tokens)
++        trace("tokens: \(result.count)")
++        return result
+     }
+ }

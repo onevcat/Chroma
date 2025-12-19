@@ -1,0 +1,176 @@
+import Foundation
+
+// MARK: - Curated Swift Fixture
+// This file is intentionally dense to exercise tokenizer paths.
+
+@available(macOS 13.0, iOS 16.0, *)
+@propertyWrapper
+struct Clamped<Value: Comparable> {
+    private var value: Value
+    private let range: ClosedRange<Value>
+
+    init(wrappedValue: Value, _ range: ClosedRange<Value>) {
+        self.range = range
+        self.value = min(max(wrappedValue, range.lowerBound), range.upperBound)
+    }
+
+    var wrappedValue: Value {
+        get { value }
+        set { value = min(max(newValue, range.lowerBound), range.upperBound) }
+    }
+}
+
+protocol Storage {
+    associatedtype Element
+    mutating func append(_ element: Element)
+    var count: Int { get }
+}
+
+struct RingBuffer<Element>: Storage {
+    private var buffer: [Element?]
+    private var head: Int = 0
+    private var tail: Int = 0
+    private(set) var count: Int = 0
+
+    init(capacity: Int) {
+        buffer = Array(repeating: nil, count: max(1, capacity))
+    }
+
+    mutating func append(_ element: Element) {
+        buffer[tail] = element
+        tail = (tail + 1) % buffer.count
+        if count == buffer.count {
+            head = (head + 1) % buffer.count
+        } else {
+            count += 1
+        }
+    }
+
+    mutating func pop() -> Element? {
+        guard count > 0 else { return nil }
+        let value = buffer[head]
+        buffer[head] = nil
+        head = (head + 1) % buffer.count
+        count -= 1
+        return value
+    }
+}
+
+enum Event: Equatable {
+    case started(id: UUID, at: Date)
+    case finished(id: UUID, duration: TimeInterval)
+    case failed(id: UUID, reason: String)
+}
+
+struct Pipeline<Input, Output> {
+    let transform: (Input) throws -> Output
+
+    func run(_ input: Input) -> Result<Output, Error> {
+        do {
+            return .success(try transform(input))
+        } catch {
+            return .failure(error)
+        }
+    }
+}
+
+func parseNumbers(from input: String) -> [Int] {
+    let parts = input.split(whereSeparator: { !$0.isNumber })
+    return parts.compactMap { Int($0) }
+}
+
+func renderTable<T>(_ items: [T], format: (T) -> String) -> String {
+    var output = "| index | value |\n| --- | --- |\n"
+    for (index, item) in items.enumerated() {
+        output += "| \(index) | \(format(item)) |\n"
+    }
+    return output
+}
+
+let sampleJSON = """
+{
+  "name": "Chroma",
+  "features": ["tokenizer", "renderer", "themes"],
+  "meta": {
+    "stable": true,
+    "version": 4.2
+  }
+}
+"""
+
+let rawString = #"""A raw string with \n and \t should not escape."""#
+
+let text = "alpha 123 beta 456 gamma 789"
+let numbers = parseNumbers(from: text)
+let table = renderTable(numbers) { "num=\($0)" }
+
+let pipeline = Pipeline<String, [Int]> { value in
+    guard !value.isEmpty else { throw NSError(domain: "Demo", code: 1) }
+    return parseNumbers(from: value)
+}
+
+switch pipeline.run(text) {
+case .success(let list) where !list.isEmpty:
+    print(list)
+case .success:
+    print("empty")
+case .failure(let error):
+    print("error: \(error)")
+}
+
+// Multi-line comment with tricky tokens:
+/*
+This block has // slashes, "quotes", and /* nested */ patterns.
+Also includes operators: + - * / % & | ^ ! ~= <> ?:
+*/
+
+struct Matrix<T: Numeric> {
+    let rows: Int
+    let cols: Int
+    private var values: [T]
+
+    init(rows: Int, cols: Int, repeating value: T) {
+        self.rows = rows
+        self.cols = cols
+        self.values = Array(repeating: value, count: rows * cols)
+    }
+
+    subscript(row: Int, col: Int) -> T {
+        get { values[row * cols + col] }
+        set { values[row * cols + col] = newValue }
+    }
+}
+
+func demoRegex() {
+    // Swift Regex literal (tokenizer should see /.../ as operators + punctuation)
+    let pattern = /[A-Za-z_][A-Za-z0-9_]*/
+    _ = pattern
+}
+
+demoRegex()
+
+struct User {
+    let id: UUID
+    let name: String
+    let tags: [String]
+
+    func hasTag(_ tag: String) -> Bool {
+        tags.contains(tag)
+    }
+}
+
+let users = [
+    User(id: UUID(), name: "Ada", tags: ["swift", "compiler"]),
+    User(id: UUID(), name: "Linus", tags: ["kernel", "c"]),
+    User(id: UUID(), name: "Grace", tags: ["navy", "cobol"]),
+]
+
+let filtered = users.filter { $0.hasTag("swift") }
+print(filtered.map { $0.name })
+
+// Conditional compilation
+#if DEBUG
+print("debug")
+#else
+print("release")
+#endif

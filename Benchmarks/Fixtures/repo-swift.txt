@@ -1,0 +1,1487 @@
+// --- File: Sources/Chroma/Tokenizer.swift ---
+
+import Foundation
+
+@_spi(Benchmarking)
+public struct TokenizerMetrics: Equatable {
+    public var iterations: Int
+    public var rulesEvaluated: Int
+    public var matchesFound: Int
+    public var bestMatchUpdates: Int
+    public var fallbackComposed: Int
+    public var tokensEmitted: Int
+    public var coalescedTokens: Int
+    public var coalescedMerges: Int
+
+    public init() {
+        self.iterations = 0
+        self.rulesEvaluated = 0
+        self.matchesFound = 0
+        self.bestMatchUpdates = 0
+        self.fallbackComposed = 0
+        self.tokensEmitted = 0
+        self.coalescedTokens = 0
+        self.coalescedMerges = 0
+    }
+
+    public mutating func reset() {
+        self = .init()
+    }
+}
+
+struct Token {
+    var kind: TokenKind
+    var range: NSRange
+}
+
+final class RegexTokenizer {
+    private let rules: [TokenRule]
+
+    init(rules: [TokenRule]) {
+        self.rules = rules
+    }
+
+    func tokenize(_ code: String) -> [Token] {
+        let ns = code as NSString
+        let length = ns.length
+
+        var tokens: [Token] = []
+        tokens.reserveCapacity(max(16, length / 4))
+
+        var location = 0
+        while location < length {
+            var bestMatch: NSTextCheckingResult?
+            var bestRuleIndex: Int?
+
+            let searchRange = NSRange(location: location, length: length - location)
+            for (index, rule) in rules.enumerated() {
+                guard let match = rule.regex.firstMatch(in: code, options: [.anchored], range: searchRange) else {
+                    continue
+                }
+                if bestMatch == nil || match.range.length > bestMatch!.range.length {
+                    bestMatch = match
+                    bestRuleIndex = index
+                }
+            }
+
+            if let bestMatch, let bestRuleIndex {
+                tokens.append(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
+                location += bestMatch.range.length
+                continue
+            }
+
+            let composed = ns.rangeOfComposedCharacterSequence(at: location)
+            tokens.append(Token(kind: .plain, range: composed))
+            location += composed.length
+        }
+
+        return coalescingAdjacentTokens(tokens)
+    }
+
+    func tokenize(_ code: String, metrics: inout TokenizerMetrics) -> [Token] {
+        metrics.reset()
+
+        let ns = code as NSString
+        let length = ns.length
+
+        var tokens: [Token] = []
+        tokens.reserveCapacity(max(16, length / 4))
+
+        var location = 0
+        while location < length {
+            metrics.iterations += 1
+
+            var bestMatch: NSTextCheckingResult?
+            var bestRuleIndex: Int?
+
+            let searchRange = NSRange(location: location, length: length - location)
+            for (index, rule) in rules.enumerated() {
+                metrics.rulesEvaluated += 1
+                guard let match = rule.regex.firstMatch(in: code, options: [.anchored], range: searchRange) else {
+                    continue
+                }
+                metrics.matchesFound += 1
+                if bestMatch == nil || match.range.length > bestMatch!.range.length {
+                    bestMatch = match
+                    bestRuleIndex = index
+                    metrics.bestMatchUpdates += 1
+                }
+            }
+
+            if let bestMatch, let bestRuleIndex {
+                tokens.append(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
+                location += bestMatch.range.length
+                continue
+            }
+
+            let composed = ns.rangeOfComposedCharacterSequence(at: location)
+            tokens.append(Token(kind: .plain, range: composed))
+            metrics.fallbackComposed += 1
+            location += composed.length
+        }
+
+        let result = coalescingAdjacentTokens(tokens)
+        metrics.tokensEmitted = tokens.count
+        metrics.coalescedTokens = result.count
+        metrics.coalescedMerges = tokens.count - result.count
+        return result
+    }
+
+    private func coalescingAdjacentTokens(_ tokens: [Token]) -> [Token] {
+        guard var current = tokens.first else { return [] }
+
+        var result: [Token] = []
+        result.reserveCapacity(tokens.count)
+
+        for token in tokens.dropFirst() {
+            if token.kind == current.kind && current.range.location + current.range.length == token.range.location {
+                current.range.length += token.range.length
+            } else {
+                result.append(current)
+                current = token
+            }
+        }
+        result.append(current)
+
+        return result
+    }
+}
+
+
+// --- File: Sources/Chroma/Renderer.swift ---
+
+import Foundation
+import Rainbow
+
+final class Renderer {
+    private let theme: Theme
+    private let options: HighlightOptions
+
+    init(theme: Theme, options: HighlightOptions) {
+        self.theme = theme
+        self.options = options
+    }
+
+    func render(code: String, tokens: [Token]) -> String {
+        let lines = splitLines(code)
+
+        let diffEnabled: Bool = {
+            switch options.diff {
+            case .none: return false
+            case .patch: return true
+            case .auto: return DiffDetector.looksLikePatch(code)
+            }
+        }()
+
+        var lineBackgrounds = Array<BackgroundColorType?>(repeating: nil, count: lines.count)
+        if diffEnabled {
+            for (index, line) in lines.enumerated() {
+                guard let kind = DiffDetector.kind(forLine: line) else { continue }
+                switch kind {
+                case .added:
+                    lineBackgrounds[index] = theme.diffAddedBackground
+                case .removed:
+                    lineBackgrounds[index] = theme.diffRemovedBackground
+                case .fileHeader, .hunkHeader, .meta:
+                    break
+                }
+            }
+        }
+
+        if !options.highlightLines.ranges.isEmpty {
+            for (index, _) in lines.enumerated() {
+                let lineNumber = index + 1
+                if options.highlightLines.contains(lineNumber) {
+                    lineBackgrounds[index] = theme.lineHighlightBackground
+                }
+            }
+        }
+
+        let ns = code as NSString
+        var segments: [Rainbow.Segment] = []
+        segments.reserveCapacity(tokens.count * 2)
+
+        var currentLine = 1
+        for token in tokens {
+            let raw = ns.substring(with: token.range)
+            appendTokenSegments(
+                raw,
+                kind: token.kind,
+                currentLine: &currentLine,
+                lineBackgrounds: lineBackgrounds,
+                into: &segments
+            )
+        }
+
+        return AnsiStringGenerator.generate(for: Rainbow.Entry(segments: segments))
+    }
+
+    private func appendTokenSegments(
+        _ text: String,
+        kind: TokenKind,
+        currentLine: inout Int,
+        lineBackgrounds: [BackgroundColorType?],
+        into segments: inout [Rainbow.Segment]
+    ) {
+        var start = text.startIndex
+
+        while start < text.endIndex {
+            if let newline = text[start...].firstIndex(of: "\n") {
+                let piece = String(text[start..<newline])
+                if !piece.isEmpty {
+                    let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                    segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
+                }
+
+                segments.append(Rainbow.Segment(text: "\n"))
+                currentLine += 1
+                start = text.index(after: newline)
+            } else {
+                let piece = String(text[start..<text.endIndex])
+                if !piece.isEmpty {
+                    let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                    segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
+                }
+                break
+            }
+        }
+    }
+
+    private func backgroundForLine(_ line: Int, lineBackgrounds: [BackgroundColorType?]) -> BackgroundColorType? {
+        let index = line - 1
+        guard index >= 0, index < lineBackgrounds.count else { return nil }
+        return lineBackgrounds[index]
+    }
+}
+
+
+// --- File: Sources/Chroma/Highlighter.swift ---
+
+import Foundation
+import Rainbow
+
+public final class Highlighter {
+    public enum Error: Swift.Error, Equatable {
+        case languageNotFound(LanguageID)
+    }
+
+    public var theme: Theme
+    public let registry: LanguageRegistry
+
+    public init(theme: Theme = .dark, registry: LanguageRegistry = .builtIn()) {
+        self.theme = theme
+        self.registry = registry
+    }
+
+    public func highlight(
+        _ code: String,
+        language: LanguageID,
+        options: HighlightOptions = .init()
+    ) throws -> String {
+        guard let language = registry.language(for: language) else {
+            throw Error.languageNotFound(language)
+        }
+
+        let theme = options.theme ?? self.theme
+        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokens = tokenizer.tokenize(code)
+
+        let renderer = Renderer(theme: theme, options: options)
+        return renderer.render(code: code, tokens: tokens)
+    }
+}
+
+
+// --- File: Sources/Chroma/BuiltInLanguages.swift ---
+
+import Foundation
+
+enum BuiltInLanguages {
+    static let all: [LanguageDefinition] = [
+        swift,
+        objectiveC,
+        alias(objectiveC, id: .objc),
+        c,
+        javascript,
+        alias(javascript, id: .js),
+        typescript,
+        alias(typescript, id: .ts),
+        python,
+        alias(python, id: .py),
+        ruby,
+        alias(ruby, id: .rb),
+        go,
+        alias(go, id: .golang),
+        rust,
+        kotlin,
+        csharp,
+        alias(csharp, id: .cs),
+    ]
+
+    private static func alias(_ base: LanguageDefinition, id: LanguageID, displayName: String? = nil) -> LanguageDefinition {
+        var lang = base
+        lang.id = id
+        if let displayName {
+            lang.displayName = displayName
+        }
+        return lang
+    }
+
+    private static func wordAlternation(_ words: [String]) -> String {
+        words
+            .map(NSRegularExpression.escapedPattern(for:))
+            .sorted { $0.count > $1.count }
+            .joined(separator: "|")
+    }
+
+    private static func wordRule(kind: TokenKind, words: [String]) -> TokenRule {
+        let alternation = wordAlternation(words)
+        return try! TokenRule(kind: kind, pattern: "\\b(?:\(alternation))\\b")
+    }
+
+    private static func cStyleRules(
+        keywords: [String],
+        builtInTypes: [String],
+        strings: [String],
+        additionalRules: [TokenRule] = []
+    ) -> [TokenRule] {
+        var rules: [TokenRule] = []
+
+        // Comments
+        rules.append(try! TokenRule(kind: .comment, pattern: "//[^\\n\\r]*"))
+        rules.append(try! TokenRule(kind: .comment, pattern: "/\\*[\\s\\S]*?\\*/"))
+
+        // Strings
+        for pattern in strings {
+            rules.append(try! TokenRule(kind: .string, pattern: pattern))
+        }
+
+        // Numbers
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b0x[0-9a-fA-F]+\\b"))
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b\\d+(?:\\.\\d+)?\\b"))
+
+        // Keywords / Types
+        rules.append(wordRule(kind: .keyword, words: keywords))
+        rules.append(wordRule(kind: .type, words: builtInTypes))
+
+        // Identifiers (heuristics)
+        rules.append(try! TokenRule(kind: .function, pattern: "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"))
+        rules.append(try! TokenRule(kind: .property, pattern: "\\.[A-Za-z_][A-Za-z0-9_]*\\b"))
+
+        // Operators / punctuation
+        rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
+        rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;]"))
+
+        rules.append(contentsOf: additionalRules)
+        return rules
+    }
+
+    private static let swift: LanguageDefinition = {
+        let keywords = [
+            "associatedtype", "class", "deinit", "enum", "extension", "fileprivate", "func", "import", "init",
+            "inout", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript",
+            "typealias", "var", "break", "case", "continue", "default", "defer", "do", "else", "fallthrough", "for",
+            "guard", "if", "in", "repeat", "return", "switch", "where", "while", "as", "catch", "false", "is", "nil",
+            "rethrows", "super", "self", "Self", "throw", "throws", "true", "try", "Any",
+        ]
+        let types = [
+            "Bool", "Int", "Int8", "Int16", "Int32", "Int64", "UInt", "UInt8", "UInt16", "UInt32", "UInt64",
+            "Float", "Double", "String", "Character", "Substring", "Array", "Dictionary", "Set", "Optional",
+            "Result", "Error", "Never", "Void",
+        ]
+
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "\"\"\"[\\s\\S]*?\"\"\"",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+            ],
+            additionalRules: [
+                try! TokenRule(kind: .keyword, pattern: "#\\w+"),
+                try! TokenRule(kind: .keyword, pattern: "@[A-Za-z_][A-Za-z0-9_]*\\b"),
+            ]
+        )
+
+        return LanguageDefinition(id: .swift, displayName: "Swift", rules: rules)
+    }()
+
+    private static let objectiveC: LanguageDefinition = {
+        let keywords = [
+            "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern",
+            "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short", "signed",
+            "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while",
+            "@interface", "@implementation", "@end", "@protocol", "@class", "@public", "@private", "@protected",
+            "@package", "@property", "@synthesize", "@dynamic", "@selector", "@try", "@catch", "@finally", "@throw",
+            "@autoreleasepool",
+        ]
+
+        let types = [
+            "id", "BOOL", "NSInteger", "NSUInteger", "CGFloat", "NSObject", "NSString", "NSArray", "NSDictionary",
+            "NSSet", "NSData", "NSError",
+        ]
+
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "@\"(?:\\\\.|[^\"\\\\])*\"",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ],
+            additionalRules: [
+                try! TokenRule(kind: .keyword, pattern: "#\\s*(?:import|include|define|undef|if|ifdef|ifndef|elif|else|endif|pragma)\\b.*")
+            ]
+        )
+        return LanguageDefinition(id: .objectiveC, displayName: "Objective-C", rules: rules)
+    }()
+
+    private static let c: LanguageDefinition = {
+        let keywords = [
+            "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern",
+            "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short", "signed",
+            "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while",
+        ]
+        let types = [
+            "size_t", "ptrdiff_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t", "int8_t", "int16_t", "int32_t",
+            "int64_t",
+        ]
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ],
+            additionalRules: [
+                try! TokenRule(kind: .keyword, pattern: "#\\s*(?:include|define|undef|if|ifdef|ifndef|elif|else|endif|pragma)\\b.*")
+            ]
+        )
+        return LanguageDefinition(id: .c, displayName: "C", rules: rules)
+    }()
+
+    private static let javascript: LanguageDefinition = {
+        let keywords = [
+            "await", "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do",
+            "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof", "let",
+            "new", "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with",
+            "yield", "true", "false", "null", "undefined",
+        ]
+        let types = [
+            "String", "Number", "Boolean", "Object", "Array", "Map", "Set", "Date", "RegExp", "Promise", "Error",
+            "Symbol", "BigInt",
+        ]
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "`[\\s\\S]*?`",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ]
+        )
+        return LanguageDefinition(id: .javascript, displayName: "JavaScript", rules: rules)
+    }()
+
+    private static let typescript: LanguageDefinition = {
+        let keywords = [
+            "any", "as", "asserts", "async", "await", "bigint", "boolean", "break", "case", "catch", "class", "const",
+            "continue", "debugger", "declare", "default", "delete", "do", "else", "enum", "export", "extends",
+            "false", "finally", "for", "from", "function", "get", "if", "implements", "import", "in", "infer",
+            "instanceof", "interface", "is", "keyof", "let", "module", "namespace", "never", "new", "null",
+            "number", "object", "package", "private", "protected", "public", "readonly", "return", "satisfies",
+            "set", "static", "string", "super", "switch", "symbol", "this", "throw", "true", "try", "type",
+            "typeof", "undefined", "unique", "unknown", "var", "void", "while", "with", "yield",
+        ]
+        let types = [
+            "String", "Number", "Boolean", "Object", "Array", "Map", "Set", "Date", "RegExp", "Promise", "Error",
+            "Symbol", "BigInt",
+        ]
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "`[\\s\\S]*?`",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ]
+        )
+        return LanguageDefinition(id: .typescript, displayName: "TypeScript", rules: rules)
+    }()
+
+    private static let python: LanguageDefinition = {
+        let keywords = [
+            "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else",
+            "except", "False", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "None",
+            "nonlocal", "not", "or", "pass", "raise", "return", "True", "try", "while", "with", "yield",
+        ]
+        let types = [
+            "int", "float", "str", "bytes", "bool", "list", "dict", "set", "tuple", "object", "type",
+        ]
+
+        var rules: [TokenRule] = []
+        rules.append(try! TokenRule(kind: .comment, pattern: "#[^\\n\\r]*"))
+        rules.append(try! TokenRule(kind: .string, pattern: "\"\"\"[\\s\\S]*?\"\"\""))
+        rules.append(try! TokenRule(kind: .string, pattern: "'''[\\s\\S]*?'''"))
+        rules.append(try! TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""))
+        rules.append(try! TokenRule(kind: .string, pattern: "'(?:\\\\.|[^'\\\\])*'"))
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b0x[0-9a-fA-F]+\\b"))
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b\\d+(?:\\.\\d+)?\\b"))
+        rules.append(wordRule(kind: .keyword, words: keywords))
+        rules.append(wordRule(kind: .type, words: types))
+        rules.append(try! TokenRule(kind: .function, pattern: "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"))
+        rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
+        rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;:]"))
+
+        return LanguageDefinition(id: .python, displayName: "Python", rules: rules)
+    }()
+
+    private static let ruby: LanguageDefinition = {
+        let keywords = [
+            "BEGIN", "END", "alias", "and", "begin", "break", "case", "class", "def", "defined?", "do", "else",
+            "elsif", "end", "ensure", "false", "for", "if", "in", "module", "next", "nil", "not", "or", "redo",
+            "rescue", "retry", "return", "self", "super", "then", "true", "undef", "unless", "until", "when",
+            "while", "yield",
+        ]
+        let types = [
+            "String", "Integer", "Float", "Array", "Hash", "Symbol", "Object", "Module", "Class",
+        ]
+
+        var rules: [TokenRule] = []
+        rules.append(try! TokenRule(kind: .comment, pattern: "#[^\\n\\r]*"))
+        rules.append(try! TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""))
+        rules.append(try! TokenRule(kind: .string, pattern: "'(?:\\\\.|[^'\\\\])*'"))
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b0x[0-9a-fA-F]+\\b"))
+        rules.append(try! TokenRule(kind: .number, pattern: "\\b\\d+(?:\\.\\d+)?\\b"))
+        rules.append(wordRule(kind: .keyword, words: keywords))
+        rules.append(wordRule(kind: .type, words: types))
+        rules.append(try! TokenRule(kind: .function, pattern: "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"))
+        rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
+        rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;:]"))
+
+        return LanguageDefinition(id: .ruby, displayName: "Ruby", rules: rules)
+    }()
+
+    private static let go: LanguageDefinition = {
+        let keywords = [
+            "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func",
+            "go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select", "struct",
+            "switch", "type", "var",
+        ]
+        let types = [
+            "bool", "byte", "complex64", "complex128", "error", "float32", "float64", "int", "int8", "int16",
+            "int32", "int64", "rune", "string", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+        ]
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "`[\\s\\S]*?`",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+            ]
+        )
+        return LanguageDefinition(id: .go, displayName: "Go", rules: rules)
+    }()
+
+    private static let rust: LanguageDefinition = {
+        let keywords = [
+            "as", "async", "await", "break", "const", "continue", "crate", "dyn", "else", "enum", "extern", "false",
+            "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref", "return",
+            "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe", "use", "where", "while",
+        ]
+        let types = [
+            "bool", "char", "str", "String", "usize", "isize", "u8", "u16", "u32", "u64", "u128", "i8", "i16",
+            "i32", "i64", "i128", "f32", "f64", "Option", "Result",
+        ]
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "r#*\"[\\s\\S]*?\"#*",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ]
+        )
+        return LanguageDefinition(id: .rust, displayName: "Rust", rules: rules)
+    }()
+
+    private static let kotlin: LanguageDefinition = {
+        let keywords = [
+            "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in", "interface", "is",
+            "null", "object", "package", "return", "super", "this", "throw", "true", "try", "typealias", "val",
+            "var", "when", "while", "by", "catch", "constructor", "delegate", "dynamic", "field", "file",
+            "finally", "get", "import", "init", "param", "property", "receiver", "set", "setparam", "where",
+        ]
+        let types = [
+            "Any", "Boolean", "Byte", "Char", "Double", "Float", "Int", "Long", "Short", "String", "Unit",
+            "List", "Map", "Set",
+        ]
+        var rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "\"\"\"[\\s\\S]*?\"\"\"",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ]
+        )
+        return LanguageDefinition(id: .kotlin, displayName: "Kotlin", rules: rules)
+    }()
+
+    private static let csharp: LanguageDefinition = {
+        let keywords = [
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
+            "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit",
+            "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in",
+            "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator",
+            "out", "override", "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte",
+            "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw",
+            "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void",
+            "volatile", "while", "var", "record", "init", "required", "with", "when",
+        ]
+        let types = [
+            "bool", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal",
+            "char", "string", "object", "dynamic", "DateTime", "Guid", "Task", "ValueTask",
+        ]
+
+        let rules = cStyleRules(
+            keywords: keywords,
+            builtInTypes: types,
+            strings: [
+                "\\$@\"(?:\"\"|[\\s\\S])*?\"",
+                "@\"(?:\"\"|[\\s\\S])*?\"",
+                "\\$\"(?:\\\\.|[^\"\\\\])*\"",
+                "\"(?:\\\\.|[^\"\\\\])*\"",
+                "'(?:\\\\.|[^'\\\\])*'",
+            ]
+        )
+
+        return LanguageDefinition(id: .csharp, displayName: "C#", rules: rules)
+    }()
+}
+
+
+// --- File: Sources/Chroma/Diff.swift ---
+
+import Foundation
+
+enum DiffLineKind {
+    case added
+    case removed
+    case fileHeader
+    case hunkHeader
+    case meta
+}
+
+enum DiffDetector {
+    static func looksLikePatch(_ code: String) -> Bool {
+        for line in splitLines(code) {
+            let s = trimmingCR(line)
+            if s.hasPrefix("diff --git ") { return true }
+            if s.hasPrefix("@@") { return true }
+            if s.hasPrefix("--- ") || s.hasPrefix("+++ ") { return true }
+        }
+        return false
+    }
+
+    static func kind(forLine line: Substring) -> DiffLineKind? {
+        let s = trimmingCR(line)
+
+        if s.hasPrefix("diff --git ") { return .meta }
+        if s.hasPrefix("index ") { return .meta }
+        if s.hasPrefix("new file mode ") { return .meta }
+        if s.hasPrefix("deleted file mode ") { return .meta }
+        if s.hasPrefix("rename from ") { return .meta }
+        if s.hasPrefix("rename to ") { return .meta }
+        if s.hasPrefix("Binary files ") { return .meta }
+
+        if s.hasPrefix("@@") { return .hunkHeader }
+        if s.hasPrefix("--- ") || s.hasPrefix("+++ ") { return .fileHeader }
+
+        if s.hasPrefix("+") && !s.hasPrefix("+++ ") { return .added }
+        if s.hasPrefix("-") && !s.hasPrefix("--- ") { return .removed }
+
+        return nil
+    }
+}
+
+func splitLines(_ string: String) -> [Substring] {
+    var result: [Substring] = []
+    result.reserveCapacity(64)
+
+    var start = string.startIndex
+    while true {
+        if let newline = string[start...].firstIndex(of: "\n") {
+            result.append(string[start..<newline])
+            start = string.index(after: newline)
+        } else {
+            result.append(string[start..<string.endIndex])
+            break
+        }
+    }
+    return result
+}
+
+func trimmingCR(_ line: Substring) -> Substring {
+    if line.hasSuffix("\r") {
+        return line.dropLast()
+    }
+    return line
+}
+
+
+// --- File: Sources/Chroma/AnsiStringGenerator.swift ---
+
+import Rainbow
+
+enum AnsiStringGenerator {
+    static func generate(for entry: Rainbow.Entry) -> String {
+        generate(for: entry, isEnabled: Rainbow.enabled)
+    }
+
+    static func generate(for entry: Rainbow.Entry, isEnabled: Bool) -> String {
+        guard isEnabled else {
+            return entry.plainText
+        }
+
+        // Mirrors Rainbow's console generator behavior, but does not depend on `stdout` being a TTY.
+        let totalTextLength = entry.segments.reduce(0) { $0 + $1.text.count }
+        let estimatedTotalLength = totalTextLength + (entry.segments.count * 20)
+
+        var result = ""
+        result.reserveCapacity(estimatedTotalLength)
+
+        for segment in entry.segments {
+            if segment.isPlain {
+                result.append(segment.text)
+                continue
+            }
+
+            var codes: [UInt8] = []
+            if let color = segment.color { codes += color.value }
+            if let backgroundColor = segment.backgroundColor { codes += backgroundColor.value }
+            if let styles = segment.styles { codes += styles.flatMap { $0.value } }
+
+            if codes.isEmpty || segment.text.isEmpty {
+                result.append(segment.text)
+                continue
+            }
+
+            result.append("\u{001B}[")
+            for (index, code) in codes.enumerated() {
+                if index > 0 { result.append(";") }
+                result.append(String(code))
+            }
+            result.append("m")
+            result.append(segment.text)
+            result.append("\u{001B}[0m")
+        }
+
+        return result
+    }
+}
+
+
+// --- File: Sources/Chroma/LanguageRegistry.swift ---
+
+import Foundation
+
+public final class LanguageRegistry {
+    private var storage: [LanguageID: LanguageDefinition]
+    private let lock = NSLock()
+
+    public init(languages: [LanguageDefinition] = []) {
+        self.storage = Dictionary(uniqueKeysWithValues: languages.map { ($0.id, $0) })
+    }
+
+    /// Creates a new registry pre-filled with built-in language definitions.
+    public static func builtIn() -> LanguageRegistry {
+        LanguageRegistry(languages: BuiltInLanguages.all)
+    }
+
+    public func register(_ language: LanguageDefinition, overwrite: Bool = true) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        if !overwrite, storage[language.id] != nil {
+            return
+        }
+        storage[language.id] = language
+    }
+
+    public func language(for id: LanguageID) -> LanguageDefinition? {
+        lock.lock()
+        defer { lock.unlock() }
+        return storage[id]
+    }
+
+    public func allLanguages() -> [LanguageDefinition] {
+        lock.lock()
+        defer { lock.unlock() }
+        return storage.values.sorted { $0.id.rawValue < $1.id.rawValue }
+    }
+}
+
+
+// --- File: Tests/ChromaTests/BuiltInLanguageGoldenTests.swift ---
+
+import Testing
+@testable import Chroma
+
+@Suite("Golden - Swift")
+struct SwiftGoldenTests {
+    @Test("Basic keywords and numbers")
+    func basicKeywords() throws {
+        try assertGolden(
+            "let value = 42",
+            language: .swift,
+            expected: [
+                ExpectedToken(.keyword, "let"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "42"),
+            ]
+        )
+    }
+
+    @Test("Functions, strings, and comments")
+    func functionStringComment() throws {
+        try assertGolden(
+            "print(\"hi\") // note",
+            language: .swift,
+            expected: [
+                ExpectedToken(.function, "print"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.comment, "// note"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Objective-C")
+struct ObjectiveCGoldenTests {
+    @Test("Types and strings")
+    func typesAndStrings() throws {
+        try assertGolden(
+            "NSString *name = @\"hi\"",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.type, "NSString"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "*"),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.string, "@\"hi\""),
+            ]
+        )
+    }
+
+    @Test("Keywords, operators, and numbers")
+    func keywordsOperatorsNumbers() throws {
+        try assertGolden(
+            "if (value == 0) {}",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.keyword, "if"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "=="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "0"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "{}"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - C")
+struct CGoldenTests {
+    @Test("Keywords and hex numbers")
+    func keywordsNumbers() throws {
+        try assertGolden(
+            "int value = 0x2A",
+            language: .c,
+            expected: [
+                ExpectedToken(.keyword, "int"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "0x2A"),
+            ]
+        )
+    }
+
+    @Test("Functions, strings, and punctuation")
+    func functionsAndStrings() throws {
+        try assertGolden(
+            "printf(\"hi\");",
+            language: .c,
+            expected: [
+                ExpectedToken(.function, "printf"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken(.punctuation, ");"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - JavaScript")
+struct JavaScriptGoldenTests {
+    @Test("Keywords and numbers")
+    func keywordsNumbers() throws {
+        try assertGolden(
+            "const value = 42",
+            language: .javascript,
+            expected: [
+                ExpectedToken(.keyword, "const"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "42"),
+            ]
+        )
+    }
+
+    @Test("Properties and strings")
+    func propertiesAndStrings() throws {
+        try assertGolden(
+            "console.log(\"hi\")",
+            language: .javascript,
+            expected: [
+                ExpectedToken(.plain, "console"),
+                ExpectedToken(.property, ".log"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken(.punctuation, ")"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - TypeScript")
+struct TypeScriptGoldenTests {
+    @Test("Keywords and object shapes")
+    func keywordsAndObjects() throws {
+        try assertGolden(
+            "type User = { id: number }",
+            language: .typescript,
+            expected: [
+                ExpectedToken(.keyword, "type"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "User"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "{"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "id"),
+                ExpectedToken(.operator, ":"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.keyword, "number"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "}"),
+            ]
+        )
+    }
+
+    @Test("Generics and arrays")
+    func genericsAndArrays() throws {
+        try assertGolden(
+            "const list: Array<string> = []",
+            language: .typescript,
+            expected: [
+                ExpectedToken(.keyword, "const"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "list"),
+                ExpectedToken(.operator, ":"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "Array"),
+                ExpectedToken(.operator, "<"),
+                ExpectedToken(.keyword, "string"),
+                ExpectedToken(.operator, ">"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "[]"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Python")
+struct PythonGoldenTests {
+    @Test("Functions and punctuation")
+    func functionsAndPunctuation() throws {
+        try assertGolden(
+            "def greet(name):",
+            language: .python,
+            expected: [
+                ExpectedToken(.keyword, "def"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken(.operator, ":"),
+            ]
+        )
+    }
+
+    @Test("Strings and comments")
+    func stringsAndComments() throws {
+        try assertGolden(
+            "return \"hi\" # note",
+            language: .python,
+            expected: [
+                ExpectedToken(.keyword, "return"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.comment, "# note"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Ruby")
+struct RubyGoldenTests {
+    @Test("Functions and punctuation")
+    func functionsAndPunctuation() throws {
+        try assertGolden(
+            "def greet(name)",
+            language: .ruby,
+            expected: [
+                ExpectedToken(.keyword, "def"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken(.punctuation, ")"),
+            ]
+        )
+    }
+
+    @Test("Strings and comments")
+    func stringsAndComments() throws {
+        try assertGolden(
+            "greet(\"hi\") # note",
+            language: .ruby,
+            expected: [
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.comment, "# note"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Go")
+struct GoGoldenTests {
+    @Test("Functions and types")
+    func functionsAndTypes() throws {
+        try assertGolden(
+            "func greet(name string) {",
+            language: .go,
+            expected: [
+                ExpectedToken(.keyword, "func"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "string"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "{"),
+            ]
+        )
+    }
+
+    @Test("Operators and numbers")
+    func operatorsAndNumbers() throws {
+        try assertGolden(
+            "value := 10",
+            language: .go,
+            expected: [
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, ":="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "10"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Rust")
+struct RustGoldenTests {
+    @Test("Functions and types")
+    func functionsAndTypes() throws {
+        try assertGolden(
+            "fn greet(name: &str) -> String",
+            language: .rust,
+            expected: [
+                ExpectedToken(.keyword, "fn"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken(.operator, ":"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "&"),
+                ExpectedToken(.type, "str"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "->"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "String"),
+            ]
+        )
+    }
+
+    @Test("Keywords and hex numbers")
+    func keywordsNumbers() throws {
+        try assertGolden(
+            "let value = 0x2A",
+            language: .rust,
+            expected: [
+                ExpectedToken(.keyword, "let"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "value"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "0x2A"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - Kotlin")
+struct KotlinGoldenTests {
+    @Test("Functions and types")
+    func functionsAndTypes() throws {
+        try assertGolden(
+            "fun greet(name: String): Int",
+            language: .kotlin,
+            expected: [
+                ExpectedToken(.keyword, "fun"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.function, "greet"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken(.operator, ":"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "String"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken(.operator, ":"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "Int"),
+            ]
+        )
+    }
+
+    @Test("Keywords and numbers")
+    func keywordsNumbers() throws {
+        try assertGolden(
+            "val count = 42",
+            language: .kotlin,
+            expected: [
+                ExpectedToken(.keyword, "val"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "count"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "42"),
+            ]
+        )
+    }
+}
+
+@Suite("Golden - C#")
+struct CSharpGoldenTests {
+    @Test("Properties and strings")
+    func propertiesAndStrings() throws {
+        try assertGolden(
+            "Console.WriteLine(\"hi\");",
+            language: .csharp,
+            expected: [
+                ExpectedToken(.plain, "Console"),
+                ExpectedToken(.property, ".WriteLine"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.string, "\"hi\""),
+                ExpectedToken(.punctuation, ");"),
+            ]
+        )
+    }
+
+    @Test("Keywords and numbers")
+    func keywordsNumbers() throws {
+        try assertGolden(
+            "var total = 3.14",
+            language: .csharp,
+            expected: [
+                ExpectedToken(.keyword, "var"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "total"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.number, "3.14"),
+            ]
+        )
+    }
+}
+
+
+// --- File: Tests/ChromaTests/RendererTests.swift ---
+
+import Foundation
+import Testing
+@testable import Chroma
+
+@Suite("Renderer")
+struct RendererTests {
+    @Test("Applies line highlight background")
+    func appliesLineHighlight() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .none, highlightLines: [2...2])
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\nlet b"
+        let tokens = [
+            Token(kind: .keyword, range: NSRange(location: 0, length: 3)),
+            Token(kind: .plain, range: NSRange(location: 3, length: 2)),
+            Token(kind: .plain, range: NSRange(location: 5, length: 1)),
+            Token(kind: .keyword, range: NSRange(location: 6, length: 3)),
+            Token(kind: .plain, range: NSRange(location: 9, length: 2)),
+        ]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expected = renderExpected([
+            ExpectedToken(.keyword, "let"),
+            ExpectedToken.plain(" a"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.keyword, "let", background: theme.lineHighlightBackground),
+            ExpectedToken(.plain, " b", background: theme.lineHighlightBackground),
+        ])
+
+        #expect(output == expected)
+    }
+
+    @Test("Line highlighting overrides diff backgrounds")
+    func highlightOverridesDiff() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .patch, highlightLines: [1...1])
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "+let a = 1"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expected = renderExpected([
+            ExpectedToken(.keyword, "let", background: theme.lineHighlightBackground)
+        ])
+        let unexpected = renderExpected([
+            ExpectedToken(.keyword, "let", background: theme.diffAddedBackground)
+        ])
+
+        #expect(output.contains(expected))
+        #expect(!output.contains(unexpected))
+    }
+}
+
+
+// --- File: Tests/ChromaTests/ChromaTests.swift ---
+
+import Testing
+@testable import Chroma
+
+@Suite("Highlighter output")
+struct HighlighterOutputTests {
+    @Test("Swift keyword styling uses provided theme")
+    func swiftKeywordStyling() throws {
+        let output = try highlightWithTestTheme("struct User {}", language: .swift)
+        let expected = renderExpected([ExpectedToken(.keyword, "struct")])
+        #expect(output.contains(expected))
+    }
+
+    @Test("Swift string and comment styling uses provided theme")
+    func swiftStringAndCommentStyling() throws {
+        let code = """
+        let s = "hello"
+        // comment
+        """
+        let output = try highlightWithTestTheme(code, language: .swift)
+
+        let expectedString = renderExpected([ExpectedToken(.string, "\"hello\"")])
+        let expectedComment = renderExpected([ExpectedToken(.comment, "// comment")])
+        #expect(output.contains(expectedString))
+        #expect(output.contains(expectedComment))
+    }
+
+    @Test("Options theme overrides the highlighter theme")
+    func themeOverride() throws {
+        let customTheme = Theme(
+            name: "override",
+            tokenStyles: [
+                .plain: .init(),
+                .comment: .init(foreground: .named(.white), styles: [.bold]),
+            ],
+            lineHighlightBackground: .named(.lightYellow),
+            diffAddedBackground: .named(.lightGreen),
+            diffRemovedBackground: .named(.lightRed)
+        )
+        let output = try highlightWithTestTheme(
+            "// comment",
+            language: .swift,
+            options: .init(theme: customTheme)
+        )
+        let expected = renderExpected([ExpectedToken(.comment, "// comment")], theme: customTheme)
+        #expect(output.contains(expected))
+    }
+
+    @Test("Line highlighting applies background to styled tokens")
+    func lineHighlighting() throws {
+        let code = """
+        struct A {}
+        struct B {}
+        """
+        let output = try highlightWithTestTheme(
+            code,
+            language: .swift,
+            options: .init(highlightLines: [2...2])
+        )
+
+        let expected = renderExpected([
+            ExpectedToken(.keyword, "struct", background: TestThemes.stable.lineHighlightBackground)
+        ])
+        #expect(output.contains(expected))
+    }
+
+    @Test("Diff highlighting uses patch rules for +/- lines")
+    func diffHighlightingPatch() throws {
+        let patch = """
+        diff --git a/Foo.swift b/Foo.swift
+        --- a/Foo.swift
+        +++ b/Foo.swift
+        @@ -1,1 +1,1 @@
+        -let a = 1
+        +let a = 2
+        """
+
+        let output = try highlightWithTestTheme(
+            patch,
+            language: .swift,
+            options: .init(diff: .patch)
+        )
+
+        let expectedAdded = renderExpected([
+            ExpectedToken(.keyword, "let", background: TestThemes.stable.diffAddedBackground)
+        ])
+        let unexpectedHeader = renderExpected([
+            ExpectedToken(.operator, "+++", background: TestThemes.stable.diffAddedBackground)
+        ])
+        #expect(output.contains(expectedAdded))
+        #expect(!output.contains(unexpectedHeader))
+    }
+
+    @Test("Language aliases resolve in the built-in registry")
+    func languageAliases() throws {
+        #expect(throws: Never.self) {
+            _ = try highlightWithTestTheme("const x = 1", language: .js)
+        }
+        #expect(throws: Never.self) {
+            _ = try highlightWithTestTheme("class A {}", language: .objc)
+        }
+        #expect(throws: Never.self) {
+            _ = try highlightWithTestTheme("var x = 1", language: .cs)
+        }
+    }
+}
+
+
+// --- File: Package.swift ---
+
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "Chroma",
+    platforms: [
+        .macOS(.v13),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6),
+    ],
+    products: [
+        // Products define the executables and libraries a package produces, making them visible to other packages.
+        .library(
+            name: "Chroma",
+            targets: ["Chroma"]
+        ),
+        .executable(
+            name: "ChromaDemo",
+            targets: ["ChromaDemo"]
+        ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/onevcat/Rainbow.git", from: "4.2.1"),
+        .package(url: "https://github.com/ordo-one/package-benchmark", from: "1.20.0"),
+    ],
+    targets: [
+        // Targets are the basic building blocks of a package, defining a module or a test suite.
+        // Targets can depend on other targets in this package and products from dependencies.
+        .target(
+            name: "Chroma",
+            dependencies: [
+                .product(name: "Rainbow", package: "Rainbow"),
+            ]
+        ),
+        .testTarget(
+            name: "ChromaTests",
+            dependencies: ["Chroma"]
+        ),
+        .executableTarget(
+            name: "ChromaDemo",
+            dependencies: ["Chroma"]
+        ),
+        .executableTarget(
+            name: "ChromaBenchmarks",
+            dependencies: [
+                "Chroma",
+                .product(name: "Benchmark", package: "package-benchmark"),
+            ],
+            path: "Benchmarks/ChromaBenchmarks",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
+            ]
+        ),
+    ]
+)
