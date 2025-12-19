@@ -4,10 +4,12 @@ import Rainbow
 final class Renderer {
     private let theme: Theme
     private let options: HighlightOptions
+    private let styleCache: Theme.StyleCache
 
     init(theme: Theme, options: HighlightOptions) {
         self.theme = theme
         self.options = options
+        self.styleCache = theme.makeStyleCache()
     }
 
     func render(code: String, tokens: [Token]) -> String {
@@ -62,7 +64,8 @@ final class Renderer {
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
-                    segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
+                    let style = styleCache.style(for: kind)
+                    segments.append(style.makeSegment(text: piece, backgroundOverride: background))
                 }
 
                 segments.append(Rainbow.Segment(text: "\n"))
@@ -73,7 +76,8 @@ final class Renderer {
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
-                    segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
+                    let style = styleCache.style(for: kind)
+                    segments.append(style.makeSegment(text: piece, backgroundOverride: background))
                 }
                 break
             }

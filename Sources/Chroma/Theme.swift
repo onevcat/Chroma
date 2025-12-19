@@ -30,6 +30,26 @@ public struct Theme: Equatable {
     public func style(for kind: TokenKind) -> TextStyle {
         tokenStyles[kind] ?? tokenStyles[.plain] ?? .init()
     }
+
+    func makeStyleCache() -> StyleCache {
+        StyleCache(tokenStyles: tokenStyles)
+    }
+}
+
+extension Theme {
+    struct StyleCache {
+        private let styles: [TokenKind: TextStyle]
+        private let defaultStyle: TextStyle
+
+        init(tokenStyles: [TokenKind: TextStyle]) {
+            self.styles = tokenStyles
+            self.defaultStyle = tokenStyles[.plain] ?? .init()
+        }
+
+        func style(for kind: TokenKind) -> TextStyle {
+            styles[kind] ?? defaultStyle
+        }
+    }
 }
 
 public extension Theme {
