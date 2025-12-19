@@ -73,6 +73,7 @@ final class RegexTokenizer {
         metrics: UnsafeMutablePointer<TokenizerMetrics>?,
         emit: (Token) -> Void
     ) {
+        let isASCII = code.unicodeScalars.allSatisfy { $0.isASCII }
         let ns = code as NSString
         let length = ns.length
 
@@ -113,6 +114,12 @@ final class RegexTokenizer {
                 metrics.pointee.fallbackComposed += 1
                 index = composed.location + composed.length
             }
+        }
+
+        func appendPlainASCII(_ range: NSRange) {
+            guard range.length > 0 else { return }
+            appendToken(Token(kind: .plain, range: range))
+            metrics?.pointee.fallbackComposed += range.length
         }
 
         var cachedMatches: [NSTextCheckingResult?] = Array(repeating: nil, count: rules.count)
@@ -162,10 +169,14 @@ final class RegexTokenizer {
             guard let earliestLocation else {
                 let remainingRange = NSRange(location: location, length: length - location)
                 if remainingRange.length > 0 {
-                    let safeRange = ns.rangeOfComposedCharacterSequences(for: remainingRange)
-                    if safeRange.length > 0 {
-                        appendToken(Token(kind: .plain, range: safeRange))
-                        recordFallbackComposed(in: safeRange)
+                    if isASCII {
+                        appendPlainASCII(remainingRange)
+                    } else {
+                        let safeRange = ns.rangeOfComposedCharacterSequences(for: remainingRange)
+                        if safeRange.length > 0 {
+                            appendToken(Token(kind: .plain, range: safeRange))
+                            recordFallbackComposed(in: safeRange)
+                        }
                     }
                 }
                 break
@@ -173,19 +184,25 @@ final class RegexTokenizer {
 
             if earliestLocation > location {
                 let plainRange = NSRange(location: location, length: earliestLocation - location)
-                let safeRange = ns.rangeOfComposedCharacterSequences(for: plainRange)
-                if safeRange.length > 0 {
-                    appendToken(Token(kind: .plain, range: safeRange))
-                    recordFallbackComposed(in: safeRange)
-                    location = safeRange.location + safeRange.length
+                if isASCII {
+                    appendPlainASCII(plainRange)
+                    location += plainRange.length
+                    continue
+                } else {
+                    let safeRange = ns.rangeOfComposedCharacterSequences(for: plainRange)
+                    if safeRange.length > 0 {
+                        appendToken(Token(kind: .plain, range: safeRange))
+                        recordFallbackComposed(in: safeRange)
+                        location = safeRange.location + safeRange.length
+                        continue
+                    }
+
+                    let composed = ns.rangeOfComposedCharacterSequence(at: location)
+                    appendToken(Token(kind: .plain, range: composed))
+                    recordFallbackComposed(in: composed)
+                    location += composed.length
                     continue
                 }
-
-                let composed = ns.rangeOfComposedCharacterSequence(at: location)
-                appendToken(Token(kind: .plain, range: composed))
-                recordFallbackComposed(in: composed)
-                location += composed.length
-                continue
             }
 
             var bestMatch: NSTextCheckingResult?
@@ -205,10 +222,15 @@ final class RegexTokenizer {
                 continue
             }
 
-            let composed = ns.rangeOfComposedCharacterSequence(at: location)
-            appendToken(Token(kind: .plain, range: composed))
-            recordFallbackComposed(in: composed)
-            location += composed.length
+            if isASCII {
+                appendPlainASCII(NSRange(location: location, length: 1))
+                location += 1
+            } else {
+                let composed = ns.rangeOfComposedCharacterSequence(at: location)
+                appendToken(Token(kind: .plain, range: composed))
+                recordFallbackComposed(in: composed)
+                location += composed.length
+            }
         }
 
         flushPending()
