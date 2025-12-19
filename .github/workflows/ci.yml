@@ -23,7 +23,7 @@ jobs:
           swift-version: ${{ matrix.swift }}
 
       - name: Build and test
-        run: swift test -v
+        run: BENCHMARK_DISABLE_JEMALLOC=1 swift test -v
 
   benchmark:
     name: swift package benchmark (macos-latest)
@@ -40,23 +40,6 @@ jobs:
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
         run: brew install jemalloc
-
-      - name: Run benchmarks
-        run: swift package benchmark --target ChromaBenchmarks
-
-  benchmark-linux:
-    name: swift package benchmark (ubuntu-latest)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0"
-
-      - name: Install jemalloc
-        run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
 
       - name: Run benchmarks
         run: swift package benchmark --target ChromaBenchmarks
