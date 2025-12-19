@@ -25,10 +25,54 @@ public final class Highlighter {
 
         let theme = options.theme ?? self.theme
         let tokenizer = RegexTokenizer(rules: language.rules)
-        let tokens = tokenizer.tokenize(code)
+        let renderer = Renderer(theme: theme, options: options)
+        return renderer.render(code: code) { emit in
+            tokenizer.scan(code, emit: emit)
+        }
+    }
 
+    public func tokenize(
+        _ code: String,
+        language: LanguageID
+    ) throws -> [Token] {
+        guard let language = registry.language(for: language) else {
+            throw Error.languageNotFound(language)
+        }
+
+        let tokenizer = RegexTokenizer(rules: language.rules)
+        return tokenizer.tokenize(code)
+    }
+
+    public func tokenize(
+        _ code: String,
+        language: LanguageID,
+        emit: (Token) -> Void
+    ) throws {
+        guard let language = registry.language(for: language) else {
+            throw Error.languageNotFound(language)
+        }
+
+        let tokenizer = RegexTokenizer(rules: language.rules)
+        tokenizer.scan(code, emit: emit)
+    }
+
+    public func render(
+        _ code: String,
+        tokens: [Token],
+        options: HighlightOptions = .init()
+    ) -> String {
+        let theme = options.theme ?? self.theme
         let renderer = Renderer(theme: theme, options: options)
         return renderer.render(code: code, tokens: tokens)
     }
-}
 
+    public func render(
+        _ code: String,
+        options: HighlightOptions = .init(),
+        tokenStream: (_ emit: (Token) -> Void) -> Void
+    ) -> String {
+        let theme = options.theme ?? self.theme
+        let renderer = Renderer(theme: theme, options: options)
+        return renderer.render(code: code, tokenStream: tokenStream)
+    }
+}

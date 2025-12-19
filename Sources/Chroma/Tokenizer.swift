@@ -27,9 +27,14 @@ public struct TokenizerMetrics: Equatable {
     }
 }
 
-struct Token {
-    var kind: TokenKind
-    var range: NSRange
+public struct Token: Equatable {
+    public var kind: TokenKind
+    public var range: NSRange
+
+    public init(kind: TokenKind, range: NSRange) {
+        self.kind = kind
+        self.range = range
+    }
 }
 
 final class RegexTokenizer {
@@ -40,107 +45,172 @@ final class RegexTokenizer {
     }
 
     func tokenize(_ code: String) -> [Token] {
-        let ns = code as NSString
-        let length = ns.length
-
         var tokens: [Token] = []
-        tokens.reserveCapacity(max(16, length / 4))
-
-        var location = 0
-        while location < length {
-            var bestMatch: NSTextCheckingResult?
-            var bestRuleIndex: Int?
-
-            let searchRange = NSRange(location: location, length: length - location)
-            for (index, rule) in rules.enumerated() {
-                guard let match = rule.regex.firstMatch(in: code, options: [.anchored], range: searchRange) else {
-                    continue
-                }
-                if bestMatch == nil || match.range.length > bestMatch!.range.length {
-                    bestMatch = match
-                    bestRuleIndex = index
-                }
-            }
-
-            if let bestMatch, let bestRuleIndex {
-                tokens.append(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
-                location += bestMatch.range.length
-                continue
-            }
-
-            let composed = ns.rangeOfComposedCharacterSequence(at: location)
-            tokens.append(Token(kind: .plain, range: composed))
-            location += composed.length
+        scan(code) { token in
+            tokens.append(token)
         }
-
-        return coalescingAdjacentTokens(tokens)
+        return tokens
     }
 
     func tokenize(_ code: String, metrics: inout TokenizerMetrics) -> [Token] {
         metrics.reset()
 
+        var tokens: [Token] = []
+        withUnsafeMutablePointer(to: &metrics) { pointer in
+            scan(code, metrics: pointer) { token in
+                tokens.append(token)
+            }
+        }
+        return tokens
+    }
+
+    func scan(_ code: String, emit: (Token) -> Void) {
+        scan(code, metrics: nil, emit: emit)
+    }
+
+    private func scan(
+        _ code: String,
+        metrics: UnsafeMutablePointer<TokenizerMetrics>?,
+        emit: (Token) -> Void
+    ) {
         let ns = code as NSString
         let length = ns.length
 
-        var tokens: [Token] = []
-        tokens.reserveCapacity(max(16, length / 4))
+        var pending: Token?
+
+        func flushPending() {
+            guard let current = pending else { return }
+            emit(current)
+            metrics?.pointee.coalescedTokens += 1
+            pending = nil
+        }
+
+        func appendToken(_ token: Token) {
+            metrics?.pointee.tokensEmitted += 1
+
+            if var current = pending,
+               current.kind == token.kind,
+               current.range.location + current.range.length == token.range.location {
+                current.range.length += token.range.length
+                pending = current
+                metrics?.pointee.coalescedMerges += 1
+                return
+            }
+
+            if pending != nil {
+                flushPending()
+            }
+            pending = token
+        }
+
+        func recordFallbackComposed(in range: NSRange) {
+            guard let metrics = metrics, range.length > 0 else { return }
+
+            var index = range.location
+            let end = range.location + range.length
+            while index < end {
+                let composed = ns.rangeOfComposedCharacterSequence(at: index)
+                metrics.pointee.fallbackComposed += 1
+                index = composed.location + composed.length
+            }
+        }
+
+        var cachedMatches: [NSTextCheckingResult?] = Array(repeating: nil, count: rules.count)
+        var cachedSearchLocations: [Int] = Array(repeating: 0, count: rules.count)
+
+        func updateMatch(for index: Int, from location: Int) {
+            let searchRange = NSRange(location: location, length: length - location)
+            cachedSearchLocations[index] = location
+            metrics?.pointee.rulesEvaluated += 1
+            guard let match = rules[index].regex.firstMatch(in: code, options: [], range: searchRange) else {
+                cachedMatches[index] = nil
+                return
+            }
+            cachedMatches[index] = match
+            metrics?.pointee.matchesFound += 1
+        }
 
         var location = 0
+        if length > 0 {
+            for index in rules.indices {
+                updateMatch(for: index, from: location)
+            }
+        }
+
         while location < length {
-            metrics.iterations += 1
+            metrics?.pointee.iterations += 1
+
+            for index in rules.indices {
+                if let match = cachedMatches[index] {
+                    if match.range.location < location {
+                        updateMatch(for: index, from: location)
+                    }
+                } else if cachedSearchLocations[index] < location {
+                    continue
+                }
+            }
+
+            var earliestLocation: Int?
+            for match in cachedMatches {
+                guard let match, match.range.length > 0 else { continue }
+                let matchLocation = match.range.location
+                if earliestLocation == nil || matchLocation < earliestLocation! {
+                    earliestLocation = matchLocation
+                }
+            }
+
+            guard let earliestLocation else {
+                let remainingRange = NSRange(location: location, length: length - location)
+                if remainingRange.length > 0 {
+                    let safeRange = ns.rangeOfComposedCharacterSequences(for: remainingRange)
+                    if safeRange.length > 0 {
+                        appendToken(Token(kind: .plain, range: safeRange))
+                        recordFallbackComposed(in: safeRange)
+                    }
+                }
+                break
+            }
+
+            if earliestLocation > location {
+                let plainRange = NSRange(location: location, length: earliestLocation - location)
+                let safeRange = ns.rangeOfComposedCharacterSequences(for: plainRange)
+                if safeRange.length > 0 {
+                    appendToken(Token(kind: .plain, range: safeRange))
+                    recordFallbackComposed(in: safeRange)
+                    location = safeRange.location + safeRange.length
+                    continue
+                }
+
+                let composed = ns.rangeOfComposedCharacterSequence(at: location)
+                appendToken(Token(kind: .plain, range: composed))
+                recordFallbackComposed(in: composed)
+                location += composed.length
+                continue
+            }
 
             var bestMatch: NSTextCheckingResult?
             var bestRuleIndex: Int?
-
-            let searchRange = NSRange(location: location, length: length - location)
-            for (index, rule) in rules.enumerated() {
-                metrics.rulesEvaluated += 1
-                guard let match = rule.regex.firstMatch(in: code, options: [.anchored], range: searchRange) else {
-                    continue
-                }
-                metrics.matchesFound += 1
+            for (index, match) in cachedMatches.enumerated() {
+                guard let match, match.range.location == location, match.range.length > 0 else { continue }
                 if bestMatch == nil || match.range.length > bestMatch!.range.length {
                     bestMatch = match
                     bestRuleIndex = index
-                    metrics.bestMatchUpdates += 1
+                    metrics?.pointee.bestMatchUpdates += 1
                 }
             }
 
             if let bestMatch, let bestRuleIndex {
-                tokens.append(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
+                appendToken(Token(kind: rules[bestRuleIndex].kind, range: bestMatch.range))
                 location += bestMatch.range.length
                 continue
             }
 
             let composed = ns.rangeOfComposedCharacterSequence(at: location)
-            tokens.append(Token(kind: .plain, range: composed))
-            metrics.fallbackComposed += 1
+            appendToken(Token(kind: .plain, range: composed))
+            recordFallbackComposed(in: composed)
             location += composed.length
         }
 
-        let result = coalescingAdjacentTokens(tokens)
-        metrics.tokensEmitted = tokens.count
-        metrics.coalescedTokens = result.count
-        metrics.coalescedMerges = tokens.count - result.count
-        return result
-    }
-
-    private func coalescingAdjacentTokens(_ tokens: [Token]) -> [Token] {
-        guard var current = tokens.first else { return [] }
-
-        var result: [Token] = []
-        result.reserveCapacity(tokens.count)
-
-        for token in tokens.dropFirst() {
-            if token.kind == current.kind && current.range.location + current.range.length == token.range.location {
-                current.range.length += token.range.length
-            } else {
-                result.append(current)
-                current = token
-            }
-        }
-        result.append(current)
-
-        return result
+        flushPending()
     }
 }
