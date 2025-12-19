@@ -102,4 +102,37 @@ struct HighlighterOutputTests {
             _ = try highlightWithTestTheme("var x = 1", language: .cs)
         }
     }
+
+    @Test("Preserves non-ASCII identifiers and literals")
+    func nonAsciiIdentifiersAndLiterals() throws {
+        let code = """
+        // commentaire café
+        let café = "déjà vu"
+        let 变量 = "漢字"
+        let 😀 = "👩🏽‍💻"
+        """
+        let output = try highlightWithTestTheme(code, language: .swift)
+
+        let expectedComment = renderExpected([ExpectedToken(.comment, "// commentaire café")])
+        let expectedStringLatin = renderExpected([ExpectedToken(.string, "\"déjà vu\"")])
+        let expectedStringCJK = renderExpected([ExpectedToken(.string, "\"漢字\"")])
+        let expectedStringEmoji = renderExpected([ExpectedToken(.string, "\"👩🏽‍💻\"")])
+        let unexpectedLatinIdentifier = renderExpected([ExpectedToken(.keyword, "café")])
+        let unexpectedCjkIdentifier = renderExpected([ExpectedToken(.keyword, "变量")])
+        let unexpectedEmojiIdentifier = renderExpected([ExpectedToken(.keyword, "😀")])
+
+        #expect(output.contains(expectedComment))
+        #expect(output.contains(expectedStringLatin))
+        #expect(output.contains(expectedStringCJK))
+        #expect(output.contains(expectedStringEmoji))
+        #expect(!output.contains(unexpectedLatinIdentifier))
+        #expect(!output.contains(unexpectedCjkIdentifier))
+        #expect(!output.contains(unexpectedEmojiIdentifier))
+        #expect(output.contains("café"))
+        #expect(output.contains("déjà vu"))
+        #expect(output.contains("变量"))
+        #expect(output.contains("漢字"))
+        #expect(output.contains("😀"))
+        #expect(output.contains("👩🏽‍💻"))
+    }
 }
