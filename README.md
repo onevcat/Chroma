@@ -37,6 +37,29 @@ This package includes a small SwiftPM executable target that prints highlighted 
 swift run ChromaDemo
 ```
 
+## Benchmarks
+
+Benchmarks use `package-benchmark`. Install jemalloc to enable memory stats.
+
+```bash
+brew install jemalloc
+swift package benchmark --target ChromaBenchmarks
+```
+
+On Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libjemalloc-dev
+swift package benchmark --target ChromaBenchmarks
+```
+
+If jemalloc is not available, run:
+
+```bash
+BENCHMARK_DISABLE_JEMALLOC=1 swift package benchmark --target ChromaBenchmarks
+```
+
 ### Themes
 
 ```swift

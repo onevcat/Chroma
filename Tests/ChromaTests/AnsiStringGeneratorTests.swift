@@ -30,4 +30,18 @@ struct AnsiStringGeneratorTests {
 
         #expect(output == "plain \u{001B}[34mstyled\u{001B}[0m")
     }
+
+    @Test("Disables ANSI output when Rainbow is disabled")
+    func disablesAnsiOutputWhenDisabled() {
+        let entry = Rainbow.Entry(segments: [
+            Rainbow.Segment(text: "plain "),
+            Rainbow.Segment(text: "styled", color: .named(.blue), backgroundColor: nil, styles: [.bold])
+        ])
+
+        let output = withRainbowEnabled(false) {
+            AnsiStringGenerator.generate(for: entry)
+        }
+
+        #expect(output == "plain styled")
+    }
 }

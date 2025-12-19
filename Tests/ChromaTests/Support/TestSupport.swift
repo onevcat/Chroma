@@ -41,7 +41,7 @@ struct ExpectedToken: Equatable {
 }
 
 private enum RainbowToggle {
-    static let lock = NSLock()
+    static let lock = NSRecursiveLock()
     static var depth = 0
     static var previousEnabled = true
 }
@@ -55,10 +55,8 @@ func withRainbowEnabled<T>(_ enabled: Bool = true, _ body: () throws -> T) rethr
         Rainbow.enabled = true
     }
     RainbowToggle.depth += 1
-    RainbowToggle.lock.unlock()
 
     defer {
-        RainbowToggle.lock.lock()
         RainbowToggle.depth -= 1
         if RainbowToggle.depth == 0 {
             Rainbow.enabled = RainbowToggle.previousEnabled

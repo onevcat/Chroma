@@ -13,6 +13,8 @@
 - `swift build`: Compile the library and demo executable.
 - `swift test`: Run the full test suite.
 - `swift run ChromaDemo`: Print highlighted samples to the terminal.
+- `swift package benchmark --target ChromaBenchmarks`: Run performance benchmarks (jemalloc recommended).
+- `BENCHMARK_DISABLE_JEMALLOC=1 swift package benchmark --target ChromaBenchmarks`: Run benchmarks without jemalloc if it is not installed.
 
 ## Coding Style & Naming Conventions
 
@@ -42,4 +44,5 @@
 
 - Swift 5.9+ (see `Package.swift`).
 - External dependency: `Rainbow` for ANSI styling.
-- Supported platforms: macOS 10.15+, Linux.
+- Benchmarks use `package-benchmark`; install jemalloc for memory stats or set `BENCHMARK_DISABLE_JEMALLOC=1`.
+- Supported platforms: macOS 13+, Linux.

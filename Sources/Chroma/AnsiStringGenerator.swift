@@ -42,4 +42,3 @@ enum AnsiStringGenerator {
         return result
     }
 }
-

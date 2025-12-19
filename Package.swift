@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Chroma",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v13),
         .iOS(.v13),
         .tvOS(.v13),
         .watchOS(.v6),
@@ -24,6 +24,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/onevcat/Rainbow.git", from: "4.2.0"),
+        .package(url: "https://github.com/ordo-one/package-benchmark", from: "1.20.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -41,6 +42,17 @@ let package = Package(
         .executableTarget(
             name: "ChromaDemo",
             dependencies: ["Chroma"]
+        ),
+        .executableTarget(
+            name: "ChromaBenchmarks",
+            dependencies: [
+                "Chroma",
+                .product(name: "Benchmark", package: "package-benchmark"),
+            ],
+            path: "Benchmarks/ChromaBenchmarks",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
+            ]
         ),
     ]
 )
