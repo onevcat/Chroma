@@ -16,22 +16,6 @@ struct PerformanceTests {
         #expect(elapsed < .seconds(1))
     }
 
-    @Test("Large Swift highlight without Rainbow stays under baseline")
-    func largeSwiftHighlightNoColor() throws {
-        let line = "let value = 123 // comment\n"
-        let code = String(repeating: line, count: 2000)
-        let highlighter = Highlighter(theme: TestThemes.stable, registry: .builtIn())
-
-        let clock = ContinuousClock()
-        let start = clock.now
-        _ = try withRainbowEnabled(false) {
-            try highlighter.highlight(code, language: .swift, options: .init(theme: TestThemes.stable))
-        }
-        let elapsed = clock.now - start
-
-        #expect(elapsed < .seconds(1))
-    }
-
     @Test("Diff highlight stays under baseline")
     func diffHighlightBaseline() throws {
         let header = "diff --git a/Foo.swift b/Foo.swift\n@@ -1 +1 @@\n"

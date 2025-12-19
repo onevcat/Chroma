@@ -1,4 +1,3 @@
-import Foundation
 import Rainbow
 import Testing
 @testable import Chroma
@@ -40,40 +39,11 @@ struct ExpectedToken: Equatable {
     }
 }
 
-private enum RainbowToggle {
-    static let lock = NSRecursiveLock()
-    static var depth = 0
-    static var previousEnabled = true
-}
-
-func withRainbowEnabled<T>(_ enabled: Bool = true, _ body: () throws -> T) rethrows -> T {
-    RainbowToggle.lock.lock()
-    if RainbowToggle.depth == 0 {
-        RainbowToggle.previousEnabled = Rainbow.enabled
-        Rainbow.enabled = enabled
-    } else if enabled {
-        Rainbow.enabled = true
-    }
-    RainbowToggle.depth += 1
-
-    defer {
-        RainbowToggle.depth -= 1
-        if RainbowToggle.depth == 0 {
-            Rainbow.enabled = RainbowToggle.previousEnabled
-        }
-        RainbowToggle.lock.unlock()
-    }
-
-    return try body()
-}
-
 func renderExpected(_ tokens: [ExpectedToken], theme: Theme = TestThemes.stable) -> String {
-    withRainbowEnabled(true) {
-        let segments = tokens.map { token in
-            theme.style(for: token.kind).makeSegment(text: token.text, backgroundOverride: token.background)
-        }
-        return AnsiStringGenerator.generate(for: Rainbow.Entry(segments: segments))
+    let segments = tokens.map { token in
+        theme.style(for: token.kind).makeSegment(text: token.text, backgroundOverride: token.background)
     }
+    return AnsiStringGenerator.generate(for: Rainbow.Entry(segments: segments))
 }
 
 func assertGolden(
@@ -102,7 +72,5 @@ func highlightWithTestTheme(
     if options.theme == nil {
         options.theme = theme
     }
-    return try withRainbowEnabled(true) {
-        try highlighter.highlight(code, language: language, options: options)
-    }
+    return try highlighter.highlight(code, language: language, options: options)
 }

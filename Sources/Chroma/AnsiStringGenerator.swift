@@ -2,7 +2,11 @@ import Rainbow
 
 enum AnsiStringGenerator {
     static func generate(for entry: Rainbow.Entry) -> String {
-        guard Rainbow.enabled else {
+        generate(for: entry, isEnabled: Rainbow.enabled)
+    }
+
+    static func generate(for entry: Rainbow.Entry, isEnabled: Bool) -> String {
+        guard isEnabled else {
             return entry.plainText
         }
 

@@ -19,9 +19,7 @@ struct RendererTests {
             Token(kind: .plain, range: NSRange(location: 9, length: 2)),
         ]
 
-        let output = withRainbowEnabled(true) {
-            renderer.render(code: code, tokens: tokens)
-        }
+        let output = renderer.render(code: code, tokens: tokens)
         let expected = renderExpected([
             ExpectedToken(.keyword, "let"),
             ExpectedToken.plain(" a"),
@@ -43,9 +41,7 @@ struct RendererTests {
         let language = BuiltInLanguages.all.first { $0.id == .swift }!
         let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
 
-        let output = withRainbowEnabled(true) {
-            renderer.render(code: code, tokens: tokens)
-        }
+        let output = renderer.render(code: code, tokens: tokens)
         let expected = renderExpected([
             ExpectedToken(.keyword, "let", background: theme.lineHighlightBackground)
         ])

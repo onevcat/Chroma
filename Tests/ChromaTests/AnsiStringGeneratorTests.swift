@@ -10,9 +10,7 @@ struct AnsiStringGeneratorTests {
             Rainbow.Segment(text: "hi", color: .named(.red), backgroundColor: nil, styles: [.bold])
         ])
 
-        let output = withRainbowEnabled(true) {
-            AnsiStringGenerator.generate(for: entry)
-        }
+        let output = AnsiStringGenerator.generate(for: entry, isEnabled: true)
 
         #expect(output == "\u{001B}[31;1mhi\u{001B}[0m")
     }
@@ -24,9 +22,7 @@ struct AnsiStringGeneratorTests {
             Rainbow.Segment(text: "styled", color: .named(.blue), backgroundColor: nil, styles: nil)
         ])
 
-        let output = withRainbowEnabled(true) {
-            AnsiStringGenerator.generate(for: entry)
-        }
+        let output = AnsiStringGenerator.generate(for: entry, isEnabled: true)
 
         #expect(output == "plain \u{001B}[34mstyled\u{001B}[0m")
     }
@@ -38,9 +34,7 @@ struct AnsiStringGeneratorTests {
             Rainbow.Segment(text: "styled", color: .named(.blue), backgroundColor: nil, styles: [.bold])
         ])
 
-        let output = withRainbowEnabled(false) {
-            AnsiStringGenerator.generate(for: entry)
-        }
+        let output = AnsiStringGenerator.generate(for: entry, isEnabled: false)
 
         #expect(output == "plain styled")
     }
