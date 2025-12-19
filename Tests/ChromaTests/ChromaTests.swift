@@ -1,53 +1,70 @@
 import Testing
-import Rainbow
 @testable import Chroma
 
-@Suite("Chroma highlighting")
-struct ChromaHighlightingTests {
-    @Test("Swift keyword styling uses theme")
+@Suite("Highlighter output")
+struct HighlighterOutputTests {
+    @Test("Swift keyword styling uses provided theme")
     func swiftKeywordStyling() throws {
-        Rainbow.enabled = true
-
-        let output = try Chroma.highlight("struct User {}", language: .swift)
-        #expect(output.contains("\u{001B}[95;1mstruct\u{001B}[0m"))
+        let output = try highlightWithTestTheme("struct User {}", language: .swift)
+        let expected = renderExpected([ExpectedToken(.keyword, "struct")])
+        #expect(output.contains(expected))
     }
 
-    @Test("Swift string and comment styling uses theme")
+    @Test("Swift string and comment styling uses provided theme")
     func swiftStringAndCommentStyling() throws {
-        Rainbow.enabled = true
-
         let code = """
         let s = "hello"
         // comment
         """
-        let output = try Chroma.highlight(code, language: .swift)
+        let output = try highlightWithTestTheme(code, language: .swift)
 
-        #expect(output.contains("\u{001B}[92m\"hello\"\u{001B}[0m"))
-        #expect(output.contains("\u{001B}[90;2m// comment\u{001B}[0m"))
+        let expectedString = renderExpected([ExpectedToken(.string, "\"hello\"")])
+        let expectedComment = renderExpected([ExpectedToken(.comment, "// comment")])
+        #expect(output.contains(expectedString))
+        #expect(output.contains(expectedComment))
+    }
+
+    @Test("Options theme overrides the highlighter theme")
+    func themeOverride() throws {
+        let customTheme = Theme(
+            name: "override",
+            tokenStyles: [
+                .plain: .init(),
+                .comment: .init(foreground: .named(.white), styles: [.bold]),
+            ],
+            lineHighlightBackground: .named(.lightYellow),
+            diffAddedBackground: .named(.lightGreen),
+            diffRemovedBackground: .named(.lightRed)
+        )
+        let output = try highlightWithTestTheme(
+            "// comment",
+            language: .swift,
+            options: .init(theme: customTheme)
+        )
+        let expected = renderExpected([ExpectedToken(.comment, "// comment")], theme: customTheme)
+        #expect(output.contains(expected))
     }
 
     @Test("Line highlighting applies background to styled tokens")
     func lineHighlighting() throws {
-        Rainbow.enabled = true
-
         let code = """
         struct A {}
         struct B {}
         """
-        let output = try Chroma.highlight(
+        let output = try highlightWithTestTheme(
             code,
             language: .swift,
             options: .init(highlightLines: [2...2])
         )
 
-        // `Theme.dark` uses background `lightBlack` (100) for highlighted lines.
-        #expect(output.contains("\u{001B}[95;100;1mstruct\u{001B}[0m"))
+        let expected = renderExpected([
+            ExpectedToken(.keyword, "struct", background: TestThemes.stable.lineHighlightBackground)
+        ])
+        #expect(output.contains(expected))
     }
 
     @Test("Diff highlighting uses patch rules for +/- lines")
     func diffHighlightingPatch() throws {
-        Rainbow.enabled = true
-
         let patch = """
         diff --git a/Foo.swift b/Foo.swift
         --- a/Foo.swift
@@ -57,29 +74,32 @@ struct ChromaHighlightingTests {
         +let a = 2
         """
 
-        let output = try Chroma.highlight(
+        let output = try highlightWithTestTheme(
             patch,
             language: .swift,
             options: .init(diff: .patch)
         )
 
-        // `Theme.dark` uses background `green` (42) for added lines.
-        #expect(output.contains("\u{001B}[95;42;1mlet\u{001B}[0m"))
-        #expect(!output.contains("\u{001B}[42m+++"))
+        let expectedAdded = renderExpected([
+            ExpectedToken(.keyword, "let", background: TestThemes.stable.diffAddedBackground)
+        ])
+        let unexpectedHeader = renderExpected([
+            ExpectedToken(.operator, "+++", background: TestThemes.stable.diffAddedBackground)
+        ])
+        #expect(output.contains(expectedAdded))
+        #expect(!output.contains(unexpectedHeader))
     }
 
     @Test("Language aliases resolve in the built-in registry")
     func languageAliases() throws {
-        Rainbow.enabled = true
-
         #expect(throws: Never.self) {
-            _ = try Chroma.highlight("const x = 1", language: .js)
+            _ = try highlightWithTestTheme("const x = 1", language: .js)
         }
         #expect(throws: Never.self) {
-            _ = try Chroma.highlight("class A {}", language: .objc)
+            _ = try highlightWithTestTheme("class A {}", language: .objc)
         }
         #expect(throws: Never.self) {
-            _ = try Chroma.highlight("var x = 1", language: .cs)
+            _ = try highlightWithTestTheme("var x = 1", language: .cs)
         }
     }
 }

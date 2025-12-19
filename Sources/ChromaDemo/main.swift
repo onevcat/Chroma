@@ -158,6 +158,14 @@ struct ChromaDemo {
                 ))
                 print("")
 
+                printSection("Line Highlighting + Numbers")
+                print(try highlighter.highlight(
+                    Samples.swiftNumbers,
+                    language: .swift,
+                    options: .init(highlightLines: [2...2])
+                ))
+                print("")
+
                 printSection("Diff Highlighting (unified patch)")
                 print(try highlighter.highlight(
                     Samples.patch,
@@ -251,6 +259,13 @@ enum Samples {
 
     @attached(member)
     macro MyMacro() = #externalMacro(module: "MyMacros", type: "MyMacro")
+    """
+
+    static let swiftNumbers = """
+    struct Metrics {
+        let count = 42
+        let ratio = 3.14
+    }
     """
 
     static let objc = """
@@ -391,4 +406,3 @@ enum Samples {
     }
     """
 }
-

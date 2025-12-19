@@ -41,7 +41,7 @@ public extension Theme {
             .type: .init(foreground: .named(.lightCyan)),
             .number: .init(foreground: .named(.lightYellow)),
             .string: .init(foreground: .named(.lightGreen)),
-            .comment: .init(foreground: .named(.lightBlack), styles: [.dim]),
+            .comment: .init(foreground: .named(.white), styles: [.dim]),
             .function: .init(foreground: .named(.lightBlue)),
             .property: .init(foreground: .named(.cyan)),
             .punctuation: .init(foreground: .named(.lightWhite)),
@@ -60,7 +60,7 @@ public extension Theme {
             .type: .init(foreground: .named(.blue)),
             .number: .init(foreground: .named(.yellow)),
             .string: .init(foreground: .named(.green)),
-            .comment: .init(foreground: .named(.lightBlack), styles: [.dim]),
+            .comment: .init(foreground: .named(.black), styles: [.dim]),
             .function: .init(foreground: .named(.blue)),
             .property: .init(foreground: .named(.cyan)),
             .punctuation: .init(foreground: .named(.black)),
@@ -71,4 +71,3 @@ public extension Theme {
         diffRemovedBackground: .named(.lightRed)
     )
 }
-
