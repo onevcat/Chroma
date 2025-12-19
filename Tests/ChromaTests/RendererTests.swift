@@ -6,6 +6,7 @@ import Testing
 struct RendererTests {
     @Test("Applies line highlight background")
     func appliesLineHighlight() {
+        ensureRainbowEnabled()
         let theme = TestThemes.stable
         let options = HighlightOptions(theme: theme, diff: .none, highlightLines: [2...2])
         let renderer = Renderer(theme: theme, options: options)
@@ -33,6 +34,7 @@ struct RendererTests {
 
     @Test("Line highlighting overrides diff backgrounds")
     func highlightOverridesDiff() throws {
+        ensureRainbowEnabled()
         let theme = TestThemes.stable
         let options = HighlightOptions(theme: theme, diff: .patch, highlightLines: [1...1])
         let renderer = Renderer(theme: theme, options: options)

@@ -5,6 +5,7 @@ import Testing
 struct ChromaFacadeTests {
     @Test("Chroma.highlight applies options theme")
     func highlightUsesOptionsTheme() throws {
+        ensureRainbowEnabled()
         let theme = TestThemes.stable
         let output = try Chroma.highlight(
             "let value = 1",

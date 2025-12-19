@@ -39,7 +39,15 @@ struct ExpectedToken: Equatable {
     }
 }
 
+@inline(__always)
+func ensureRainbowEnabled() {
+    if !Rainbow.enabled {
+        Rainbow.enabled = true
+    }
+}
+
 func renderExpected(_ tokens: [ExpectedToken], theme: Theme = TestThemes.stable) -> String {
+    ensureRainbowEnabled()
     let segments = tokens.map { token in
         theme.style(for: token.kind).makeSegment(text: token.text, backgroundOverride: token.background)
     }
@@ -66,6 +74,7 @@ func highlightWithTestTheme(
     registry: LanguageRegistry = .builtIn(),
     options: HighlightOptions = .init()
 ) throws -> String {
+    ensureRainbowEnabled()
     let theme = TestThemes.stable
     let highlighter = Highlighter(theme: theme, registry: registry)
     var options = options

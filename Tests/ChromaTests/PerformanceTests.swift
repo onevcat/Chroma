@@ -1,5 +1,16 @@
+import Foundation
 import Testing
 @testable import Chroma
+
+private func performanceBaseline() -> Duration {
+    let environment = ProcessInfo.processInfo.environment
+    if let value = environment["CHROMA_PERF_BASELINE_SECONDS"],
+       let seconds = Double(value),
+       seconds > 0 {
+        return .seconds(seconds)
+    }
+    return .seconds(1)
+}
 
 @Suite("Performance")
 struct PerformanceTests {
@@ -13,7 +24,7 @@ struct PerformanceTests {
         _ = try highlightWithTestTheme(code, language: .swift)
         let elapsed = clock.now - start
 
-        #expect(elapsed < .seconds(1))
+        #expect(elapsed < performanceBaseline())
     }
 
     @Test("Diff highlight stays under baseline")
@@ -31,6 +42,6 @@ struct PerformanceTests {
         )
         let elapsed = clock.now - start
 
-        #expect(elapsed < .seconds(1))
+        #expect(elapsed < performanceBaseline())
     }
 }
