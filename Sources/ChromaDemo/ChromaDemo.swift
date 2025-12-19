@@ -154,7 +154,7 @@ struct ChromaDemo {
                 print(try highlighter.highlight(
                     Samples.swift,
                     language: .swift,
-                    options: .init(highlightLines: [2...3])
+                    options: .init(highlightLines: [3...4])
                 ))
                 print("")
 

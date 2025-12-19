@@ -49,7 +49,7 @@ let output = try Chroma.highlight(
 
 ### Highlight lines
 
-Line numbers are 1-based.
+Line numbers are 1-based and include empty lines.
 
 ```swift
 let output = try Chroma.highlight(
