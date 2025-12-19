@@ -23,12 +23,9 @@ jobs:
           swift-version: ${{ matrix.swift }}
 
       - name: Build and test
-        run: BENCHMARK_DISABLE_JEMALLOC=1 swift test --skip ChromaTests.PerformanceTests
-
-      - name: Run performance tests
         env:
           CHROMA_PERF_BASELINE_SECONDS: "10"
-        run: BENCHMARK_DISABLE_JEMALLOC=1 swift test -c release --filter ChromaTests.PerformanceTests
+        run: BENCHMARK_DISABLE_JEMALLOC=1 swift test -c release
 
   benchmark:
     name: swift package benchmark (macos-latest)
