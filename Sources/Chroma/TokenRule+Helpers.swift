@@ -7,7 +7,6 @@ public extension TokenRule {
             .map(NSRegularExpression.escapedPattern(for:))
             .sorted { $0.count > $1.count }
             .joined(separator: "|")
-        return try TokenRule(kind: kind, pattern: "\\b(?:\(alternation))\\b")
+        return try TokenRule(kind: kind, pattern: "\\b(?:\(alternation))\\b", isWordList: true)
     }
 }
-

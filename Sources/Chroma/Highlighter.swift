@@ -24,7 +24,7 @@ public final class Highlighter {
         }
 
         let theme = options.theme ?? self.theme
-        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         let renderer = Renderer(theme: theme, options: options)
         return renderer.render(code: code) { emit in
             tokenizer.scan(code, emit: emit)
@@ -39,7 +39,7 @@ public final class Highlighter {
             throw Error.languageNotFound(language)
         }
 
-        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return tokenizer.tokenize(code)
     }
 
@@ -52,7 +52,7 @@ public final class Highlighter {
             throw Error.languageNotFound(language)
         }
 
-        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         tokenizer.scan(code, emit: emit)
     }
 

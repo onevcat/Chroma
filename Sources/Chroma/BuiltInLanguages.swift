@@ -40,7 +40,7 @@ enum BuiltInLanguages {
 
     private static func wordRule(kind: TokenKind, words: [String]) -> TokenRule {
         let alternation = wordAlternation(words)
-        return try! TokenRule(kind: kind, pattern: "\\b(?:\(alternation))\\b")
+        return try! TokenRule(kind: kind, pattern: "\\b(?:\(alternation))\\b", isWordList: true)
     }
 
     private static func cStyleRules(
@@ -107,7 +107,8 @@ enum BuiltInLanguages {
             ]
         )
 
-        return LanguageDefinition(id: .swift, displayName: "Swift", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .swift, displayName: "Swift", rules: rules, fastPath: fastPath)
     }()
 
     private static let objectiveC: LanguageDefinition = {
@@ -137,7 +138,8 @@ enum BuiltInLanguages {
                 try! TokenRule(kind: .keyword, pattern: "#\\s*(?:import|include|define|undef|if|ifdef|ifndef|elif|else|endif|pragma)\\b.*")
             ]
         )
-        return LanguageDefinition(id: .objectiveC, displayName: "Objective-C", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .objectiveC, displayName: "Objective-C", rules: rules, fastPath: fastPath)
     }()
 
     private static let c: LanguageDefinition = {
@@ -161,7 +163,8 @@ enum BuiltInLanguages {
                 try! TokenRule(kind: .keyword, pattern: "#\\s*(?:include|define|undef|if|ifdef|ifndef|elif|else|endif|pragma)\\b.*")
             ]
         )
-        return LanguageDefinition(id: .c, displayName: "C", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .c, displayName: "C", rules: rules, fastPath: fastPath)
     }()
 
     private static let javascript: LanguageDefinition = {
@@ -184,7 +187,8 @@ enum BuiltInLanguages {
                 "'(?:\\\\.|[^'\\\\])*'",
             ]
         )
-        return LanguageDefinition(id: .javascript, displayName: "JavaScript", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .javascript, displayName: "JavaScript", rules: rules, fastPath: fastPath)
     }()
 
     private static let typescript: LanguageDefinition = {
@@ -210,7 +214,8 @@ enum BuiltInLanguages {
                 "'(?:\\\\.|[^'\\\\])*'",
             ]
         )
-        return LanguageDefinition(id: .typescript, displayName: "TypeScript", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .typescript, displayName: "TypeScript", rules: rules, fastPath: fastPath)
     }()
 
     private static let python: LanguageDefinition = {
@@ -237,7 +242,8 @@ enum BuiltInLanguages {
         rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
         rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;:]"))
 
-        return LanguageDefinition(id: .python, displayName: "Python", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .python, displayName: "Python", rules: rules, fastPath: fastPath)
     }()
 
     private static let ruby: LanguageDefinition = {
@@ -263,7 +269,8 @@ enum BuiltInLanguages {
         rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
         rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;:]"))
 
-        return LanguageDefinition(id: .ruby, displayName: "Ruby", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .ruby, displayName: "Ruby", rules: rules, fastPath: fastPath)
     }()
 
     private static let go: LanguageDefinition = {
@@ -284,7 +291,8 @@ enum BuiltInLanguages {
                 "\"(?:\\\\.|[^\"\\\\])*\"",
             ]
         )
-        return LanguageDefinition(id: .go, displayName: "Go", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .go, displayName: "Go", rules: rules, fastPath: fastPath)
     }()
 
     private static let rust: LanguageDefinition = {
@@ -306,7 +314,8 @@ enum BuiltInLanguages {
                 "'(?:\\\\.|[^'\\\\])*'",
             ]
         )
-        return LanguageDefinition(id: .rust, displayName: "Rust", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .rust, displayName: "Rust", rules: rules, fastPath: fastPath)
     }()
 
     private static let kotlin: LanguageDefinition = {
@@ -329,7 +338,8 @@ enum BuiltInLanguages {
                 "'(?:\\\\.|[^'\\\\])*'",
             ]
         )
-        return LanguageDefinition(id: .kotlin, displayName: "Kotlin", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .kotlin, displayName: "Kotlin", rules: rules, fastPath: fastPath)
     }()
 
     private static let csharp: LanguageDefinition = {
@@ -360,6 +370,7 @@ enum BuiltInLanguages {
             ]
         )
 
-        return LanguageDefinition(id: .csharp, displayName: "C#", rules: rules)
+        let fastPath = LanguageFastPath(keywords: keywords, types: types)
+        return LanguageDefinition(id: .csharp, displayName: "C#", rules: rules, fastPath: fastPath)
     }()
 }

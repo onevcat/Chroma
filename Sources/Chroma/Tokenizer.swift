@@ -39,9 +39,11 @@ public struct Token: Equatable {
 
 final class RegexTokenizer {
     private let rules: [TokenRule]
+    private let fastPath: LanguageFastPath?
 
-    init(rules: [TokenRule]) {
+    init(rules: [TokenRule], fastPath: LanguageFastPath? = nil) {
         self.rules = rules
+        self.fastPath = fastPath
     }
 
     func tokenize(_ code: String) -> [Token] {
@@ -74,6 +76,8 @@ final class RegexTokenizer {
         emit: (Token) -> Void
     ) {
         let isASCII = code.unicodeScalars.allSatisfy { $0.isASCII }
+        let fastPath = fastPath
+        let useFastPath = isASCII && (fastPath?.isEmpty == false)
         let ns = code as NSString
         let length = ns.length
 
@@ -122,12 +126,80 @@ final class RegexTokenizer {
             metrics?.pointee.fallbackComposed += range.length
         }
 
+        func isIdentStart(_ value: unichar) -> Bool {
+            (value >= 65 && value <= 90) || (value >= 97 && value <= 122) || value == 95
+        }
+
+        func isIdentContinue(_ value: unichar) -> Bool {
+            isIdentStart(value) || (value >= 48 && value <= 57)
+        }
+
+        func fastPathKeywordMatch(at location: Int, end: Int, fastPath: LanguageFastPath) -> (TokenKind, NSRange)? {
+            guard location < end else { return nil }
+            let value = ns.character(at: location)
+            guard isIdentStart(value) else { return nil }
+
+            var index = location + 1
+            while index < end && isIdentContinue(ns.character(at: index)) {
+                index += 1
+            }
+            let wordRange = NSRange(location: location, length: index - location)
+            let word = ns.substring(with: wordRange)
+            if fastPath.keywords.contains(word) {
+                return (.keyword, wordRange)
+            }
+            if fastPath.types.contains(word) {
+                return (.type, wordRange)
+            }
+            return nil
+        }
+
+        func appendPlainWithFastPath(_ range: NSRange, fastPath: LanguageFastPath) {
+            guard range.length > 0 else { return }
+
+            let end = range.location + range.length
+            var index = range.location
+
+            while index < end {
+                let value = ns.character(at: index)
+                if isIdentStart(value) {
+                    let start = index
+                    index += 1
+                    while index < end && isIdentContinue(ns.character(at: index)) {
+                        index += 1
+                    }
+                    let wordRange = NSRange(location: start, length: index - start)
+                    let word = ns.substring(with: wordRange)
+                    if fastPath.keywords.contains(word) {
+                        appendToken(Token(kind: .keyword, range: wordRange))
+                    } else if fastPath.types.contains(word) {
+                        appendToken(Token(kind: .type, range: wordRange))
+                    } else {
+                        appendPlainASCII(wordRange)
+                    }
+                } else {
+                    let start = index
+                    index += 1
+                    while index < end && !isIdentStart(ns.character(at: index)) {
+                        index += 1
+                    }
+                    let plainRange = NSRange(location: start, length: index - start)
+                    appendPlainASCII(plainRange)
+                }
+            }
+        }
+
         var cachedMatches: [NSTextCheckingResult?] = Array(repeating: nil, count: rules.count)
         var cachedSearchLocations: [Int] = Array(repeating: 0, count: rules.count)
 
         func updateMatch(for index: Int, from location: Int) {
             let searchRange = NSRange(location: location, length: length - location)
             cachedSearchLocations[index] = location
+            if useFastPath && rules[index].isWordList {
+                cachedMatches[index] = nil
+                cachedSearchLocations[index] = location
+                return
+            }
             metrics?.pointee.rulesEvaluated += 1
             guard let match = rules[index].regex.firstMatch(in: code, options: [], range: searchRange) else {
                 cachedMatches[index] = nil
@@ -157,6 +229,13 @@ final class RegexTokenizer {
                 }
             }
 
+            if useFastPath, let fastPath,
+               let (kind, range) = fastPathKeywordMatch(at: location, end: length, fastPath: fastPath) {
+                appendToken(Token(kind: kind, range: range))
+                location += range.length
+                continue
+            }
+
             var earliestLocation: Int?
             for match in cachedMatches {
                 guard let match, match.range.length > 0 else { continue }
@@ -169,7 +248,9 @@ final class RegexTokenizer {
             guard let earliestLocation else {
                 let remainingRange = NSRange(location: location, length: length - location)
                 if remainingRange.length > 0 {
-                    if isASCII {
+                    if useFastPath, let fastPath {
+                        appendPlainWithFastPath(remainingRange, fastPath: fastPath)
+                    } else if isASCII {
                         appendPlainASCII(remainingRange)
                     } else {
                         let safeRange = ns.rangeOfComposedCharacterSequences(for: remainingRange)
@@ -184,7 +265,11 @@ final class RegexTokenizer {
 
             if earliestLocation > location {
                 let plainRange = NSRange(location: location, length: earliestLocation - location)
-                if isASCII {
+                if useFastPath, let fastPath {
+                    appendPlainWithFastPath(plainRange, fastPath: fastPath)
+                    location += plainRange.length
+                    continue
+                } else if isASCII {
                     appendPlainASCII(plainRange)
                     location += plainRange.length
                     continue

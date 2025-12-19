@@ -16,7 +16,7 @@ public enum BenchmarkSupport {
             throw Highlighter.Error.languageNotFound(language)
         }
 
-        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return TokenBuffer(tokens: tokenizer.tokenize(code))
     }
 
@@ -30,7 +30,7 @@ public enum BenchmarkSupport {
             throw Highlighter.Error.languageNotFound(language)
         }
 
-        let tokenizer = RegexTokenizer(rules: language.rules)
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return TokenBuffer(tokens: tokenizer.tokenize(code, metrics: &metrics))
     }
 
