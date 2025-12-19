@@ -10,7 +10,11 @@ enum DiffLineKind {
 
 enum DiffDetector {
     static func looksLikePatch(_ code: String) -> Bool {
-        for line in splitLines(code) {
+        return looksLikePatch(lines: splitLines(code))
+    }
+
+    static func looksLikePatch(lines: [Substring]) -> Bool {
+        for line in lines {
             let s = trimmingCR(line)
             if s.hasPrefix("diff --git ") { return true }
             if s.hasPrefix("@@") { return true }
@@ -63,4 +67,3 @@ func trimmingCR(_ line: Substring) -> Substring {
     }
     return line
 }
-

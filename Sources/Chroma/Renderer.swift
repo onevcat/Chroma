@@ -27,9 +27,9 @@ final class Renderer {
 
         var currentLine = 1
         tokenStream { token in
-            let raw = ns.substring(with: token.range)
             appendTokenSegments(
-                raw,
+                ns,
+                range: token.range,
                 kind: token.kind,
                 currentLine: &currentLine,
                 lineBackgrounds: plan.lineBackgrounds,
@@ -41,28 +41,37 @@ final class Renderer {
     }
 
     private func appendTokenSegments(
-        _ text: String,
+        _ ns: NSString,
+        range: NSRange,
         kind: TokenKind,
         currentLine: inout Int,
         lineBackgrounds: [BackgroundColorType?],
         into segments: inout [Rainbow.Segment]
     ) {
-        var start = text.startIndex
+        guard range.length > 0 else { return }
 
-        while start < text.endIndex {
-            if let newline = text[start...].firstIndex(of: "\n") {
-                let piece = String(text[start..<newline])
-                if !piece.isEmpty {
+        let end = range.location + range.length
+        var location = range.location
+
+        while location < end {
+            let searchRange = NSRange(location: location, length: end - location)
+            let newlineRange = ns.range(of: "\n", options: [], range: searchRange)
+
+            if newlineRange.location != NSNotFound {
+                let pieceLength = newlineRange.location - location
+                if pieceLength > 0 {
+                    let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
                     segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
                 }
 
                 segments.append(Rainbow.Segment(text: "\n"))
                 currentLine += 1
-                start = text.index(after: newline)
+                location = newlineRange.location + 1
             } else {
-                let piece = String(text[start..<text.endIndex])
-                if !piece.isEmpty {
+                let pieceLength = end - location
+                if pieceLength > 0 {
+                    let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
                     segments.append(theme.style(for: kind).makeSegment(text: piece, backgroundOverride: background))
                 }
@@ -88,7 +97,7 @@ final class Renderer {
             switch options.diff {
             case .none: return false
             case .patch: return true
-            case .auto: return DiffDetector.looksLikePatch(code)
+            case .auto: return DiffDetector.looksLikePatch(lines: lines)
             }
         }()
 
