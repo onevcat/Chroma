@@ -47,6 +47,7 @@ final class Renderer {
                     kind: token.kind,
                     currentLine: &currentLine,
                     lineBackgrounds: plan.lineBackgrounds,
+                    lineBreaks: plan.lineBreaks,
                     into: &writer
                 )
             }
@@ -70,6 +71,7 @@ final class Renderer {
         kind: TokenKind,
         currentLine: inout Int,
         lineBackgrounds: [BackgroundColorType?],
+        lineBreaks: [Int],
         into writer: inout AnsiWriter
     ) {
         guard range.length > 0 else { return }
@@ -77,13 +79,12 @@ final class Renderer {
         let style = styleCache.style(for: kind)
         let end = range.location + range.length
         var location = range.location
+        var lineIndex = currentLine - 1
 
         while location < end {
-            let searchRange = NSRange(location: location, length: end - location)
-            let newlineRange = ns.range(of: "\n", options: [], range: searchRange)
-
-            if newlineRange.location != NSNotFound {
-                let pieceLength = newlineRange.location - location
+            let nextBreak = lineIndex < lineBreaks.count ? lineBreaks[lineIndex] : nil
+            if let nextBreak, nextBreak < end {
+                let pieceLength = nextBreak - location
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
@@ -92,7 +93,8 @@ final class Renderer {
 
                 writer.appendPlain("\n")
                 currentLine += 1
-                location = newlineRange.location + 1
+                lineIndex += 1
+                location = nextBreak + 1
             } else {
                 let pieceLength = end - location
                 if pieceLength > 0 {
@@ -126,6 +128,7 @@ final class Renderer {
     private struct RenderPlan {
         let lineBackgrounds: [BackgroundColorType?]
         let hasLineBackgrounds: Bool
+        let lineBreaks: [Int]
     }
 
     private func makePlan(for code: String) -> RenderPlan {
@@ -167,7 +170,22 @@ final class Renderer {
             }
         }
 
-        return RenderPlan(lineBackgrounds: lineBackgrounds, hasLineBackgrounds: hasLineBackgrounds)
+        let lineBreaks = hasLineBackgrounds ? lineBreakLocations(code) : []
+        return RenderPlan(lineBackgrounds: lineBackgrounds, hasLineBackgrounds: hasLineBackgrounds, lineBreaks: lineBreaks)
+    }
+
+    private func lineBreakLocations(_ code: String) -> [Int] {
+        var locations: [Int] = []
+        locations.reserveCapacity(max(16, code.count / 64))
+
+        var index = 0
+        for value in code.utf16 {
+            if value == 10 {
+                locations.append(index)
+            }
+            index += 1
+        }
+        return locations
     }
 }
 
