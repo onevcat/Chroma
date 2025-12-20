@@ -29,6 +29,19 @@ final class Renderer {
         estimatedSegments: Int?,
         tokenStream: (_ emit: (Token) -> Void) -> Void
     ) -> String {
+        if !Rainbow.enabled && options.highlightLines.ranges.isEmpty {
+            switch options.diff {
+            case .none:
+                return code
+            case .auto:
+                if !DiffDetector.looksLikePatch(code) {
+                    return code
+                }
+            case .patch:
+                break
+            }
+        }
+
         let plan = makePlan(for: code)
         let ns = code as NSString
 
