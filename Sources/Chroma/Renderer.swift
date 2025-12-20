@@ -38,16 +38,27 @@ final class Renderer {
             isEnabled: Rainbow.enabled
         )
 
-        var currentLine = 1
-        tokenStream { token in
-            appendTokenSegments(
-                ns,
-                range: token.range,
-                kind: token.kind,
-                currentLine: &currentLine,
-                lineBackgrounds: plan.lineBackgrounds,
-                into: &writer
-            )
+        if plan.hasLineBackgrounds {
+            var currentLine = 1
+            tokenStream { token in
+                appendTokenSegments(
+                    ns,
+                    range: token.range,
+                    kind: token.kind,
+                    currentLine: &currentLine,
+                    lineBackgrounds: plan.lineBackgrounds,
+                    into: &writer
+                )
+            }
+        } else {
+            tokenStream { token in
+                appendTokenSegmentsWithoutLineBackground(
+                    ns,
+                    range: token.range,
+                    kind: token.kind,
+                    into: &writer
+                )
+            }
         }
 
         return writer.finish()
@@ -94,6 +105,18 @@ final class Renderer {
         }
     }
 
+    private func appendTokenSegmentsWithoutLineBackground(
+        _ ns: NSString,
+        range: NSRange,
+        kind: TokenKind,
+        into writer: inout AnsiWriter
+    ) {
+        guard range.length > 0 else { return }
+        let style = styleCache.style(for: kind)
+        let piece = ns.substring(with: range)
+        writer.append(text: piece, style: style, backgroundOverride: nil)
+    }
+
     private func backgroundForLine(_ line: Int, lineBackgrounds: [BackgroundColorType?]) -> BackgroundColorType? {
         let index = line - 1
         guard index >= 0, index < lineBackgrounds.count else { return nil }
@@ -102,6 +125,7 @@ final class Renderer {
 
     private struct RenderPlan {
         let lineBackgrounds: [BackgroundColorType?]
+        let hasLineBackgrounds: Bool
     }
 
     private func makePlan(for code: String) -> RenderPlan {
@@ -116,14 +140,17 @@ final class Renderer {
         }()
 
         var lineBackgrounds = Array<BackgroundColorType?>(repeating: nil, count: lines.count)
+        var hasLineBackgrounds = false
         if diffEnabled {
             for (index, line) in lines.enumerated() {
                 guard let kind = DiffDetector.kind(forLine: line) else { continue }
                 switch kind {
                 case .added:
                     lineBackgrounds[index] = theme.diffAddedBackground
+                    hasLineBackgrounds = true
                 case .removed:
                     lineBackgrounds[index] = theme.diffRemovedBackground
+                    hasLineBackgrounds = true
                 case .fileHeader, .hunkHeader, .meta:
                     break
                 }
@@ -135,11 +162,12 @@ final class Renderer {
                 let lineNumber = index + 1
                 if options.highlightLines.contains(lineNumber) {
                     lineBackgrounds[index] = theme.lineHighlightBackground
+                    hasLineBackgrounds = true
                 }
             }
         }
 
-        return RenderPlan(lineBackgrounds: lineBackgrounds)
+        return RenderPlan(lineBackgrounds: lineBackgrounds, hasLineBackgrounds: hasLineBackgrounds)
     }
 }
 
