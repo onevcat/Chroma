@@ -40,10 +40,12 @@ public struct Token: Equatable {
 final class RegexTokenizer {
     private let rules: [TokenRule]
     private let fastPath: LanguageFastPath?
+    private let fastPathSkipRules: [Bool]
 
     init(rules: [TokenRule], fastPath: LanguageFastPath? = nil) {
         self.rules = rules
         self.fastPath = fastPath
+        self.fastPathSkipRules = RegexTokenizer.makeFastPathSkipRules(rules: rules, fastPath: fastPath)
     }
 
     func tokenize(_ code: String) -> [Token] {
@@ -134,6 +136,24 @@ final class RegexTokenizer {
             isIdentStart(value) || (value >= 48 && value <= 57)
         }
 
+        func isOperatorChar(_ value: unichar) -> Bool {
+            switch value {
+            case 43, 45, 42, 47, 37, 38, 124, 94, 33, 126, 61, 60, 62, 63, 58:
+                return true
+            default:
+                return false
+            }
+        }
+
+        func isPunctuationChar(_ value: unichar) -> Bool {
+            switch value {
+            case 91, 93, 123, 125, 40, 41, 46, 44, 59:
+                return true
+            default:
+                return false
+            }
+        }
+
         func fastPathKeywordMatch(at location: Int, end: Int, fastPath: LanguageFastPath) -> (TokenKind, NSRange)? {
             guard location < end else { return nil }
             let value = ns.character(at: location)
@@ -177,10 +197,25 @@ final class RegexTokenizer {
                     } else {
                         appendPlainASCII(wordRange)
                     }
+                } else if isOperatorChar(value) {
+                    let start = index
+                    index += 1
+                    while index < end && isOperatorChar(ns.character(at: index)) {
+                        index += 1
+                    }
+                    let opRange = NSRange(location: start, length: index - start)
+                    appendToken(Token(kind: .operator, range: opRange))
+                } else if isPunctuationChar(value) {
+                    let punctuationRange = NSRange(location: index, length: 1)
+                    appendToken(Token(kind: .punctuation, range: punctuationRange))
+                    index += 1
                 } else {
                     let start = index
                     index += 1
-                    while index < end && !isIdentStart(ns.character(at: index)) {
+                    while index < end &&
+                            !isIdentStart(ns.character(at: index)) &&
+                            !isOperatorChar(ns.character(at: index)) &&
+                            !isPunctuationChar(ns.character(at: index)) {
                         index += 1
                     }
                     let plainRange = NSRange(location: start, length: index - start)
@@ -196,6 +231,11 @@ final class RegexTokenizer {
             let searchRange = NSRange(location: location, length: length - location)
             cachedSearchLocations[index] = location
             if useFastPath && rules[index].isWordList {
+                cachedMatches[index] = nil
+                cachedSearchLocations[index] = location
+                return
+            }
+            if useFastPath && fastPathSkipRules[index] {
                 cachedMatches[index] = nil
                 cachedSearchLocations[index] = location
                 return
@@ -319,5 +359,39 @@ final class RegexTokenizer {
         }
 
         flushPending()
+    }
+}
+
+private extension RegexTokenizer {
+    static let operatorPattern = "[+\\-*/%&|^!~=<>?:]+"
+    static let punctuationPattern = "[\\[\\]{}().,;]"
+
+    static func makeFastPathSkipRules(rules: [TokenRule], fastPath: LanguageFastPath?) -> [Bool] {
+        var result = Array(repeating: false, count: rules.count)
+        guard let fastPath, !fastPath.isEmpty else { return result }
+
+        var hasCustomPunctuation = false
+        for rule in rules where rule.kind == .punctuation {
+            if rule.regex.pattern != punctuationPattern {
+                hasCustomPunctuation = true
+                break
+            }
+        }
+
+        for (index, rule) in rules.enumerated() {
+            switch rule.kind {
+            case .operator:
+                if rule.regex.pattern == operatorPattern && !hasCustomPunctuation {
+                    result[index] = true
+                }
+            case .punctuation:
+                if rule.regex.pattern == punctuationPattern {
+                    result[index] = true
+                }
+            default:
+                break
+            }
+        }
+        return result
     }
 }
