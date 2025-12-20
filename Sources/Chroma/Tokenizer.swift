@@ -83,6 +83,52 @@ final class RegexTokenizer {
         let ns = code as NSString
         let length = ns.length
 
+        if isASCII {
+            if code.utf16.withContiguousStorageIfAvailable({ buffer in
+                let source = UTF16BufferSource(buffer: buffer)
+                scanCore(
+                    code,
+                    metrics: metrics,
+                    emit: emit,
+                    ns: ns,
+                    length: length,
+                    fastPath: fastPath,
+                    isASCII: isASCII,
+                    useFastPath: useFastPath,
+                    source: source
+                )
+                return true
+            }) == true {
+                return
+            }
+        }
+
+        let source = NSStringSource(ns: ns)
+        scanCore(
+            code,
+            metrics: metrics,
+            emit: emit,
+            ns: ns,
+            length: length,
+            fastPath: fastPath,
+            isASCII: isASCII,
+            useFastPath: useFastPath,
+            source: source
+        )
+    }
+
+    private func scanCore<Source: CharacterSource>(
+        _ code: String,
+        metrics: UnsafeMutablePointer<TokenizerMetrics>?,
+        emit: (Token) -> Void,
+        ns: NSString,
+        length: Int,
+        fastPath: LanguageFastPath?,
+        isASCII: Bool,
+        useFastPath: Bool,
+        source: Source
+    ) {
+
         var pending: Token?
 
         func flushPending() {
@@ -156,11 +202,11 @@ final class RegexTokenizer {
 
         func fastPathKeywordMatch(at location: Int, end: Int, fastPath: LanguageFastPath) -> (TokenKind, NSRange)? {
             guard location < end else { return nil }
-            let value = ns.character(at: location)
+            let value = source.charAt(location)
             guard isIdentStart(value) else { return nil }
 
             var index = location + 1
-            while index < end && isIdentContinue(ns.character(at: index)) {
+            while index < end && isIdentContinue(source.charAt(index)) {
                 index += 1
             }
             let wordRange = NSRange(location: location, length: index - location)
@@ -181,11 +227,11 @@ final class RegexTokenizer {
             var index = range.location
 
             while index < end {
-                let value = ns.character(at: index)
+                let value = source.charAt(index)
                 if isIdentStart(value) {
                     let start = index
                     index += 1
-                    while index < end && isIdentContinue(ns.character(at: index)) {
+                    while index < end && isIdentContinue(source.charAt(index)) {
                         index += 1
                     }
                     let wordRange = NSRange(location: start, length: index - start)
@@ -200,7 +246,7 @@ final class RegexTokenizer {
                 } else if isOperatorChar(value) {
                     let start = index
                     index += 1
-                    while index < end && isOperatorChar(ns.character(at: index)) {
+                    while index < end && isOperatorChar(source.charAt(index)) {
                         index += 1
                     }
                     let opRange = NSRange(location: start, length: index - start)
@@ -213,9 +259,9 @@ final class RegexTokenizer {
                     let start = index
                     index += 1
                     while index < end &&
-                            !isIdentStart(ns.character(at: index)) &&
-                            !isOperatorChar(ns.character(at: index)) &&
-                            !isPunctuationChar(ns.character(at: index)) {
+                            !isIdentStart(source.charAt(index)) &&
+                            !isOperatorChar(source.charAt(index)) &&
+                            !isPunctuationChar(source.charAt(index)) {
                         index += 1
                     }
                     let plainRange = NSRange(location: start, length: index - start)
@@ -359,6 +405,29 @@ final class RegexTokenizer {
         }
 
         flushPending()
+    }
+}
+
+private protocol CharacterSource {
+    @inline(__always)
+    func charAt(_ index: Int) -> unichar
+}
+
+private struct NSStringSource: CharacterSource {
+    let ns: NSString
+
+    @inline(__always)
+    func charAt(_ index: Int) -> unichar {
+        ns.character(at: index)
+    }
+}
+
+private struct UTF16BufferSource: CharacterSource {
+    let buffer: UnsafeBufferPointer<UInt16>
+
+    @inline(__always)
+    func charAt(_ index: Int) -> unichar {
+        unichar(buffer[index])
     }
 }
 
