@@ -7,7 +7,7 @@ struct HighlightOptionsTests {
     func defaults() {
         let options = HighlightOptions()
         #expect(options.theme == nil)
-        #expect(options.diff == .auto)
+        #expect(options.diff == .auto())
         #expect(options.highlightLines == LineRangeSet())
         #expect(options.indent == 0)
     }

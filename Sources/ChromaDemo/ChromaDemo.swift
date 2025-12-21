@@ -178,7 +178,23 @@ struct ChromaDemo {
                 print(try highlighter.highlight(
                     Samples.patch,
                     language: .swift,
-                    options: .init(diff: .patch)
+                    options: .init(diff: .patch())
+                ))
+                print("")
+
+                printSection("Diff Highlighting (foreground)")
+                print(try highlighter.highlight(
+                    Samples.patch,
+                    language: .swift,
+                    options: .init(diff: .patch(style: .foreground()))
+                ))
+                print("")
+
+                printSection("Diff Highlighting (background, plain code)")
+                print(try highlighter.highlight(
+                    Samples.patch,
+                    language: .swift,
+                    options: .init(diff: .patch(style: .background(diffCode: .plain)))
                 ))
                 print("")
 

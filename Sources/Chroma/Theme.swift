@@ -13,18 +13,28 @@ public struct Theme: Equatable {
     /// Background used by `HighlightOptions.diff` for removed lines.
     public var diffRemovedBackground: BackgroundColorType
 
+    /// Foreground used by `HighlightOptions.diff` for added lines.
+    public var diffAddedForeground: ColorType
+
+    /// Foreground used by `HighlightOptions.diff` for removed lines.
+    public var diffRemovedForeground: ColorType
+
     public init(
         name: String,
         tokenStyles: [TokenKind: TextStyle],
         lineHighlightBackground: BackgroundColorType,
         diffAddedBackground: BackgroundColorType,
-        diffRemovedBackground: BackgroundColorType
+        diffRemovedBackground: BackgroundColorType,
+        diffAddedForeground: ColorType,
+        diffRemovedForeground: ColorType
     ) {
         self.name = name
         self.tokenStyles = tokenStyles
         self.lineHighlightBackground = lineHighlightBackground
         self.diffAddedBackground = diffAddedBackground
         self.diffRemovedBackground = diffRemovedBackground
+        self.diffAddedForeground = diffAddedForeground
+        self.diffRemovedForeground = diffRemovedForeground
     }
 
     public func style(for kind: TokenKind) -> TextStyle {
@@ -69,7 +79,9 @@ public extension Theme {
         ],
         lineHighlightBackground: .named(.lightBlack),
         diffAddedBackground: .named(.green),
-        diffRemovedBackground: .named(.red)
+        diffRemovedBackground: .named(.red),
+        diffAddedForeground: .named(.lightGreen),
+        diffRemovedForeground: .named(.lightRed)
     )
 
     static let light = Theme(
@@ -88,6 +100,8 @@ public extension Theme {
         ],
         lineHighlightBackground: .named(.lightYellow),
         diffAddedBackground: .named(.lightGreen),
-        diffRemovedBackground: .named(.lightRed)
+        diffRemovedBackground: .named(.lightRed),
+        diffAddedForeground: .named(.green),
+        diffRemovedForeground: .named(.red)
     )
 }

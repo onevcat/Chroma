@@ -30,15 +30,8 @@ final class Renderer {
         tokenStream: (_ emit: (Token) -> Void) -> Void
     ) -> String {
         if !Rainbow.enabled && options.highlightLines.ranges.isEmpty && options.indent == 0 {
-            switch options.diff {
-            case .none:
+            if options.diff.rendering(for: code) == nil {
                 return code
-            case .auto:
-                if !DiffDetector.looksLikePatch(code) {
-                    return code
-                }
-            case .patch:
-                break
             }
         }
 
@@ -54,7 +47,7 @@ final class Renderer {
         )
 
         var atLineStart = true
-        if plan.hasLineBackgrounds {
+        if plan.hasLineOverrides {
             var currentLine = 1
             tokenStream { token in
                 appendTokenSegments(
@@ -63,6 +56,8 @@ final class Renderer {
                     kind: token.kind,
                     currentLine: &currentLine,
                     lineBackgrounds: plan.lineBackgrounds,
+                    lineForegrounds: plan.lineForegrounds,
+                    linePlainStyles: plan.linePlainStyles,
                     lineBreaks: plan.lineBreaks,
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
@@ -93,6 +88,8 @@ final class Renderer {
         kind: TokenKind,
         currentLine: inout Int,
         lineBackgrounds: [BackgroundColorType?],
+        lineForegrounds: [ColorType?],
+        linePlainStyles: [Bool],
         lineBreaks: [Int],
         indentPrefix: String,
         plainStyle: TextStyle,
@@ -101,7 +98,6 @@ final class Renderer {
     ) {
         guard range.length > 0 else { return }
 
-        let style = styleCache.style(for: kind)
         let end = range.location + range.length
         var location = range.location
         var lineIndex = currentLine - 1
@@ -111,10 +107,12 @@ final class Renderer {
             if let nextBreak, nextBreak < end {
                 let pieceLength = nextBreak - location
                 let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
                 if pieceLength == 0 {
                     appendIndentIfNeeded(
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
+                        foregroundOverride: foreground,
                         backgroundOverride: background,
                         atLineStart: &atLineStart,
                         into: &writer
@@ -122,14 +120,30 @@ final class Renderer {
                 }
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
+                    let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
+                    let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
                     appendIndentIfNeeded(
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
+                        foregroundOverride: foreground,
                         backgroundOverride: background,
                         atLineStart: &atLineStart,
                         into: &writer
                     )
-                    writer.append(text: piece, style: style, backgroundOverride: background)
+                    if let foreground {
+                        writer.append(
+                            text: piece,
+                            style: style,
+                            foregroundOverride: foreground,
+                            backgroundOverride: background
+                        )
+                    } else {
+                        writer.append(
+                            text: piece,
+                            style: style,
+                            backgroundOverride: background
+                        )
+                    }
                     atLineStart = false
                 }
 
@@ -143,14 +157,31 @@ final class Renderer {
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                    let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
+                    let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
+                    let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
                     appendIndentIfNeeded(
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
+                        foregroundOverride: foreground,
                         backgroundOverride: background,
                         atLineStart: &atLineStart,
                         into: &writer
                     )
-                    writer.append(text: piece, style: style, backgroundOverride: background)
+                    if let foreground {
+                        writer.append(
+                            text: piece,
+                            style: style,
+                            foregroundOverride: foreground,
+                            backgroundOverride: background
+                        )
+                    } else {
+                        writer.append(
+                            text: piece,
+                            style: style,
+                            backgroundOverride: background
+                        )
+                    }
                     atLineStart = false
                 }
                 break
@@ -168,7 +199,7 @@ final class Renderer {
         into writer: inout AnsiWriter
     ) {
         guard range.length > 0 else { return }
-        let style = styleCache.style(for: kind)
+        let style = resolvedStyle(for: kind, usePlainTextStyle: false, plainStyle: plainStyle)
         let piece = ns.substring(with: range)
         if indentPrefix.isEmpty {
             writer.append(text: piece, style: style, backgroundOverride: nil)
@@ -178,6 +209,7 @@ final class Renderer {
         appendTextWithIndent(
             piece,
             style: style,
+            foregroundOverride: nil,
             backgroundOverride: nil,
             indentPrefix: indentPrefix,
             plainStyle: plainStyle,
@@ -192,6 +224,26 @@ final class Renderer {
         return lineBackgrounds[index]
     }
 
+    private func foregroundForLine(_ line: Int, lineForegrounds: [ColorType?]) -> ColorType? {
+        let index = line - 1
+        guard index >= 0, index < lineForegrounds.count else { return nil }
+        return lineForegrounds[index]
+    }
+
+    private func plainStyleForLine(_ line: Int, linePlainStyles: [Bool]) -> Bool {
+        let index = line - 1
+        guard index >= 0, index < linePlainStyles.count else { return false }
+        return linePlainStyles[index]
+    }
+
+    private func resolvedStyle(
+        for kind: TokenKind,
+        usePlainTextStyle: Bool,
+        plainStyle: TextStyle
+    ) -> TextStyle {
+        usePlainTextStyle ? plainStyle : styleCache.style(for: kind)
+    }
+
     private func makeIndentPrefix() -> String {
         guard options.indent > 0 else { return "" }
         return String(repeating: " ", count: options.indent)
@@ -200,18 +252,33 @@ final class Renderer {
     private func appendIndentIfNeeded(
         indentPrefix: String,
         plainStyle: TextStyle,
+        foregroundOverride: ColorType?,
         backgroundOverride: BackgroundColorType?,
         atLineStart: inout Bool,
         into writer: inout AnsiWriter
     ) {
         guard atLineStart, !indentPrefix.isEmpty else { return }
-        writer.append(text: indentPrefix, style: plainStyle, backgroundOverride: backgroundOverride)
+        if let foregroundOverride {
+            writer.append(
+                text: indentPrefix,
+                style: plainStyle,
+                foregroundOverride: foregroundOverride,
+                backgroundOverride: backgroundOverride
+            )
+        } else {
+            writer.append(
+                text: indentPrefix,
+                style: plainStyle,
+                backgroundOverride: backgroundOverride
+            )
+        }
         atLineStart = false
     }
 
     private func appendTextWithIndent(
         _ text: String,
         style: TextStyle,
+        foregroundOverride: ColorType?,
         backgroundOverride: BackgroundColorType?,
         indentPrefix: String,
         plainStyle: TextStyle,
@@ -227,12 +294,26 @@ final class Renderer {
                 appendIndentIfNeeded(
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
+                    foregroundOverride: foregroundOverride,
                     backgroundOverride: backgroundOverride,
                     atLineStart: &atLineStart,
                     into: &writer
                 )
                 if !segment.isEmpty {
-                    writer.append(text: String(segment), style: style, backgroundOverride: backgroundOverride)
+                    if let foregroundOverride {
+                        writer.append(
+                            text: String(segment),
+                            style: style,
+                            foregroundOverride: foregroundOverride,
+                            backgroundOverride: backgroundOverride
+                        )
+                    } else {
+                        writer.append(
+                            text: String(segment),
+                            style: style,
+                            backgroundOverride: backgroundOverride
+                        )
+                    }
                     atLineStart = false
                 }
                 writer.appendPlain("\n")
@@ -247,12 +328,26 @@ final class Renderer {
                 appendIndentIfNeeded(
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
+                    foregroundOverride: foregroundOverride,
                     backgroundOverride: backgroundOverride,
                     atLineStart: &atLineStart,
                     into: &writer
                 )
                 if !segment.isEmpty {
-                    writer.append(text: String(segment), style: style, backgroundOverride: backgroundOverride)
+                    if let foregroundOverride {
+                        writer.append(
+                            text: String(segment),
+                            style: style,
+                            foregroundOverride: foregroundOverride,
+                            backgroundOverride: backgroundOverride
+                        )
+                    } else {
+                        writer.append(
+                            text: String(segment),
+                            style: style,
+                            backgroundOverride: backgroundOverride
+                        )
+                    }
                     atLineStart = false
                 }
                 break
@@ -262,51 +357,98 @@ final class Renderer {
 
     private struct RenderPlan {
         let lineBackgrounds: [BackgroundColorType?]
-        let hasLineBackgrounds: Bool
+        let lineForegrounds: [ColorType?]
+        let linePlainStyles: [Bool]
+        let hasLineOverrides: Bool
         let lineBreaks: [Int]
     }
 
     private func makePlan(for code: String) -> RenderPlan {
+        let diffRendering = options.diff.rendering(for: code)
+        if diffRendering == nil && options.highlightLines.ranges.isEmpty {
+            return RenderPlan(
+                lineBackgrounds: [],
+                lineForegrounds: [],
+                linePlainStyles: [],
+                hasLineOverrides: false,
+                lineBreaks: []
+            )
+        }
+
         let lines = splitLines(code)
 
-        let diffEnabled: Bool = {
-            switch options.diff {
-            case .none: return false
-            case .patch: return true
-            case .auto: return DiffDetector.looksLikePatch(lines: lines)
-            }
-        }()
-
-        var lineBackgrounds = Array<BackgroundColorType?>(repeating: nil, count: lines.count)
-        var hasLineBackgrounds = false
-        if diffEnabled {
+        var lineBackgrounds: [BackgroundColorType?] = []
+        var lineForegrounds: [ColorType?] = []
+        var linePlainStyles: [Bool] = []
+        var hasLineOverrides = false
+        if let diffRendering {
+            let diffStyle = diffRendering.style
+            lineBackgrounds = [BackgroundColorType?](repeating: nil, count: lines.count)
+            lineForegrounds = [ColorType?](repeating: nil, count: lines.count)
+            linePlainStyles = Array(repeating: false, count: lines.count)
             for (index, line) in lines.enumerated() {
-                guard let kind = DiffDetector.kind(forLine: line) else { continue }
+                let kind = DiffDetector.kind(forLine: line)
+                let isDiffLine: Bool = {
+                    switch kind {
+                    case .added?, .removed?:
+                        return true
+                    default:
+                        return false
+                    }
+                }()
+
+                let codeStyle = isDiffLine ? diffStyle.diffCodeStyle : diffStyle.contextCodeStyle
+                if codeStyle == .plain {
+                    linePlainStyles[index] = true
+                    hasLineOverrides = true
+                }
+
                 switch kind {
                 case .added:
-                    lineBackgrounds[index] = theme.diffAddedBackground
-                    hasLineBackgrounds = true
+                    switch diffStyle {
+                    case .background(diffCode: _, contextCode: _):
+                        lineBackgrounds[index] = theme.diffAddedBackground
+                        hasLineOverrides = true
+                    case .foreground:
+                        lineForegrounds[index] = theme.diffAddedForeground
+                        hasLineOverrides = true
+                    }
                 case .removed:
-                    lineBackgrounds[index] = theme.diffRemovedBackground
-                    hasLineBackgrounds = true
-                case .fileHeader, .hunkHeader, .meta:
+                    switch diffStyle {
+                    case .background(diffCode: _, contextCode: _):
+                        lineBackgrounds[index] = theme.diffRemovedBackground
+                        hasLineOverrides = true
+                    case .foreground:
+                        lineForegrounds[index] = theme.diffRemovedForeground
+                        hasLineOverrides = true
+                    }
+                case .fileHeader, .hunkHeader, .meta, .none:
                     break
                 }
             }
         }
 
         if !options.highlightLines.ranges.isEmpty {
+            if lineBackgrounds.isEmpty {
+                lineBackgrounds = [BackgroundColorType?](repeating: nil, count: lines.count)
+            }
             for (index, _) in lines.enumerated() {
                 let lineNumber = index + 1
                 if options.highlightLines.contains(lineNumber) {
                     lineBackgrounds[index] = theme.lineHighlightBackground
-                    hasLineBackgrounds = true
+                    hasLineOverrides = true
                 }
             }
         }
 
-        let lineBreaks = hasLineBackgrounds ? lineBreakLocations(code) : []
-        return RenderPlan(lineBackgrounds: lineBackgrounds, hasLineBackgrounds: hasLineBackgrounds, lineBreaks: lineBreaks)
+        let lineBreaks = hasLineOverrides ? lineBreakLocations(code) : []
+        return RenderPlan(
+            lineBackgrounds: lineBackgrounds,
+            lineForegrounds: lineForegrounds,
+            linePlainStyles: linePlainStyles,
+            hasLineOverrides: hasLineOverrides,
+            lineBreaks: lineBreaks
+        )
     }
 
     private func lineBreakLocations(_ code: String) -> [Int] {
@@ -367,6 +509,72 @@ private struct AnsiWriter {
         }
 
         let color = style.foreground
+        let background = backgroundOverride ?? style.background
+        let styles = style.styles
+
+        if color == nil && background == nil && styles == nil {
+            result.append(text)
+            return
+        }
+
+        if let cached = prefixCache.first(where: { $0.matches(color: color, backgroundColor: background, styles: styles) }) {
+            result.append(cached.prefix)
+            result.append(text)
+            result.append("\u{001B}[0m")
+            return
+        }
+
+        var codes: [UInt8] = []
+        if let color { codes += color.value }
+        if let background { codes += background.value }
+        if let styles { codes += styles.flatMap { $0.value } }
+
+        if codes.isEmpty {
+            result.append(text)
+            return
+        }
+
+        var prefix = "\u{001B}["
+        for (index, code) in codes.enumerated() {
+            if index > 0 { prefix.append(";") }
+            prefix.append(String(code))
+        }
+        prefix.append("m")
+        prefixCache.append(
+            PrefixCacheEntry(
+                color: color,
+                backgroundColor: background,
+                styles: styles,
+                prefix: prefix
+            )
+        )
+        result.append(prefix)
+        result.append(text)
+        result.append("\u{001B}[0m")
+    }
+
+    mutating func append(
+        text: String,
+        style: TextStyle,
+        foregroundOverride: ColorType?,
+        backgroundOverride: BackgroundColorType?
+    ) {
+        guard let foregroundOverride else {
+            append(text: text, style: style, backgroundOverride: backgroundOverride)
+            return
+        }
+
+        if text.isEmpty {
+            result.append(text)
+            return
+        }
+
+        guard isEnabled else {
+            result.append(text)
+            return
+        }
+
+        let color: ColorType? = foregroundOverride
         let background = backgroundOverride ?? style.background
         let styles = style.styles
 

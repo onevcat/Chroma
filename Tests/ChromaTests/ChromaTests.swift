@@ -34,7 +34,9 @@ struct HighlighterOutputTests {
             ],
             lineHighlightBackground: .named(.lightYellow),
             diffAddedBackground: .named(.lightGreen),
-            diffRemovedBackground: .named(.lightRed)
+            diffRemovedBackground: .named(.lightRed),
+            diffAddedForeground: .named(.green),
+            diffRemovedForeground: .named(.red)
         )
         let output = try highlightWithTestTheme(
             "// comment",
@@ -77,7 +79,7 @@ struct HighlighterOutputTests {
         let output = try highlightWithTestTheme(
             patch,
             language: .swift,
-            options: .init(diff: .patch)
+            options: .init(diff: .patch())
         )
 
         let expectedAdded = renderExpected([

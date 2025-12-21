@@ -52,7 +52,7 @@ struct PerformanceTests {
         _ = try highlightWithTestTheme(
             code,
             language: .swift,
-            options: .init(diff: .patch)
+            options: .init(diff: .patch())
         )
         let elapsed = clock.now - start
 

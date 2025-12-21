@@ -39,7 +39,7 @@ let curatedSwiftTokens = try! BenchmarkSupport.tokenize(curatedSwift, language: 
 let curatedDiffTokens = try! BenchmarkSupport.tokenize(curatedDiff, language: .swift, registry: registry)
 
 let defaultOptions = HighlightOptions()
-let diffOptions = HighlightOptions(diff: .patch)
+let diffOptions = HighlightOptions(diff: .patch())
 
 let shouldPrintMetrics = ProcessInfo.processInfo.environment["CHROMA_BENCH_PRINT_METRICS"] == "1"
 
