@@ -29,7 +29,7 @@ final class Renderer {
         estimatedSegments: Int?,
         tokenStream: (_ emit: (Token) -> Void) -> Void
     ) -> String {
-        if !Rainbow.enabled && options.highlightLines.ranges.isEmpty {
+        if !Rainbow.enabled && options.highlightLines.ranges.isEmpty && options.indent == 0 {
             switch options.diff {
             case .none:
                 return code
@@ -44,6 +44,8 @@ final class Renderer {
 
         let plan = makePlan(for: code)
         let ns = code as NSString
+        let indentPrefix = makeIndentPrefix()
+        let plainStyle = styleCache.style(for: .plain)
 
         var writer = AnsiWriter(
             estimatedTextLength: code.count,
@@ -51,6 +53,7 @@ final class Renderer {
             isEnabled: Rainbow.enabled
         )
 
+        var atLineStart = true
         if plan.hasLineBackgrounds {
             var currentLine = 1
             tokenStream { token in
@@ -61,6 +64,9 @@ final class Renderer {
                     currentLine: &currentLine,
                     lineBackgrounds: plan.lineBackgrounds,
                     lineBreaks: plan.lineBreaks,
+                    indentPrefix: indentPrefix,
+                    plainStyle: plainStyle,
+                    atLineStart: &atLineStart,
                     into: &writer
                 )
             }
@@ -70,6 +76,9 @@ final class Renderer {
                     ns,
                     range: token.range,
                     kind: token.kind,
+                    indentPrefix: indentPrefix,
+                    plainStyle: plainStyle,
+                    atLineStart: &atLineStart,
                     into: &writer
                 )
             }
@@ -85,6 +94,9 @@ final class Renderer {
         currentLine: inout Int,
         lineBackgrounds: [BackgroundColorType?],
         lineBreaks: [Int],
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        atLineStart: inout Bool,
         into writer: inout AnsiWriter
     ) {
         guard range.length > 0 else { return }
@@ -98,13 +110,31 @@ final class Renderer {
             let nextBreak = lineIndex < lineBreaks.count ? lineBreaks[lineIndex] : nil
             if let nextBreak, nextBreak < end {
                 let pieceLength = nextBreak - location
+                let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                if pieceLength == 0 {
+                    appendIndentIfNeeded(
+                        indentPrefix: indentPrefix,
+                        plainStyle: plainStyle,
+                        backgroundOverride: background,
+                        atLineStart: &atLineStart,
+                        into: &writer
+                    )
+                }
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
-                    let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                    appendIndentIfNeeded(
+                        indentPrefix: indentPrefix,
+                        plainStyle: plainStyle,
+                        backgroundOverride: background,
+                        atLineStart: &atLineStart,
+                        into: &writer
+                    )
                     writer.append(text: piece, style: style, backgroundOverride: background)
+                    atLineStart = false
                 }
 
                 writer.appendPlain("\n")
+                atLineStart = true
                 currentLine += 1
                 lineIndex += 1
                 location = nextBreak + 1
@@ -113,7 +143,15 @@ final class Renderer {
                 if pieceLength > 0 {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                    appendIndentIfNeeded(
+                        indentPrefix: indentPrefix,
+                        plainStyle: plainStyle,
+                        backgroundOverride: background,
+                        atLineStart: &atLineStart,
+                        into: &writer
+                    )
                     writer.append(text: piece, style: style, backgroundOverride: background)
+                    atLineStart = false
                 }
                 break
             }
@@ -124,18 +162,102 @@ final class Renderer {
         _ ns: NSString,
         range: NSRange,
         kind: TokenKind,
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        atLineStart: inout Bool,
         into writer: inout AnsiWriter
     ) {
         guard range.length > 0 else { return }
         let style = styleCache.style(for: kind)
         let piece = ns.substring(with: range)
-        writer.append(text: piece, style: style, backgroundOverride: nil)
+        if indentPrefix.isEmpty {
+            writer.append(text: piece, style: style, backgroundOverride: nil)
+            return
+        }
+
+        appendTextWithIndent(
+            piece,
+            style: style,
+            backgroundOverride: nil,
+            indentPrefix: indentPrefix,
+            plainStyle: plainStyle,
+            atLineStart: &atLineStart,
+            into: &writer
+        )
     }
 
     private func backgroundForLine(_ line: Int, lineBackgrounds: [BackgroundColorType?]) -> BackgroundColorType? {
         let index = line - 1
         guard index >= 0, index < lineBackgrounds.count else { return nil }
         return lineBackgrounds[index]
+    }
+
+    private func makeIndentPrefix() -> String {
+        guard options.indent > 0 else { return "" }
+        return String(repeating: " ", count: options.indent)
+    }
+
+    private func appendIndentIfNeeded(
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        backgroundOverride: BackgroundColorType?,
+        atLineStart: inout Bool,
+        into writer: inout AnsiWriter
+    ) {
+        guard atLineStart, !indentPrefix.isEmpty else { return }
+        writer.append(text: indentPrefix, style: plainStyle, backgroundOverride: backgroundOverride)
+        atLineStart = false
+    }
+
+    private func appendTextWithIndent(
+        _ text: String,
+        style: TextStyle,
+        backgroundOverride: BackgroundColorType?,
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        atLineStart: inout Bool,
+        into writer: inout AnsiWriter
+    ) {
+        guard !text.isEmpty else { return }
+
+        var index = text.startIndex
+        while true {
+            if let newline = text[index...].firstIndex(of: "\n") {
+                let segment = text[index..<newline]
+                appendIndentIfNeeded(
+                    indentPrefix: indentPrefix,
+                    plainStyle: plainStyle,
+                    backgroundOverride: backgroundOverride,
+                    atLineStart: &atLineStart,
+                    into: &writer
+                )
+                if !segment.isEmpty {
+                    writer.append(text: String(segment), style: style, backgroundOverride: backgroundOverride)
+                    atLineStart = false
+                }
+                writer.appendPlain("\n")
+                atLineStart = true
+
+                index = text.index(after: newline)
+                if index == text.endIndex {
+                    break
+                }
+            } else {
+                let segment = text[index..<text.endIndex]
+                appendIndentIfNeeded(
+                    indentPrefix: indentPrefix,
+                    plainStyle: plainStyle,
+                    backgroundOverride: backgroundOverride,
+                    atLineStart: &atLineStart,
+                    into: &writer
+                )
+                if !segment.isEmpty {
+                    writer.append(text: String(segment), style: style, backgroundOverride: backgroundOverride)
+                    atLineStart = false
+                }
+                break
+            }
+        }
     }
 
     private struct RenderPlan {

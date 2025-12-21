@@ -41,9 +41,13 @@ struct ExpectedToken: Equatable {
 
 @inline(__always)
 func ensureRainbowEnabled() {
-    if !Rainbow.enabled {
+    _ = RainbowTestState.enable
+}
+
+private enum RainbowTestState {
+    static let enable: Void = {
         Rainbow.enabled = true
-    }
+    }()
 }
 
 func renderExpected(_ tokens: [ExpectedToken], theme: Theme = TestThemes.stable) -> String {
