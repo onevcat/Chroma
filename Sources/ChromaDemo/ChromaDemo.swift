@@ -166,6 +166,14 @@ struct ChromaDemo {
                 ))
                 print("")
 
+                printSection("Indentation (2 spaces)")
+                print(try highlighter.highlight(
+                    Samples.swiftIndent,
+                    language: .swift,
+                    options: .init(indent: 2)
+                ))
+                print("")
+
                 printSection("Diff Highlighting (unified patch)")
                 print(try highlighter.highlight(
                     Samples.patch,
@@ -265,6 +273,12 @@ enum Samples {
     struct Metrics {
         let count = 42
         let ratio = 3.14
+    }
+    """
+
+    static let swiftIndent = """
+    class A {
+        let name: String
     }
     """
 
