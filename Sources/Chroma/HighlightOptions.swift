@@ -1,3 +1,26 @@
+public struct LineNumberOptions: Equatable {
+    public var isEnabled: Bool
+    public var start: Int {
+        didSet {
+            if start < 1 {
+                start = 1
+            }
+        }
+    }
+
+    public init(start: Int = 1) {
+        self.isEnabled = true
+        self.start = max(1, start)
+    }
+
+    private init(isEnabled: Bool, start: Int) {
+        self.isEnabled = isEnabled
+        self.start = max(1, start)
+    }
+
+    public static let none = LineNumberOptions(isEnabled: false, start: 1)
+}
+
 public struct HighlightOptions: Equatable {
     public enum DiffCodeStyle: Equatable {
         case syntax
@@ -18,6 +41,7 @@ public struct HighlightOptions: Equatable {
     public var theme: Theme?
     public var diff: DiffHighlight
     public var highlightLines: LineRangeSet
+    public var lineNumbers: LineNumberOptions
     public var indent: Int {
         didSet {
             if indent < 0 {
@@ -30,11 +54,13 @@ public struct HighlightOptions: Equatable {
         theme: Theme? = nil,
         diff: DiffHighlight = .auto(),
         highlightLines: LineRangeSet = .init(),
+        lineNumbers: LineNumberOptions = .none,
         indent: Int = 0
     ) {
         self.theme = theme
         self.diff = diff
         self.highlightLines = highlightLines
+        self.lineNumbers = lineNumbers
         self.indent = max(0, indent)
     }
 }

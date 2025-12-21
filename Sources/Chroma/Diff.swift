@@ -57,6 +57,7 @@ enum DiffDetector {
         if s.hasPrefix("rename from ") { return .meta }
         if s.hasPrefix("rename to ") { return .meta }
         if s.hasPrefix("Binary files ") { return .meta }
+        if s.hasPrefix("\\ No newline at end of file") { return .meta }
 
         if s.hasPrefix("@@") { return .hunkHeader }
         if s.hasPrefix("--- ") || s.hasPrefix("+++ ") { return .fileHeader }
@@ -65,6 +66,21 @@ enum DiffDetector {
         if s.hasPrefix("-") && !s.hasPrefix("--- ") { return .removed }
 
         return nil
+    }
+
+    static func hunkStartNumbers(forLine line: Substring) -> (old: Int, new: Int)? {
+        let s = trimmingCR(line)
+        guard s.hasPrefix("@@") else { return nil }
+        guard let dashIndex = s.firstIndex(of: "-"),
+              let plusIndex = s.firstIndex(of: "+"),
+              dashIndex < plusIndex else { return nil }
+
+        guard let (oldStart, _) = parseNumber(in: s, from: s.index(after: dashIndex)),
+              let (newStart, _) = parseNumber(in: s, from: s.index(after: plusIndex)) else {
+            return nil
+        }
+
+        return (oldStart, newStart)
     }
 }
 
@@ -90,4 +106,20 @@ func trimmingCR(_ line: Substring) -> Substring {
         return line.dropLast()
     }
     return line
+}
+
+private func parseNumber(in text: Substring, from index: String.Index) -> (Int, String.Index)? {
+    var cursor = index
+    var value = 0
+    var found = false
+
+    while cursor < text.endIndex {
+        guard let digit = text[cursor].wholeNumberValue else { break }
+        found = true
+        value = (value * 10) + digit
+        cursor = text.index(after: cursor)
+    }
+
+    guard found else { return nil }
+    return (value, cursor)
 }

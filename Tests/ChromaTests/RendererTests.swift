@@ -188,6 +188,101 @@ struct RendererTests {
         #expect(output.contains(expectedDiffKeyword))
     }
 
+    @Test("Line numbers render for plain text")
+    func lineNumbersRender() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .none, lineNumbers: .init(start: 1))
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\nlet b"
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expected = renderExpected([
+            ExpectedToken(.comment, "1", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "let a"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.comment, "2", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "let b"),
+        ])
+
+        #expect(output == expected)
+    }
+
+    @Test("Line numbers align to max width and honor indent")
+    func lineNumbersAlignmentAndIndent() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .none,
+            lineNumbers: .init(start: 9),
+            indent: 2
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "a\nb"
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expected = renderExpected([
+            ExpectedToken(.plain, "  "),
+            ExpectedToken(.comment, " 9", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "a"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.plain, "  "),
+            ExpectedToken(.comment, "10", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "b"),
+        ])
+
+        #expect(output == expected)
+    }
+
+    @Test("Line numbers follow diff hunk positions")
+    func lineNumbersFollowDiffHunks() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .none, lineNumbers: .init(start: 1))
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        @@ -10,2 +20,2 @@
+        -let a
+        +let b
+         let c
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expected = renderExpected([
+            ExpectedToken(.comment, "  ", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "@@ -10,2 +20,2 @@"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.comment, "10", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "-let a"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.comment, "20", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, "+let b"),
+            ExpectedToken.plain("\n"),
+            ExpectedToken(.comment, "21", foreground: theme.lineNumberForeground),
+            ExpectedToken(.plain, " "),
+            ExpectedToken(.plain, " let c"),
+        ])
+
+        #expect(output == expected)
+    }
+
     @Test("Indent applies to empty lines")
     func indentAppliesToEmptyLines() {
         let theme = Theme(
@@ -197,7 +292,8 @@ struct RendererTests {
             diffAddedBackground: .named(.black),
             diffRemovedBackground: .named(.black),
             diffAddedForeground: .named(.green),
-            diffRemovedForeground: .named(.red)
+            diffRemovedForeground: .named(.red),
+            lineNumberForeground: .named(.white)
         )
         let options = HighlightOptions(theme: theme, diff: .none, highlightLines: .init(), indent: 2)
         let renderer = Renderer(theme: theme, options: options)

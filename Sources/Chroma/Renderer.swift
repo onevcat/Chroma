@@ -29,7 +29,10 @@ final class Renderer {
         estimatedSegments: Int?,
         tokenStream: (_ emit: (Token) -> Void) -> Void
     ) -> String {
-        if !Rainbow.enabled && options.highlightLines.ranges.isEmpty && options.indent == 0 {
+        if !Rainbow.enabled &&
+            options.highlightLines.ranges.isEmpty &&
+            options.indent == 0 &&
+            !options.lineNumbers.isEnabled {
             if options.diff.rendering(for: code) == nil {
                 return code
             }
@@ -39,6 +42,7 @@ final class Renderer {
         let ns = code as NSString
         let indentPrefix = makeIndentPrefix()
         let plainStyle = styleCache.style(for: .plain)
+        let lineNumberStyle = styleCache.style(for: .comment)
 
         var writer = AnsiWriter(
             estimatedTextLength: code.count,
@@ -59,6 +63,10 @@ final class Renderer {
                     lineForegrounds: plan.lineForegrounds,
                     linePlainStyles: plan.linePlainStyles,
                     lineBreaks: plan.lineBreaks,
+                    lineNumbers: plan.lineNumbers,
+                    lineNumberWidth: plan.lineNumberWidth,
+                    lineNumberStyle: lineNumberStyle,
+                    lineNumberForeground: theme.lineNumberForeground,
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
                     atLineStart: &atLineStart,
@@ -91,6 +99,10 @@ final class Renderer {
         lineForegrounds: [ColorType?],
         linePlainStyles: [Bool],
         lineBreaks: [Int],
+        lineNumbers: [Int?],
+        lineNumberWidth: Int,
+        lineNumberStyle: TextStyle,
+        lineNumberForeground: ColorType,
         indentPrefix: String,
         plainStyle: TextStyle,
         atLineStart: inout Bool,
@@ -109,7 +121,12 @@ final class Renderer {
                 let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
                 let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
                 if pieceLength == 0 {
-                    appendIndentIfNeeded(
+                    appendLinePrefixIfNeeded(
+                        line: currentLine,
+                        lineNumbers: lineNumbers,
+                        lineNumberWidth: lineNumberWidth,
+                        lineNumberStyle: lineNumberStyle,
+                        lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
                         foregroundOverride: foreground,
@@ -122,7 +139,12 @@ final class Renderer {
                     let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
                     let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
                     let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
-                    appendIndentIfNeeded(
+                    appendLinePrefixIfNeeded(
+                        line: currentLine,
+                        lineNumbers: lineNumbers,
+                        lineNumberWidth: lineNumberWidth,
+                        lineNumberStyle: lineNumberStyle,
+                        lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
                         foregroundOverride: foreground,
@@ -160,7 +182,12 @@ final class Renderer {
                     let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
                     let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
                     let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
-                    appendIndentIfNeeded(
+                    appendLinePrefixIfNeeded(
+                        line: currentLine,
+                        lineNumbers: lineNumbers,
+                        lineNumberWidth: lineNumberWidth,
+                        lineNumberStyle: lineNumberStyle,
+                        lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
                         foregroundOverride: foreground,
@@ -361,17 +388,24 @@ final class Renderer {
         let linePlainStyles: [Bool]
         let hasLineOverrides: Bool
         let lineBreaks: [Int]
+        let lineNumbers: [Int?]
+        let lineNumberWidth: Int
     }
 
     private func makePlan(for code: String) -> RenderPlan {
         let diffRendering = options.diff.rendering(for: code)
-        if diffRendering == nil && options.highlightLines.ranges.isEmpty {
+        let needsLineInfo = diffRendering != nil ||
+            !options.highlightLines.ranges.isEmpty ||
+            options.lineNumbers.isEnabled
+        if !needsLineInfo {
             return RenderPlan(
                 lineBackgrounds: [],
                 lineForegrounds: [],
                 linePlainStyles: [],
                 hasLineOverrides: false,
-                lineBreaks: []
+                lineBreaks: [],
+                lineNumbers: [],
+                lineNumberWidth: 0
             )
         }
 
@@ -441,13 +475,21 @@ final class Renderer {
             }
         }
 
+        let lineNumbers = resolveLineNumbers(for: lines)
+        let lineNumberWidth = lineNumberWidth(for: lineNumbers)
+        if !lineNumbers.isEmpty {
+            hasLineOverrides = true
+        }
+
         let lineBreaks = hasLineOverrides ? lineBreakLocations(code) : []
         return RenderPlan(
             lineBackgrounds: lineBackgrounds,
             lineForegrounds: lineForegrounds,
             linePlainStyles: linePlainStyles,
             hasLineOverrides: hasLineOverrides,
-            lineBreaks: lineBreaks
+            lineBreaks: lineBreaks,
+            lineNumbers: lineNumbers,
+            lineNumberWidth: lineNumberWidth
         )
     }
 
@@ -463,6 +505,170 @@ final class Renderer {
             index += 1
         }
         return locations
+    }
+
+    private func resolveLineNumbers(for lines: [Substring]) -> [Int?] {
+        guard options.lineNumbers.isEnabled else { return [] }
+
+        if DiffDetector.looksLikePatch(lines: lines) {
+            return makePatchLineNumbers(for: lines)
+        }
+        return makeSequentialLineNumbers(for: lines, start: options.lineNumbers.start)
+    }
+
+    private func makePatchLineNumbers(for lines: [Substring]) -> [Int?] {
+        var result = [Int?](repeating: nil, count: lines.count)
+        var oldLine: Int? = nil
+        var newLine: Int? = nil
+        var hasHunkHeader = false
+
+        for (index, line) in lines.enumerated() {
+            if case .hunkHeader? = DiffDetector.kind(forLine: line) {
+                if let hunk = DiffDetector.hunkStartNumbers(forLine: line) {
+                    oldLine = hunk.old
+                    newLine = hunk.new
+                    hasHunkHeader = true
+                } else {
+                    oldLine = nil
+                    newLine = nil
+                }
+                continue
+            }
+
+            let kind = DiffDetector.kind(forLine: line)
+            switch kind {
+            case .meta?, .fileHeader?:
+                continue
+            case .removed?:
+                guard let currentOld = oldLine else { continue }
+                result[index] = currentOld
+                oldLine = currentOld + 1
+            case .added?:
+                guard let currentNew = newLine else { continue }
+                result[index] = currentNew
+                newLine = currentNew + 1
+            case .hunkHeader?:
+                continue
+            case nil:
+                guard let currentOld = oldLine, let currentNew = newLine else { continue }
+                result[index] = currentNew
+                oldLine = currentOld + 1
+                newLine = currentNew + 1
+            }
+        }
+
+        guard hasHunkHeader else {
+            return makeSequentialLineNumbers(
+                for: lines,
+                start: options.lineNumbers.start,
+                maskingDiffMeta: true
+            )
+        }
+
+        return result
+    }
+
+    private func makeSequentialLineNumbers(
+        for lines: [Substring],
+        start: Int,
+        maskingDiffMeta: Bool = false
+    ) -> [Int?] {
+        var result = [Int?](repeating: nil, count: lines.count)
+        var current = start
+
+        for (index, line) in lines.enumerated() {
+            if maskingDiffMeta {
+                let kind = DiffDetector.kind(forLine: line)
+                switch kind {
+                case .meta?, .fileHeader?, .hunkHeader?:
+                    continue
+                case nil, .added?, .removed?:
+                    break
+                }
+            }
+            result[index] = current
+            current += 1
+        }
+
+        return result
+    }
+
+    private func lineNumberWidth(for lineNumbers: [Int?]) -> Int {
+        guard options.lineNumbers.isEnabled else { return 0 }
+        let maxNumber = lineNumbers.compactMap { $0 }.max() ?? options.lineNumbers.start
+        return max(1, String(maxNumber).count)
+    }
+
+    private func appendLinePrefixIfNeeded(
+        line: Int,
+        lineNumbers: [Int?],
+        lineNumberWidth: Int,
+        lineNumberStyle: TextStyle,
+        lineNumberForeground: ColorType,
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        foregroundOverride: ColorType?,
+        backgroundOverride: BackgroundColorType?,
+        atLineStart: inout Bool,
+        into writer: inout AnsiWriter
+    ) {
+        guard atLineStart else { return }
+
+        var wrotePrefix = false
+
+        if !indentPrefix.isEmpty {
+            if let foregroundOverride {
+                writer.append(
+                    text: indentPrefix,
+                    style: plainStyle,
+                    foregroundOverride: foregroundOverride,
+                    backgroundOverride: backgroundOverride
+                )
+            } else {
+                writer.append(
+                    text: indentPrefix,
+                    style: plainStyle,
+                    backgroundOverride: backgroundOverride
+                )
+            }
+            wrotePrefix = true
+        }
+
+        if !lineNumbers.isEmpty {
+            let index = max(0, min(lineNumbers.count - 1, line - 1))
+            let numberText = makeLineNumberText(lineNumbers[index], width: lineNumberWidth)
+            if !numberText.isEmpty {
+                writer.append(
+                    text: numberText,
+                    style: lineNumberStyle,
+                    foregroundOverride: lineNumberForeground,
+                    backgroundOverride: backgroundOverride
+                )
+            }
+            writer.append(
+                text: " ",
+                style: plainStyle,
+                foregroundOverride: foregroundOverride,
+                backgroundOverride: backgroundOverride
+            )
+            wrotePrefix = true
+        }
+
+        if wrotePrefix {
+            atLineStart = false
+        }
+    }
+
+    private func makeLineNumberText(_ number: Int?, width: Int) -> String {
+        guard width > 0 else { return "" }
+        guard let number else {
+            return String(repeating: " ", count: width)
+        }
+        let digits = String(number).count
+        if digits >= width {
+            return String(number)
+        }
+        return String(repeating: " ", count: width - digits) + String(number)
     }
 }
 

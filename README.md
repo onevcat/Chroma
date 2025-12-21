@@ -12,6 +12,7 @@ ANSI styling is generated via [`Rainbow`](https://github.com/onevcat/Rainbow).
 - Custom language registration (`LanguageRegistry`)
 - Custom themes (`Theme`)
 - Line highlighting via `HighlightOptions.highlightLines`
+- Line numbers via `HighlightOptions.lineNumbers`
 - Output indentation via `HighlightOptions.indent`
 - Diff highlighting (unified patch) via `HighlightOptions.diff`
 
@@ -80,6 +81,16 @@ let output = try Chroma.highlight(
     code,
     language: .swift,
     options: .init(highlightLines: [2...3, 6...6])
+)
+```
+
+### Line numbers
+
+```swift
+let output = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(lineNumbers: .init(start: 1))
 )
 ```
 

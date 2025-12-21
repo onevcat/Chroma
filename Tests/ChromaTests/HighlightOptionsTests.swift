@@ -9,6 +9,7 @@ struct HighlightOptionsTests {
         #expect(options.theme == nil)
         #expect(options.diff == .auto())
         #expect(options.highlightLines == LineRangeSet())
+        #expect(options.lineNumbers == .none)
         #expect(options.indent == 0)
     }
 
@@ -20,5 +21,15 @@ struct HighlightOptionsTests {
         var mutable = HighlightOptions()
         mutable.indent = -4
         #expect(mutable.indent == 0)
+    }
+
+    @Test("Line numbers clamp to one")
+    func lineNumberClamp() {
+        let options = HighlightOptions(lineNumbers: .init(start: 0))
+        #expect(options.lineNumbers.start == 1)
+
+        var mutable = HighlightOptions(lineNumbers: .init(start: 3))
+        mutable.lineNumbers.start = -2
+        #expect(mutable.lineNumbers.start == 1)
     }
 }

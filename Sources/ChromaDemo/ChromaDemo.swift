@@ -162,7 +162,23 @@ struct ChromaDemo {
                 print(try highlighter.highlight(
                     Samples.swiftNumbers,
                     language: .swift,
-                    options: .init(highlightLines: [2...2])
+                    options: .init(highlightLines: [2...2], lineNumbers: .init(start: 1))
+                ))
+                print("")
+
+                printSection("Line Numbers (start at 1)")
+                print(try highlighter.highlight(
+                    Samples.swiftNumbers,
+                    language: .swift,
+                    options: .init(lineNumbers: .init(start: 1))
+                ))
+                print("")
+
+                printSection("Line Numbers (start at 98)")
+                print(try highlighter.highlight(
+                    Samples.swiftNumbers,
+                    language: .swift,
+                    options: .init(lineNumbers: .init(start: 98))
                 ))
                 print("")
 
@@ -179,6 +195,14 @@ struct ChromaDemo {
                     Samples.patch,
                     language: .swift,
                     options: .init(diff: .patch())
+                ))
+                print("")
+
+                printSection("Diff Highlighting + Line Numbers")
+                print(try highlighter.highlight(
+                    Samples.patch,
+                    language: .swift,
+                    options: .init(diff: .patch(), lineNumbers: .init(start: 1))
                 ))
                 print("")
 

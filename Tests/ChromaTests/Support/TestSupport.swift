@@ -21,7 +21,8 @@ enum TestThemes {
         diffAddedBackground: .named(.lightGreen),
         diffRemovedBackground: .named(.lightRed),
         diffAddedForeground: .named(.green),
-        diffRemovedForeground: .named(.red)
+        diffRemovedForeground: .named(.red),
+        lineNumberForeground: .named(.lightBlack)
     )
 }
 
