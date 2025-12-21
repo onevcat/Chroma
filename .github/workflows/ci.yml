@@ -21,10 +21,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Swift
+      - name: Set up Swift (Linux)
+        if: runner.os != 'macOS'
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift }}
+
+      - name: Resolve Swift version
+        id: swift-version
+        run: |
+          set -euo pipefail
+          if [ "${RUNNER_OS}" = "macOS" ]; then
+            SWIFT_BIN="$(xcrun -f swift)"
+          else
+            SWIFT_BIN="swift"
+          fi
+          SWIFT_VERSION="$("${SWIFT_BIN}" --version | head -n 1 | awk '{print $4}')"
+          echo "version=${SWIFT_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "Swift version: ${SWIFT_VERSION}"
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/.swiftpm
+          key: swiftpm-${{ runner.os }}-swift-${{ steps.swift-version.outputs.version }}-release-${{ hashFiles('Package.resolved', 'Package.swift') }}
 
       - name: Build and test
         env:
@@ -37,10 +59,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
+      - name: Resolve Swift version
+        id: swift-version
+        run: |
+          set -euo pipefail
+          SWIFT_BIN="$(xcrun -f swift)"
+          SWIFT_VERSION="$("${SWIFT_BIN}" --version | head -n 1 | awk '{print $4}')"
+          echo "version=${SWIFT_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "Swift version: ${SWIFT_VERSION}"
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
         with:
-          swift-version: "6.0"
+          path: |
+            .build
+            ~/.swiftpm
+          key: swiftpm-${{ runner.os }}-swift-${{ steps.swift-version.outputs.version }}-release-${{ hashFiles('Package.resolved', 'Package.swift') }}
 
       - name: Install jemalloc
         env:
