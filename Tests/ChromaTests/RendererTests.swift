@@ -36,7 +36,7 @@ struct RendererTests {
     func highlightOverridesDiff() throws {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch, highlightLines: [1...1])
+        let options = HighlightOptions(theme: theme, diff: .patch(), highlightLines: [1...1])
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "+let a = 1"
@@ -55,6 +55,139 @@ struct RendererTests {
         #expect(!output.contains(unexpected))
     }
 
+    @Test("Diff foreground uses line foreground and ignores token styles")
+    func diffForegroundUsesPlainStyle() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .patch(style: .foreground()))
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\n+let value = 1"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedContextPlain = renderExpected([
+            ExpectedToken(.plain, "let")
+        ])
+        let expectedDiffPlain = renderExpected([
+            ExpectedToken(.plain, "let", foreground: theme.diffAddedForeground)
+        ])
+        let unexpectedContextKeyword = renderExpected([
+            ExpectedToken(.keyword, "let")
+        ])
+        let unexpectedKeyword = renderExpected([
+            ExpectedToken(.keyword, "let", foreground: theme.diffAddedForeground)
+        ])
+
+        #expect(output.contains(expectedContextPlain))
+        #expect(output.contains(expectedDiffPlain))
+        #expect(!output.contains(unexpectedContextKeyword))
+        #expect(!output.contains(unexpectedKeyword))
+    }
+
+    @Test("Diff foreground can keep syntax styling for context lines")
+    func diffForegroundKeepsContextSyntax() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(style: .foreground(contextCode: .syntax))
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\n+let b"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedContext = renderExpected([
+            ExpectedToken(.keyword, "let")
+        ])
+
+        #expect(output.contains(expectedContext))
+    }
+
+    @Test("Diff background can disable code styling")
+    func diffBackgroundPlainStyle() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .patch(style: .background(diffCode: .plain)))
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\n+let value = 1"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedContextKeyword = renderExpected([
+            ExpectedToken(.keyword, "let")
+        ])
+        let expectedDiffPlain = renderExpected([
+            ExpectedToken(.plain, "let", background: theme.diffAddedBackground)
+        ])
+        let unexpectedKeyword = renderExpected([
+            ExpectedToken(.keyword, "let", background: theme.diffAddedBackground)
+        ])
+
+        #expect(output.contains(expectedContextKeyword))
+        #expect(output.contains(expectedDiffPlain))
+        #expect(!output.contains(unexpectedKeyword))
+    }
+
+    @Test("Diff background can keep context plain while diff uses syntax")
+    func diffBackgroundKeepsContextPlain() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(style: .background(diffCode: .syntax, contextCode: .plain))
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\n+let b"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedContextPlain = renderExpected([
+            ExpectedToken(.plain, "let")
+        ])
+        let expectedDiffKeyword = renderExpected([
+            ExpectedToken(.keyword, "let", background: theme.diffAddedBackground)
+        ])
+        let unexpectedContextKeyword = renderExpected([
+            ExpectedToken(.keyword, "let")
+        ])
+
+        #expect(output.contains(expectedContextPlain))
+        #expect(output.contains(expectedDiffKeyword))
+        #expect(!output.contains(unexpectedContextKeyword))
+    }
+
+    @Test("Diff background defaults to syntax for diff and context")
+    func diffBackgroundDefaultSyntax() throws {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .patch())
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = "let a\n+let b"
+        let language = BuiltInLanguages.all.first { $0.id == .swift }!
+        let tokens = RegexTokenizer(rules: language.rules).tokenize(code)
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedContextKeyword = renderExpected([
+            ExpectedToken(.keyword, "let")
+        ])
+        let expectedDiffKeyword = renderExpected([
+            ExpectedToken(.keyword, "let", background: theme.diffAddedBackground)
+        ])
+
+        #expect(output.contains(expectedContextKeyword))
+        #expect(output.contains(expectedDiffKeyword))
+    }
+
     @Test("Indent applies to empty lines")
     func indentAppliesToEmptyLines() {
         let theme = Theme(
@@ -62,7 +195,9 @@ struct RendererTests {
             tokenStyles: [.plain: .init()],
             lineHighlightBackground: .named(.black),
             diffAddedBackground: .named(.black),
-            diffRemovedBackground: .named(.black)
+            diffRemovedBackground: .named(.black),
+            diffAddedForeground: .named(.green),
+            diffRemovedForeground: .named(.red)
         )
         let options = HighlightOptions(theme: theme, diff: .none, highlightLines: .init(), indent: 2)
         let renderer = Renderer(theme: theme, options: options)
@@ -111,7 +246,7 @@ struct RendererTests {
     func indentAppliesDiffBackgrounds() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch, highlightLines: .init(), indent: 1)
+        let options = HighlightOptions(theme: theme, diff: .patch(), highlightLines: .init(), indent: 1)
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "+let a\n-let b"

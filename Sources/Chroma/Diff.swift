@@ -10,7 +10,31 @@ enum DiffLineKind {
 
 enum DiffDetector {
     static func looksLikePatch(_ code: String) -> Bool {
-        return looksLikePatch(lines: splitLines(code))
+        var lineStart = code.startIndex
+        var index = lineStart
+
+        func lineLooksLikePatch(start: String.Index, end: String.Index) -> Bool {
+            guard start < end else { return false }
+            let line = code[start..<end]
+            if line.hasPrefix("diff --git ") { return true }
+            if line.hasPrefix("@@") { return true }
+            if line.hasPrefix("--- ") || line.hasPrefix("+++ ") { return true }
+            return false
+        }
+
+        while index < code.endIndex {
+            if code[index] == "\n" {
+                if lineLooksLikePatch(start: lineStart, end: index) {
+                    return true
+                }
+                index = code.index(after: index)
+                lineStart = index
+                continue
+            }
+            index = code.index(after: index)
+        }
+
+        return lineLooksLikePatch(start: lineStart, end: code.endIndex)
     }
 
     static func looksLikePatch(lines: [Substring]) -> Bool {

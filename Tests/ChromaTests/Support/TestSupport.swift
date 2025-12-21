@@ -19,18 +19,27 @@ enum TestThemes {
         ],
         lineHighlightBackground: .named(.lightYellow),
         diffAddedBackground: .named(.lightGreen),
-        diffRemovedBackground: .named(.lightRed)
+        diffRemovedBackground: .named(.lightRed),
+        diffAddedForeground: .named(.green),
+        diffRemovedForeground: .named(.red)
     )
 }
 
 struct ExpectedToken: Equatable {
     let kind: TokenKind
     let text: String
+    let foreground: ColorType?
     let background: BackgroundColorType?
 
-    init(_ kind: TokenKind, _ text: String, background: BackgroundColorType? = nil) {
+    init(
+        _ kind: TokenKind,
+        _ text: String,
+        foreground: ColorType? = nil,
+        background: BackgroundColorType? = nil
+    ) {
         self.kind = kind
         self.text = text
+        self.foreground = foreground
         self.background = background
     }
 
@@ -53,7 +62,11 @@ private enum RainbowTestState {
 func renderExpected(_ tokens: [ExpectedToken], theme: Theme = TestThemes.stable) -> String {
     ensureRainbowEnabled()
     let segments = tokens.map { token in
-        theme.style(for: token.kind).makeSegment(text: token.text, backgroundOverride: token.background)
+        theme.style(for: token.kind).makeSegment(
+            text: token.text,
+            foregroundOverride: token.foreground,
+            backgroundOverride: token.background
+        )
     }
     return AnsiStringGenerator.generate(for: Rainbow.Entry(segments: segments))
 }

@@ -95,7 +95,7 @@ let output = try Chroma.highlight(
 
 ### Diff highlighting (unified patch)
 
-`Chroma` can highlight `+` / `-` lines with green / red background, following the common `git diff` patch rules.
+`Chroma` can highlight `+` / `-` lines in unified patches, following the common `git diff` patch rules.
 
 ```swift
 let patch = """
@@ -111,9 +111,39 @@ index 1111111..2222222 100644
 let output = try Chroma.highlight(
     patch,
     language: .swift,
-    options: .init(diff: .patch)
+    options: .init(diff: .patch())
 )
 print(output)
+```
+
+Foreground-only diff (plain text, no token styling):
+
+```swift
+let output = try Chroma.highlight(
+    patch,
+    language: .swift,
+    options: .init(diff: .patch(style: .foreground()))
+)
+```
+
+Foreground diff with syntax-highlighted context lines:
+
+```swift
+let output = try Chroma.highlight(
+    patch,
+    language: .swift,
+    options: .init(diff: .patch(style: .foreground(contextCode: .syntax)))
+)
+```
+
+Background diff without code styling:
+
+```swift
+let output = try Chroma.highlight(
+    patch,
+    language: .swift,
+    options: .init(diff: .patch(style: .background(diffCode: .plain)))
+)
 ```
 
 ## Custom languages

@@ -24,8 +24,13 @@ public final class Highlighter {
         }
 
         let theme = options.theme ?? self.theme
-        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         let renderer = Renderer(theme: theme, options: options)
+        if options.maySkipTokenization && options.shouldSkipTokenization(for: code) {
+            let ns = code as NSString
+            let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+            return renderer.render(code: code, tokens: tokens)
+        }
+        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return renderer.render(code: code) { emit in
             tokenizer.scan(code, emit: emit)
         }

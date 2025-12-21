@@ -15,13 +15,16 @@ public struct TextStyle: Equatable {
         self.styles = styles
     }
 
-    func makeSegment(text: String, backgroundOverride: BackgroundColorType? = nil) -> Rainbow.Segment {
+    func makeSegment(
+        text: String,
+        foregroundOverride: ColorType? = nil,
+        backgroundOverride: BackgroundColorType? = nil
+    ) -> Rainbow.Segment {
         Rainbow.Segment(
             text: text,
-            color: foreground,
+            color: foregroundOverride ?? foreground,
             backgroundColor: backgroundOverride ?? background,
             styles: styles
         )
     }
 }
-

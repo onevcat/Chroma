@@ -13,7 +13,9 @@ struct ThemeTests {
             ],
             lineHighlightBackground: .named(.lightYellow),
             diffAddedBackground: .named(.lightGreen),
-            diffRemovedBackground: .named(.lightRed)
+            diffRemovedBackground: .named(.lightRed),
+            diffAddedForeground: .named(.green),
+            diffRemovedForeground: .named(.red)
         )
 
         let style = theme.style(for: .keyword)
