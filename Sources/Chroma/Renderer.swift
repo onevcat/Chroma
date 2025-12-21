@@ -66,6 +66,7 @@ final class Renderer {
                     lineNumbers: plan.lineNumbers,
                     lineNumberWidth: plan.lineNumberWidth,
                     lineNumberStyle: lineNumberStyle,
+                    lineNumberForegrounds: plan.lineNumberForegrounds,
                     lineNumberForeground: theme.lineNumberForeground,
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
@@ -102,6 +103,7 @@ final class Renderer {
         lineNumbers: [Int?],
         lineNumberWidth: Int,
         lineNumberStyle: TextStyle,
+        lineNumberForegrounds: [ColorType?],
         lineNumberForeground: ColorType,
         indentPrefix: String,
         plainStyle: TextStyle,
@@ -126,6 +128,7 @@ final class Renderer {
                         lineNumbers: lineNumbers,
                         lineNumberWidth: lineNumberWidth,
                         lineNumberStyle: lineNumberStyle,
+                        lineNumberForegrounds: lineNumberForegrounds,
                         lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
@@ -144,6 +147,7 @@ final class Renderer {
                         lineNumbers: lineNumbers,
                         lineNumberWidth: lineNumberWidth,
                         lineNumberStyle: lineNumberStyle,
+                        lineNumberForegrounds: lineNumberForegrounds,
                         lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
@@ -187,6 +191,7 @@ final class Renderer {
                         lineNumbers: lineNumbers,
                         lineNumberWidth: lineNumberWidth,
                         lineNumberStyle: lineNumberStyle,
+                        lineNumberForegrounds: lineNumberForegrounds,
                         lineNumberForeground: lineNumberForeground,
                         indentPrefix: indentPrefix,
                         plainStyle: plainStyle,
@@ -390,6 +395,7 @@ final class Renderer {
         let lineBreaks: [Int]
         let lineNumbers: [Int?]
         let lineNumberWidth: Int
+        let lineNumberForegrounds: [ColorType?]
     }
 
     private func makePlan(for code: String) -> RenderPlan {
@@ -405,7 +411,8 @@ final class Renderer {
                 hasLineOverrides: false,
                 lineBreaks: [],
                 lineNumbers: [],
-                lineNumberWidth: 0
+                lineNumberWidth: 0,
+                lineNumberForegrounds: []
             )
         }
 
@@ -477,6 +484,12 @@ final class Renderer {
 
         let lineNumbers = resolveLineNumbers(for: lines)
         let lineNumberWidth = lineNumberWidth(for: lineNumbers)
+        let lineNumberForegrounds = resolveLineNumberForegrounds(
+            for: lines,
+            lineBackgrounds: lineBackgrounds,
+            lineForegrounds: lineForegrounds,
+            diffRendering: diffRendering
+        )
         if !lineNumbers.isEmpty {
             hasLineOverrides = true
         }
@@ -489,7 +502,8 @@ final class Renderer {
             hasLineOverrides: hasLineOverrides,
             lineBreaks: lineBreaks,
             lineNumbers: lineNumbers,
-            lineNumberWidth: lineNumberWidth
+            lineNumberWidth: lineNumberWidth,
+            lineNumberForegrounds: lineNumberForegrounds
         )
     }
 
@@ -599,11 +613,37 @@ final class Renderer {
         return max(1, String(maxNumber).count)
     }
 
+    private func resolveLineNumberForegrounds(
+        for lines: [Substring],
+        lineBackgrounds: [BackgroundColorType?],
+        lineForegrounds: [ColorType?],
+        diffRendering: HighlightOptions.DiffRendering?
+    ) -> [ColorType?] {
+        guard options.lineNumbers.isEnabled, let diffRendering else { return [] }
+
+        let style = diffRendering.style
+        switch style {
+        case .background:
+            guard !lineBackgrounds.isEmpty else { return [] }
+            var result = [ColorType?](repeating: nil, count: lines.count)
+            for (index, background) in lineBackgrounds.enumerated() {
+                if background == theme.diffAddedBackground || background == theme.diffRemovedBackground {
+                    result[index] = .named(.white)
+                }
+            }
+            return result
+        case .foreground:
+            guard !lineForegrounds.isEmpty else { return [] }
+            return lineForegrounds
+        }
+    }
+
     private func appendLinePrefixIfNeeded(
         line: Int,
         lineNumbers: [Int?],
         lineNumberWidth: Int,
         lineNumberStyle: TextStyle,
+        lineNumberForegrounds: [ColorType?],
         lineNumberForeground: ColorType,
         indentPrefix: String,
         plainStyle: TextStyle,
@@ -638,12 +678,23 @@ final class Renderer {
             let index = max(0, min(lineNumbers.count - 1, line - 1))
             let numberText = makeLineNumberText(lineNumbers[index], width: lineNumberWidth)
             if !numberText.isEmpty {
-                writer.append(
-                    text: numberText,
-                    style: lineNumberStyle,
-                    foregroundOverride: lineNumberForeground,
-                    backgroundOverride: backgroundOverride
-                )
+                let overrideForeground = lineNumberForegrounds.isEmpty ? nil : lineNumberForegrounds[index]
+                let resolvedForeground = overrideForeground ?? lineNumberForeground
+                if overrideForeground == .named(.white) {
+                    let fixedStyle = TextStyle(foreground: .named(.white))
+                    writer.append(
+                        text: numberText,
+                        style: fixedStyle,
+                        backgroundOverride: backgroundOverride
+                    )
+                } else {
+                    writer.append(
+                        text: numberText,
+                        style: lineNumberStyle,
+                        foregroundOverride: resolvedForeground,
+                        backgroundOverride: backgroundOverride
+                    )
+                }
             }
             writer.append(
                 text: " ",

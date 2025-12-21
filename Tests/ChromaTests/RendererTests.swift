@@ -283,6 +283,74 @@ struct RendererTests {
         #expect(output == expected)
     }
 
+    @Test("Line numbers use white on diff background")
+    func lineNumbersUseWhiteOnDiffBackground() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(theme: theme, diff: .patch(), lineNumbers: .init(start: 1))
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        @@ -10,1 +20,1 @@
+        -let a
+        +let b
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedRemovedNumber = renderExpected([
+            ExpectedToken(
+                .plain,
+                "10",
+                foreground: .named(.white),
+                background: theme.diffRemovedBackground
+            )
+        ])
+        let expectedAddedNumber = renderExpected([
+            ExpectedToken(
+                .plain,
+                "20",
+                foreground: .named(.white),
+                background: theme.diffAddedBackground
+            )
+        ])
+
+        #expect(output.contains(expectedRemovedNumber))
+        #expect(output.contains(expectedAddedNumber))
+    }
+
+    @Test("Line numbers use diff foreground colors")
+    func lineNumbersUseDiffForegroundColors() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(style: .foreground()),
+            lineNumbers: .init(start: 1)
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        @@ -10,1 +20,1 @@
+        -let a
+        +let b
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = renderer.render(code: code, tokens: tokens)
+        let expectedRemovedNumber = renderExpected([
+            ExpectedToken(.comment, "10", foreground: theme.diffRemovedForeground)
+        ])
+        let expectedAddedNumber = renderExpected([
+            ExpectedToken(.comment, "20", foreground: theme.diffAddedForeground)
+        ])
+
+        #expect(output.contains(expectedRemovedNumber))
+        #expect(output.contains(expectedAddedNumber))
+    }
+
     @Test("Indent applies to empty lines")
     func indentAppliesToEmptyLines() {
         let theme = Theme(

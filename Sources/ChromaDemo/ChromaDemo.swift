@@ -210,7 +210,7 @@ struct ChromaDemo {
                 print(try highlighter.highlight(
                     Samples.patch,
                     language: .swift,
-                    options: .init(diff: .patch(style: .foreground()))
+                    options: .init(diff: .patch(style: .foreground()), lineNumbers: .init())
                 ))
                 print("")
 
