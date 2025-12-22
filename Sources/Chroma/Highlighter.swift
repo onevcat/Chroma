@@ -30,6 +30,10 @@ public final class Highlighter {
             let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
             return renderer.render(code: code, tokens: tokens)
         }
+        if isMarkdown(language.id) {
+            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+            return renderer.render(code: code, tokens: tokenizer.tokenize(code))
+        }
         let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return renderer.render(code: code) { emit in
             tokenizer.scan(code, emit: emit)
@@ -44,6 +48,10 @@ public final class Highlighter {
             throw Error.languageNotFound(language)
         }
 
+        if isMarkdown(language.id) {
+            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+            return tokenizer.tokenize(code)
+        }
         let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         return tokenizer.tokenize(code)
     }
@@ -57,8 +65,17 @@ public final class Highlighter {
             throw Error.languageNotFound(language)
         }
 
+        if isMarkdown(language.id) {
+            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+            tokenizer.scan(code, emit: emit)
+            return
+        }
         let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
         tokenizer.scan(code, emit: emit)
+    }
+
+    private func isMarkdown(_ id: LanguageID) -> Bool {
+        id.rawValue == LanguageID.markdown.rawValue || id.rawValue == LanguageID.md.rawValue
     }
 
     public func render(

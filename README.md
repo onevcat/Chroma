@@ -7,7 +7,7 @@ ANSI styling is generated via [`Rainbow`](https://github.com/onevcat/Rainbow).
 
 ## Features
 
-- Built-in languages: Swift, Objective-C, C, JavaScript, TypeScript, Python, Ruby, Go, Rust, Kotlin, C#
+- Built-in languages: Swift, Objective-C, C, C++, Java, C#, JavaScript, JSX, TypeScript, TSX, Python, Ruby, Go, Rust, Kotlin, PHP, Dart, Lua, Bash, SQL, CSS, SCSS, Sass, Less, HTML, XML, JSON, YAML, TOML, Markdown, Dockerfile, Makefile
 - Built-in themes: `Theme.dark` and `Theme.light`
 - Custom language registration (`LanguageRegistry`)
 - Custom themes (`Theme`)
