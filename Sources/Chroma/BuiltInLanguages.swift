@@ -116,12 +116,13 @@ enum BuiltInLanguages {
             "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern",
             "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short", "signed",
             "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while",
+            "self",
         ]
 
         let atKeywords = [
             "@interface", "@implementation", "@end", "@protocol", "@class", "@public", "@private", "@protected",
             "@package", "@property", "@synthesize", "@dynamic", "@selector", "@try", "@catch", "@finally", "@throw",
-            "@autoreleasepool",
+            "@autoreleasepool", "@import", "@synchronized",
         ]
 
         let types = [

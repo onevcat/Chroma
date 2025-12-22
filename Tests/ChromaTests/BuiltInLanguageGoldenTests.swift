@@ -116,6 +116,42 @@ struct ObjectiveCGoldenTests {
             ]
         )
     }
+
+    @Test("self keyword")
+    func selfKeyword() throws {
+        try assertGolden(
+            "self.name = @\"hi\"",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.keyword, "self"),
+                ExpectedToken(.property, ".name"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "="),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.string, "@\"hi\""),
+            ]
+        )
+    }
+
+    @Test("@import and @synchronized")
+    func importAndSynchronized() throws {
+        try assertGolden(
+            "@import Foundation\n@synchronized(self) {}",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.keyword, "@import"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "Foundation"),
+                ExpectedToken.plain("\n"),
+                ExpectedToken(.keyword, "@synchronized"),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.keyword, "self"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "{}"),
+            ]
+        )
+    }
 }
 
 @Suite("Golden - C")
