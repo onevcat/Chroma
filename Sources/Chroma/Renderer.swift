@@ -68,6 +68,8 @@ final class Renderer {
                     lineNumberStyle: lineNumberStyle,
                     lineNumberForegrounds: plan.lineNumberForegrounds,
                     lineNumberForeground: theme.lineNumberForeground,
+                    lineVisibility: plan.lineVisibility,
+                    lineSeparators: plan.lineSeparators,
                     indentPrefix: indentPrefix,
                     plainStyle: plainStyle,
                     atLineStart: &atLineStart,
@@ -105,6 +107,8 @@ final class Renderer {
         lineNumberStyle: TextStyle,
         lineNumberForegrounds: [ColorType?],
         lineNumberForeground: ColorType,
+        lineVisibility: [Bool],
+        lineSeparators: [Int],
         indentPrefix: String,
         plainStyle: TextStyle,
         atLineStart: inout Bool,
@@ -120,60 +124,71 @@ final class Renderer {
             let nextBreak = lineIndex < lineBreaks.count ? lineBreaks[lineIndex] : nil
             if let nextBreak, nextBreak < end {
                 let pieceLength = nextBreak - location
+                let shouldRender = lineIsVisible(currentLine, lineVisibility: lineVisibility)
                 let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
                 let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
                 if pieceLength == 0 {
-                    appendLinePrefixIfNeeded(
-                        line: currentLine,
-                        lineNumbers: lineNumbers,
-                        lineNumberWidth: lineNumberWidth,
-                        lineNumberStyle: lineNumberStyle,
-                        lineNumberForegrounds: lineNumberForegrounds,
-                        lineNumberForeground: lineNumberForeground,
-                        indentPrefix: indentPrefix,
-                        plainStyle: plainStyle,
-                        foregroundOverride: foreground,
-                        backgroundOverride: background,
-                        atLineStart: &atLineStart,
-                        into: &writer
-                    )
-                }
-                if pieceLength > 0 {
-                    let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
-                    let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
-                    let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
-                    appendLinePrefixIfNeeded(
-                        line: currentLine,
-                        lineNumbers: lineNumbers,
-                        lineNumberWidth: lineNumberWidth,
-                        lineNumberStyle: lineNumberStyle,
-                        lineNumberForegrounds: lineNumberForegrounds,
-                        lineNumberForeground: lineNumberForeground,
-                        indentPrefix: indentPrefix,
-                        plainStyle: plainStyle,
-                        foregroundOverride: foreground,
-                        backgroundOverride: background,
-                        atLineStart: &atLineStart,
-                        into: &writer
-                    )
-                    if let foreground {
-                        writer.append(
-                            text: piece,
-                            style: style,
+                    if shouldRender {
+                        appendLinePrefixIfNeeded(
+                            line: currentLine,
+                            lineNumbers: lineNumbers,
+                            lineNumberWidth: lineNumberWidth,
+                            lineNumberStyle: lineNumberStyle,
+                            lineNumberForegrounds: lineNumberForegrounds,
+                            lineNumberForeground: lineNumberForeground,
+                            lineVisibility: lineVisibility,
+                            lineSeparators: lineSeparators,
+                            indentPrefix: indentPrefix,
+                            plainStyle: plainStyle,
                             foregroundOverride: foreground,
-                            backgroundOverride: background
-                        )
-                    } else {
-                        writer.append(
-                            text: piece,
-                            style: style,
-                            backgroundOverride: background
+                            backgroundOverride: background,
+                            atLineStart: &atLineStart,
+                            into: &writer
                         )
                     }
-                    atLineStart = false
+                }
+                if pieceLength > 0 {
+                    if shouldRender {
+                        let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
+                        let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
+                        let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
+                        appendLinePrefixIfNeeded(
+                            line: currentLine,
+                            lineNumbers: lineNumbers,
+                            lineNumberWidth: lineNumberWidth,
+                            lineNumberStyle: lineNumberStyle,
+                            lineNumberForegrounds: lineNumberForegrounds,
+                            lineNumberForeground: lineNumberForeground,
+                            lineVisibility: lineVisibility,
+                            lineSeparators: lineSeparators,
+                            indentPrefix: indentPrefix,
+                            plainStyle: plainStyle,
+                            foregroundOverride: foreground,
+                            backgroundOverride: background,
+                            atLineStart: &atLineStart,
+                            into: &writer
+                        )
+                        if let foreground {
+                            writer.append(
+                                text: piece,
+                                style: style,
+                                foregroundOverride: foreground,
+                                backgroundOverride: background
+                            )
+                        } else {
+                            writer.append(
+                                text: piece,
+                                style: style,
+                                backgroundOverride: background
+                            )
+                        }
+                        atLineStart = false
+                    }
                 }
 
-                writer.appendPlain("\n")
+                if shouldRender {
+                    writer.appendPlain("\n")
+                }
                 atLineStart = true
                 currentLine += 1
                 lineIndex += 1
@@ -181,40 +196,45 @@ final class Renderer {
             } else {
                 let pieceLength = end - location
                 if pieceLength > 0 {
-                    let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
-                    let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
-                    let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
-                    let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
-                    let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
-                    appendLinePrefixIfNeeded(
-                        line: currentLine,
-                        lineNumbers: lineNumbers,
-                        lineNumberWidth: lineNumberWidth,
-                        lineNumberStyle: lineNumberStyle,
-                        lineNumberForegrounds: lineNumberForegrounds,
-                        lineNumberForeground: lineNumberForeground,
-                        indentPrefix: indentPrefix,
-                        plainStyle: plainStyle,
-                        foregroundOverride: foreground,
-                        backgroundOverride: background,
-                        atLineStart: &atLineStart,
-                        into: &writer
-                    )
-                    if let foreground {
-                        writer.append(
-                            text: piece,
-                            style: style,
+                    let shouldRender = lineIsVisible(currentLine, lineVisibility: lineVisibility)
+                    if shouldRender {
+                        let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
+                        let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
+                        let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
+                        let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
+                        let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
+                        appendLinePrefixIfNeeded(
+                            line: currentLine,
+                            lineNumbers: lineNumbers,
+                            lineNumberWidth: lineNumberWidth,
+                            lineNumberStyle: lineNumberStyle,
+                            lineNumberForegrounds: lineNumberForegrounds,
+                            lineNumberForeground: lineNumberForeground,
+                            lineVisibility: lineVisibility,
+                            lineSeparators: lineSeparators,
+                            indentPrefix: indentPrefix,
+                            plainStyle: plainStyle,
                             foregroundOverride: foreground,
-                            backgroundOverride: background
+                            backgroundOverride: background,
+                            atLineStart: &atLineStart,
+                            into: &writer
                         )
-                    } else {
-                        writer.append(
-                            text: piece,
-                            style: style,
-                            backgroundOverride: background
-                        )
+                        if let foreground {
+                            writer.append(
+                                text: piece,
+                                style: style,
+                                foregroundOverride: foreground,
+                                backgroundOverride: background
+                            )
+                        } else {
+                            writer.append(
+                                text: piece,
+                                style: style,
+                                backgroundOverride: background
+                            )
+                        }
+                        atLineStart = false
                     }
-                    atLineStart = false
                 }
                 break
             }
@@ -396,6 +416,8 @@ final class Renderer {
         let lineNumbers: [Int?]
         let lineNumberWidth: Int
         let lineNumberForegrounds: [ColorType?]
+        let lineVisibility: [Bool]
+        let lineSeparators: [Int]
     }
 
     private func makePlan(for code: String) -> RenderPlan {
@@ -412,7 +434,9 @@ final class Renderer {
                 lineBreaks: [],
                 lineNumbers: [],
                 lineNumberWidth: 0,
-                lineNumberForegrounds: []
+                lineNumberForegrounds: [],
+                lineVisibility: [],
+                lineSeparators: []
             )
         }
 
@@ -421,6 +445,8 @@ final class Renderer {
         var lineBackgrounds: [BackgroundColorType?] = []
         var lineForegrounds: [ColorType?] = []
         var linePlainStyles: [Bool] = []
+        var lineVisibility = [Bool](repeating: true, count: lines.count)
+        var lineSeparators = [Int](repeating: 0, count: lines.count)
         var hasLineOverrides = false
         if let diffRendering {
             let diffStyle = diffRendering.style
@@ -467,6 +493,15 @@ final class Renderer {
                     break
                 }
             }
+
+            if diffRendering.presentation == .compact {
+                let compact = makeCompactLinePlan(for: lines)
+                lineVisibility = compact.visibility
+                lineSeparators = compact.separators
+                if compact.hasOverrides {
+                    hasLineOverrides = true
+                }
+            }
         }
 
         if !options.highlightLines.ranges.isEmpty {
@@ -503,7 +538,9 @@ final class Renderer {
             lineBreaks: lineBreaks,
             lineNumbers: lineNumbers,
             lineNumberWidth: lineNumberWidth,
-            lineNumberForegrounds: lineNumberForegrounds
+            lineNumberForegrounds: lineNumberForegrounds,
+            lineVisibility: lineVisibility,
+            lineSeparators: lineSeparators
         )
     }
 
@@ -645,6 +682,8 @@ final class Renderer {
         lineNumberStyle: TextStyle,
         lineNumberForegrounds: [ColorType?],
         lineNumberForeground: ColorType,
+        lineVisibility: [Bool],
+        lineSeparators: [Int],
         indentPrefix: String,
         plainStyle: TextStyle,
         foregroundOverride: ColorType?,
@@ -653,6 +692,20 @@ final class Renderer {
         into writer: inout AnsiWriter
     ) {
         guard atLineStart else { return }
+        guard lineIsVisible(line, lineVisibility: lineVisibility) else { return }
+
+        let separatorCount = separatorCount(for: line, lineSeparators: lineSeparators)
+        if separatorCount > 0 {
+            appendSeparatorLines(
+                count: separatorCount,
+                lineNumberWidth: lineNumberWidth,
+                indentPrefix: indentPrefix,
+                plainStyle: plainStyle,
+                separatorStyle: lineNumberStyle,
+                into: &writer
+            )
+            atLineStart = true
+        }
 
         var wrotePrefix = false
 
@@ -720,6 +773,118 @@ final class Renderer {
             return String(number)
         }
         return String(repeating: " ", count: width - digits) + String(number)
+    }
+
+    private func makeCompactLinePlan(for lines: [Substring]) -> (visibility: [Bool], separators: [Int], hasOverrides: Bool) {
+        var visibility = [Bool](repeating: true, count: lines.count)
+        var separators = [Int](repeating: 0, count: lines.count)
+
+        let usesGitHeader = lines.contains { trimmingCR($0).hasPrefix("diff --git ") }
+        var pendingFileSeparator = 0
+        var pendingHunkSeparator = false
+        var hunkCountInFile = 0
+        var fileHasOutput = false
+
+        for (index, line) in lines.enumerated() {
+            let trimmed = trimmingCR(line)
+            let isFileBoundary: Bool = {
+                if usesGitHeader {
+                    return trimmed.hasPrefix("diff --git ")
+                }
+                return trimmed.hasPrefix("--- ")
+            }()
+
+            if isFileBoundary {
+                if fileHasOutput {
+                    pendingFileSeparator = 2
+                }
+                hunkCountInFile = 0
+                fileHasOutput = false
+                visibility[index] = false
+                continue
+            }
+
+            let kind = DiffDetector.kind(forLine: line)
+            switch kind {
+            case .meta?, .fileHeader?:
+                visibility[index] = false
+                continue
+            case .hunkHeader?:
+                visibility[index] = false
+                if hunkCountInFile > 0 {
+                    pendingHunkSeparator = true
+                }
+                hunkCountInFile += 1
+                continue
+            case nil, .added?, .removed?:
+                break
+            }
+
+            visibility[index] = true
+            if pendingFileSeparator > 0 {
+                separators[index] = pendingFileSeparator
+                pendingFileSeparator = 0
+                pendingHunkSeparator = false
+            } else if pendingHunkSeparator {
+                separators[index] = 1
+                pendingHunkSeparator = false
+            }
+            fileHasOutput = true
+        }
+
+        let hasOverrides = visibility.contains(false) || separators.contains(where: { $0 > 0 })
+        return (visibility, separators, hasOverrides)
+    }
+
+    private func lineIsVisible(_ line: Int, lineVisibility: [Bool]) -> Bool {
+        guard !lineVisibility.isEmpty else { return true }
+        let index = line - 1
+        guard index >= 0, index < lineVisibility.count else { return true }
+        return lineVisibility[index]
+    }
+
+    private func separatorCount(for line: Int, lineSeparators: [Int]) -> Int {
+        guard !lineSeparators.isEmpty else { return 0 }
+        let index = line - 1
+        guard index >= 0, index < lineSeparators.count else { return 0 }
+        return lineSeparators[index]
+    }
+
+    private func appendSeparatorLines(
+        count: Int,
+        lineNumberWidth: Int,
+        indentPrefix: String,
+        plainStyle: TextStyle,
+        separatorStyle: TextStyle,
+        into writer: inout AnsiWriter
+    ) {
+        guard count > 0 else { return }
+        let numberPadding = lineNumberWidth > 0
+            ? String(repeating: " ", count: lineNumberWidth) + " "
+            : ""
+
+        for _ in 0..<count {
+            if !indentPrefix.isEmpty {
+                writer.append(
+                    text: indentPrefix,
+                    style: plainStyle,
+                    backgroundOverride: nil
+                )
+            }
+            if !numberPadding.isEmpty {
+                writer.append(
+                    text: numberPadding,
+                    style: plainStyle,
+                    backgroundOverride: nil
+                )
+            }
+            writer.append(
+                text: "⋮",
+                style: separatorStyle,
+                backgroundOverride: nil
+            )
+            writer.appendPlain("\n")
+        }
     }
 }
 

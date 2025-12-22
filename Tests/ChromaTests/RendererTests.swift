@@ -188,6 +188,96 @@ struct RendererTests {
         #expect(output.contains(expectedDiffKeyword))
     }
 
+    @Test("Compact diff hides headers and inserts separators")
+    func compactDiffHidesHeadersAndInsertsSeparators() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(presentation: .compact),
+            lineNumbers: .init(start: 1)
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        diff --git a/A.swift b/A.swift
+        --- a/A.swift
+        +++ b/A.swift
+        @@ -1,1 +1,1 @@
+        -let a = 1
+        +let a = 2
+        @@ -4,1 +4,1 @@
+        -let b = 1
+        +let b = 2
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = stripAnsi(renderer.render(code: code, tokens: tokens))
+        #expect(!output.contains("diff --git"))
+        #expect(!output.contains("@@ -1,1 +1,1 @@"))
+        #expect(output.contains("⋮"))
+    }
+
+    @Test("Compact diff inserts double separators between files")
+    func compactDiffInsertsDoubleSeparatorsBetweenFiles() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(presentation: .compact),
+            lineNumbers: .init(start: 1)
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        diff --git a/A.swift b/A.swift
+        --- a/A.swift
+        +++ b/A.swift
+        @@ -1,1 +1,1 @@
+        -let a = 1
+        +let a = 2
+        diff --git a/B.swift b/B.swift
+        --- a/B.swift
+        +++ b/B.swift
+        @@ -1,1 +1,1 @@
+        -let b = 1
+        +let b = 2
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = stripAnsi(renderer.render(code: code, tokens: tokens))
+        #expect(maxConsecutiveSeparatorLines(in: output) >= 2)
+    }
+
+    @Test("Verbose diff keeps headers")
+    func verboseDiffKeepsHeaders() {
+        ensureRainbowEnabled()
+        let theme = TestThemes.stable
+        let options = HighlightOptions(
+            theme: theme,
+            diff: .patch(presentation: .verbose),
+            lineNumbers: .init(start: 1)
+        )
+        let renderer = Renderer(theme: theme, options: options)
+
+        let code = """
+        diff --git a/A.swift b/A.swift
+        --- a/A.swift
+        +++ b/A.swift
+        @@ -1,1 +1,1 @@
+        -let a = 1
+        +let a = 2
+        """
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+
+        let output = stripAnsi(renderer.render(code: code, tokens: tokens))
+        #expect(output.contains("diff --git"))
+        #expect(output.contains("@@ -1,1 +1,1 @@"))
+    }
+
     @Test("Line numbers render for plain text")
     func lineNumbersRender() {
         ensureRainbowEnabled()
@@ -428,4 +518,26 @@ struct RendererTests {
 
         #expect(output == expected)
     }
+}
+
+private func stripAnsi(_ text: String) -> String {
+    let pattern = "\\u001B\\[[0-9;]*m"
+    guard let regex = try? NSRegularExpression(pattern: pattern) else { return text }
+    let range = NSRange(text.startIndex..<text.endIndex, in: text)
+    return regex.stringByReplacingMatches(in: text, range: range, withTemplate: "")
+}
+
+private func maxConsecutiveSeparatorLines(in text: String) -> Int {
+    let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+    var current = 0
+    var maxRun = 0
+    for line in lines {
+        if line.trimmingCharacters(in: .whitespaces) == "⋮" {
+            current += 1
+            if current > maxRun { maxRun = current }
+        } else {
+            current = 0
+        }
+    }
+    return maxRun
 }

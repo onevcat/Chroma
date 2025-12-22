@@ -190,11 +190,19 @@ struct ChromaDemo {
                 ))
                 print("")
 
-                printSection("Diff Highlighting (unified patch)")
+                printSection("Diff Highlighting (compact)")
+                print(try highlighter.highlight(
+                    Samples.patchCompact,
+                    language: .swift,
+                    options: .init(diff: .patch(), lineNumbers: .init(start: 1))
+                ))
+                print("")
+
+                printSection("Diff Highlighting (verbose)")
                 print(try highlighter.highlight(
                     Samples.patch,
                     language: .swift,
-                    options: .init(diff: .patch())
+                    options: .init(diff: .patch(presentation: .verbose))
                 ))
                 print("")
 
@@ -459,6 +467,29 @@ enum Samples {
     -let a = 1
     +let a = 2
      let b = 3
+    """
+
+    static let patchCompact = """
+    diff --git a/Foo.swift b/Foo.swift
+    index 1111111..2222222 100644
+    --- a/Foo.swift
+    +++ b/Foo.swift
+    @@ -1,3 +1,3 @@
+    -let a = 1
+    +let a = 2
+     let b = 3
+    @@ -10,3 +10,3 @@
+    -let c = 1
+    +let c = 2
+     let d = 3
+    diff --git a/Bar.swift b/Bar.swift
+    index 3333333..4444444 100644
+    --- a/Bar.swift
+    +++ b/Bar.swift
+    @@ -1,2 +1,2 @@
+    -let enabled = false
+    +let enabled = true
+     let value = 7
     """
 
     static let patchWithLineNumbers = """

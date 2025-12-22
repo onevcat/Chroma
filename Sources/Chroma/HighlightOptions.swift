@@ -32,10 +32,15 @@ public struct HighlightOptions: Equatable {
         case foreground(contextCode: DiffCodeStyle = .plain)
     }
 
+    public enum DiffPresentation: Equatable {
+        case compact
+        case verbose
+    }
+
     public enum DiffHighlight: Equatable {
         case none
-        case auto(style: DiffStyle = .background())
-        case patch(style: DiffStyle = .background())
+        case auto(style: DiffStyle = .background(), presentation: DiffPresentation = .compact)
+        case patch(style: DiffStyle = .background(), presentation: DiffPresentation = .compact)
     }
 
     public var theme: Theme?
@@ -68,13 +73,14 @@ public struct HighlightOptions: Equatable {
 extension HighlightOptions {
     struct DiffRendering: Equatable {
         let style: DiffStyle
+        let presentation: DiffPresentation
     }
 
     var maySkipTokenization: Bool {
         switch diff {
         case .none:
             return false
-        case let .auto(style), let .patch(style):
+        case let .auto(style, _), let .patch(style, _):
             return style.diffCodeStyle == .plain && style.contextCodeStyle == .plain
         }
     }
@@ -95,11 +101,11 @@ extension HighlightOptions.DiffHighlight {
         switch self {
         case .none:
             return nil
-        case let .patch(style):
-            return HighlightOptions.DiffRendering(style: style)
-        case let .auto(style):
+        case let .patch(style, presentation):
+            return HighlightOptions.DiffRendering(style: style, presentation: presentation)
+        case let .auto(style, presentation):
             guard DiffDetector.looksLikePatch(code) else { return nil }
-            return HighlightOptions.DiffRendering(style: style)
+            return HighlightOptions.DiffRendering(style: style, presentation: presentation)
         }
     }
 
@@ -107,11 +113,11 @@ extension HighlightOptions.DiffHighlight {
         switch self {
         case .none:
             return nil
-        case let .patch(style):
-            return HighlightOptions.DiffRendering(style: style)
-        case let .auto(style):
+        case let .patch(style, presentation):
+            return HighlightOptions.DiffRendering(style: style, presentation: presentation)
+        case let .auto(style, presentation):
             guard DiffDetector.looksLikePatch(lines: lines) else { return nil }
-            return HighlightOptions.DiffRendering(style: style)
+            return HighlightOptions.DiffRendering(style: style, presentation: presentation)
         }
     }
 }
