@@ -206,6 +206,14 @@ struct ChromaDemo {
                 ))
                 print("")
 
+                printSection("Diff Line Numbers (from hunk header)")
+                print(try highlighter.highlight(
+                    Samples.patchWithLineNumbers,
+                    language: .swift,
+                    options: .init(diff: .patch(), lineNumbers: .init(start: 1))
+                ))
+                print("")
+
                 printSection("Diff Highlighting (foreground)")
                 print(try highlighter.highlight(
                     Samples.patch,
@@ -283,7 +291,7 @@ struct ChromaDemo {
 
     private static func printSection(_ title: String) {
         let prefix = "== "
-        print((prefix + title).applyingColor(.lightYellow).applyingStyle(.bold))
+        print((prefix + title).applyingColor(.blue).applyingStyles([.bold, .dim]))
     }
 }
 
@@ -451,6 +459,20 @@ enum Samples {
     -let a = 1
     +let a = 2
      let b = 3
+    """
+
+    static let patchWithLineNumbers = """
+    diff --git a/Bar.swift b/Bar.swift
+    index 3333333..4444444 100644
+    --- a/Bar.swift
+    +++ b/Bar.swift
+    @@ -10,4 +20,4 @@
+    -let count = 1
+    -let name = "alpha"
+    +let count = 2
+    +let name = "beta"
+     let total = count + 3
+     let isEnabled = false
     """
 
     static let mini = """
