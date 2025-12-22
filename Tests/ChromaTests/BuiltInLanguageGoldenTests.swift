@@ -77,6 +77,45 @@ struct ObjectiveCGoldenTests {
             ]
         )
     }
+
+    @Test("@keywords")
+    func atKeywords() throws {
+        try assertGolden(
+            "@property (nonatomic, copy) NSString *name;",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.keyword, "@property"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "nonatomic"),
+                ExpectedToken(.punctuation, ","),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "copy"),
+                ExpectedToken(.punctuation, ")"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "NSString"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.operator, "*"),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken(.punctuation, ";"),
+            ]
+        )
+    }
+
+    @Test("@implementation and @end")
+    func implementationBlocks() throws {
+        try assertGolden(
+            "@implementation Foo\n@end",
+            language: .objectiveC,
+            expected: [
+                ExpectedToken(.keyword, "@implementation"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "Foo"),
+                ExpectedToken.plain("\n"),
+                ExpectedToken(.keyword, "@end"),
+            ]
+        )
+    }
 }
 
 @Suite("Golden - C")
