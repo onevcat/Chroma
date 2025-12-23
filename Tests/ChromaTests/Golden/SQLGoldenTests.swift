@@ -62,6 +62,32 @@ struct SQLGoldenTests {
         )
     }
 
+    @Test("Types")
+    func types() throws {
+        try assertGolden(
+            "CREATE TABLE users (id INTEGER, name TEXT);",
+            language: .sql,
+            expected: [
+                ExpectedToken(.keyword, "CREATE"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.keyword, "TABLE"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "users"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.punctuation, "("),
+                ExpectedToken(.plain, "id"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "INTEGER"),
+                ExpectedToken(.punctuation, ","),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.plain, "name"),
+                ExpectedToken.plain(" "),
+                ExpectedToken(.type, "TEXT"),
+                ExpectedToken(.punctuation, ");"),
+            ]
+        )
+    }
+
     @Test("Line comments")
     func lineComments() throws {
         try assertGolden(

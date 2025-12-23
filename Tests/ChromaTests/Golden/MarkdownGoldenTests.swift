@@ -29,10 +29,23 @@ struct MarkdownGoldenTests {
     @Test("Emphasis")
     func emphasis() throws {
         try assertGolden(
-            "**bold**",
+            "**bold** and *italic*",
             language: .markdown,
             expected: [
                 ExpectedToken(.keyword, "**bold**"),
+                ExpectedToken(.plain, " and "),
+                ExpectedToken(.type, "*italic*"),
+            ]
+        )
+    }
+
+    @Test("Blockquotes")
+    func blockquotes() throws {
+        try assertGolden(
+            "> note",
+            language: .markdown,
+            expected: [
+                ExpectedToken(.comment, "> note"),
             ]
         )
     }

@@ -10,12 +10,26 @@ extension BuiltInLanguages {
         ]
         let keywordPattern = "(?i)\\b(?:\(wordAlternation(keywords)))\\b"
 
+        let types = [
+            "int", "integer", "smallint", "bigint",
+            "text", "varchar", "char", "character",
+            "real", "double", "float",
+            "numeric", "decimal",
+            "date", "datetime", "timestamp",
+            "boolean", "bool",
+            "blob",
+            "json", "jsonb",
+            "uuid",
+        ]
+        let typePattern = "(?i)\\b(?:\(wordAlternation(types)))\\b"
+
         var rules: [TokenRule] = []
         rules.append(try! TokenRule(kind: .comment, pattern: "--[^\\n\\r]*"))
         rules.append(try! TokenRule(kind: .comment, pattern: "/\\*[\\s\\S]*?\\*/"))
         rules.append(try! TokenRule(kind: .string, pattern: "'(?:\\\\.|[^'\\\\])*'"))
         rules.append(try! TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""))
         rules.append(try! TokenRule(kind: .number, pattern: "\\b\\d+(?:\\.\\d+)?\\b"))
+        rules.append(try! TokenRule(kind: .type, pattern: typePattern, isWordList: true))
         rules.append(try! TokenRule(kind: .keyword, pattern: keywordPattern, isWordList: true))
         rules.append(try! TokenRule(kind: .operator, pattern: "[+\\-*/%&|^!~=<>?:]+"))
         rules.append(try! TokenRule(kind: .punctuation, pattern: "[\\[\\]{}().,;]"))

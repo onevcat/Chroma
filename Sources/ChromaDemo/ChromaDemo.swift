@@ -18,14 +18,35 @@ enum DemoCatalog {
         swift,
         objectiveC,
         c,
+        cpp,
         javascript,
+        jsx,
         typescript,
+        tsx,
         python,
         ruby,
         go,
         rust,
         kotlin,
+        java,
         csharp,
+        php,
+        dart,
+        lua,
+        bash,
+        sql,
+        css,
+        scss,
+        sass,
+        less,
+        html,
+        xml,
+        json,
+        yaml,
+        toml,
+        markdown,
+        dockerfile,
+        makefile,
     ]
 
     static func demo(for id: LanguageID) -> LanguageDemo? {
@@ -39,11 +60,19 @@ enum DemoCatalog {
         }
         map[LanguageID.objc.rawValue] = objectiveC
         map[LanguageID.js.rawValue] = javascript
+        map[LanguageID.jsx.rawValue] = jsx
         map[LanguageID.ts.rawValue] = typescript
+        map[LanguageID.tsx.rawValue] = tsx
         map[LanguageID.py.rawValue] = python
         map[LanguageID.rb.rawValue] = ruby
         map[LanguageID.golang.rawValue] = go
+        map[LanguageID.cplusplus.rawValue] = cpp
+        map[LanguageID.cxx.rawValue] = cpp
         map[LanguageID.cs.rawValue] = csharp
+        map[LanguageID.sh.rawValue] = bash
+        map[LanguageID.zsh.rawValue] = bash
+        map[LanguageID.yml.rawValue] = yaml
+        map[LanguageID.md.rawValue] = markdown
         return map
     }()
 
@@ -213,9 +242,63 @@ enum DemoCatalog {
         +    return user->id >= 1 && user->name != NULL;
          }
         @@ -16,3 +16,3 @@
-             }
+            }
         -    printf("User %d: %s\\n", user->id, user->name);
         +    printf("User #%d: %s\\n", user->id, user->name);
+        }
+        """
+    )
+
+    private static let cpp = LanguageDemo(
+        id: .cpp,
+        sample: """
+        #include <iostream>
+        #include <string>
+        #include <vector>
+
+        struct User {
+            int id;
+            std::string name;
+            std::vector<std::string> tags;
+        };
+
+        std::string label(const User &user) {
+            return user.name + " (#" + std::to_string(user.id) + ")";
+        }
+
+        void greet(const User &user) {
+            auto suffix = user.id == 1 ? "!" : ".";
+            std::cout << "Hello, " << user.name << suffix << std::endl;
+        }
+
+        int main() {
+            std::vector<User> users{
+                {1, "Ada", {"swift", "cli"}},
+                {2, "Linus", {"kernel"}},
+            };
+            for (const auto &user : users) {
+                greet(user);
+                std::cout << label(user) << std::endl;
+            }
+            return 0;
+        }
+        """,
+        highlightLines: [15...17, 25...25],
+        patch: """
+        diff --git a/user.cpp b/user.cpp
+        index 1212121..3434343 100644
+        --- a/user.cpp
+        +++ b/user.cpp
+        @@ -11,4 +11,4 @@
+         std::string label(const User &user) {
+        -    return user.name + " (#" + std::to_string(user.id) + ")";
+        +    return user.name + " [" + std::to_string(user.id) + "]";
+         }
+        @@ -15,4 +15,4 @@
+         void greet(const User &user) {
+        -    auto suffix = user.id == 1 ? "!" : ".";
+        +    auto suffix = user.id == 1 ? "!!" : ".";
+             std::cout << "Hello, " << user.name << suffix << std::endl;
          }
         """
     )
@@ -263,11 +346,58 @@ enum DemoCatalog {
              }
          }
         @@ -14,4 +14,4 @@
-         export function greet(user) {
-             const suffix = user.tags.includes("admin") ? "!" : "."
+        export function greet(user) {
+            const suffix = user.tags.includes("admin") ? "!" : "."
         -    return `Hello, ${user.name}${suffix}`
         +    return `Hi, ${user.name}${suffix}`
-         }
+        }
+        """
+    )
+
+    private static let jsx = LanguageDemo(
+        id: .jsx,
+        sample: """
+        import React from "react"
+
+        const users = [
+            { id: 1, name: "Ada", tags: ["swift", "cli"] },
+            { id: 2, name: "Linus", tags: ["kernel"] },
+        ]
+
+        export function UserList({ title }) {
+            return (
+                <section className="panel">
+                    <h2>{title}</h2>
+                    <ul>
+                        {users.map((user) => (
+                            <li key={user.id}>
+                                <strong>{user.name}</strong>
+                                <span className="meta">#{user.id}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )
+        }
+        """,
+        highlightLines: [8...10, 15...15],
+        patch: """
+        diff --git a/UserList.jsx b/UserList.jsx
+        index 5555555..6666666 100644
+        --- a/UserList.jsx
+        +++ b/UserList.jsx
+        @@ -8,4 +8,4 @@
+         export function UserList({ title }) {
+             return (
+        -        <section className="panel">
+        +        <section className="card">
+                 <h2>{title}</h2>
+        @@ -14,4 +14,4 @@
+                         <li key={user.id}>
+                             <strong>{user.name}</strong>
+        -                    <span className="meta">#{user.id}</span>
+        +                    <span className="meta">ID {user.id}</span>
+                         </li>
         """
     )
 
@@ -312,11 +442,68 @@ enum DemoCatalog {
              tags: string[]
          }
         @@ -9,4 +9,4 @@
-         export function greet(user: User): string {
-             const suffix = user.role === "admin" ? "!" : "."
+        export function greet(user: User): string {
+            const suffix = user.role === "admin" ? "!" : "."
         -    return `Hello, ${user.name}${suffix}`
         +    return `Hi, ${user.name ?? "guest"}${suffix}`
-         }
+        }
+        """
+    )
+
+    private static let tsx = LanguageDemo(
+        id: .tsx,
+        sample: """
+        import React from "react"
+
+        type User = {
+            id: number
+            name: string
+            tags: string[]
+        }
+
+        const users: User[] = [
+            { id: 1, name: "Ada", tags: ["swift", "cli"] },
+            { id: 2, name: "Linus", tags: ["kernel"] },
+        ]
+
+        type Props = {
+            title: string
+        }
+
+        export function UserList({ title }: Props) {
+            return (
+                <section className="panel">
+                    <h2>{title}</h2>
+                    <ul>
+                        {users.map((user) => (
+                            <li key={user.id}>
+                                <strong>{user.name}</strong>
+                                <span className="meta">#{user.id}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )
+        }
+        """,
+        highlightLines: [3...6, 23...23],
+        patch: """
+        diff --git a/UserList.tsx b/UserList.tsx
+        index 7777777..8888888 100644
+        --- a/UserList.tsx
+        +++ b/UserList.tsx
+        @@ -18,4 +18,4 @@
+         export function UserList({ title }: Props) {
+             return (
+        -        <section className="panel">
+        +        <section className="card">
+                 <h2>{title}</h2>
+        @@ -24,4 +24,4 @@
+                         <li key={user.id}>
+                             <strong>{user.name}</strong>
+        -                    <span className="meta">#{user.id}</span>
+        +                    <span className="meta">ID {user.id}</span>
+                         </li>
         """
     )
 
@@ -560,11 +747,58 @@ enum DemoCatalog {
         +    return "${user.name} [${user.id}]"
          }
         @@ -7,4 +7,4 @@
-         fun greet(user: User): String {
-             val suffix = if (user.tags.contains("admin")) "!" else "."
+        fun greet(user: User): String {
+            val suffix = if (user.tags.contains("admin")) "!" else "."
         -    return "Hello, ${user.name}$suffix"
         +    return "Hi, ${user.name}$suffix"
-         }
+        }
+        """
+    )
+
+    private static let java = LanguageDemo(
+        id: .java,
+        sample: """
+        import java.util.List;
+
+        record User(int id, String name, List<String> tags) {}
+
+        final class Greeter {
+            static String greet(User user) {
+                var suffix = user.id() == 1 ? "!" : ".";
+                return "Hello, " + user.name() + suffix;
+            }
+        }
+
+        public class Main {
+            public static void main(String[] args) {
+                var users = List.of(
+                    new User(1, "Ada", List.of("swift", "cli")),
+                    new User(2, "Linus", List.of("kernel"))
+                );
+                for (var user : users) {
+                    System.out.println(Greeter.greet(user));
+                }
+            }
+        }
+        """,
+        highlightLines: [6...8, 18...18],
+        patch: """
+        diff --git a/Main.java b/Main.java
+        index 1010101..2020202 100644
+        --- a/Main.java
+        +++ b/Main.java
+        @@ -6,4 +6,4 @@
+             static String greet(User user) {
+                 var suffix = user.id() == 1 ? "!" : ".";
+        -        return "Hello, " + user.name() + suffix;
+        +        return "Hi, " + user.name() + suffix;
+             }
+        @@ -13,4 +13,4 @@
+                 var users = List.of(
+        -            new User(1, "Ada", List.of("swift", "cli")),
+        +            new User(1, "Ada", List.of("swift", "terminal")),
+                     new User(2, "Linus", List.of("kernel"))
+                 );
         """
     )
 
@@ -610,11 +844,713 @@ enum DemoCatalog {
              }
          }
         @@ -12,4 +12,4 @@
-             public static void Main() {
-                 var users = new List<User> {
+            public static void Main() {
+                var users = new List<User> {
         -            new User(1, "Ada", new[] { "swift", "cli" }),
         +            new User(1, "Ada", new[] { "swift", "terminal" }),
-                 };
+                };
+        """
+    )
+
+    private static let php = LanguageDemo(
+        id: .php,
+        sample: """
+        <?php
+
+        final class User {
+            public function __construct(
+                public int $id,
+                public string $name,
+                public array $tags,
+            ) {}
+        }
+
+        function greet(User $user): string {
+            $suffix = in_array("admin", $user->tags, true) ? "!" : ".";
+            return "Hello, {$user->name}{$suffix}";
+        }
+
+        $users = [
+            new User(1, "Ada", ["swift", "cli"]),
+            new User(2, "Linus", ["kernel"]),
+        ];
+
+        foreach ($users as $user) {
+            echo greet($user) . PHP_EOL;
+        }
+        """,
+        highlightLines: [11...13, 21...21],
+        patch: """
+        diff --git a/User.php b/User.php
+        index 111aaaa..222bbbb 100644
+        --- a/User.php
+        +++ b/User.php
+        @@ -11,4 +11,4 @@
+         function greet(User $user): string {
+             $suffix = in_array("admin", $user->tags, true) ? "!" : ".";
+        -    return "Hello, {$user->name}{$suffix}";
+        +    return "Hi, {$user->name}{$suffix}";
+         }
+        @@ -16,4 +16,4 @@
+         $users = [
+        -    new User(1, "Ada", ["swift", "cli"]),
+        +    new User(1, "Ada", ["swift", "terminal"]),
+             new User(2, "Linus", ["kernel"]),
+         ];
+        """
+    )
+
+    private static let dart = LanguageDemo(
+        id: .dart,
+        sample: """
+        class User {
+            final int id;
+            final String name;
+            final List<String> tags;
+
+            const User(this.id, this.name, this.tags);
+        }
+
+        String greet(User user) {
+            final suffix = user.id == 1 ? "!" : ".";
+            return "Hello, ${user.name}$suffix";
+        }
+
+        void main() {
+            final users = [
+                User(1, "Ada", ["swift", "cli"]),
+                User(2, "Linus", ["kernel"]),
+            ];
+            for (final user in users) {
+                print(greet(user));
+            }
+        }
+        """,
+        highlightLines: [9...11, 19...19],
+        patch: """
+        diff --git a/main.dart b/main.dart
+        index 333cccc..444dddd 100644
+        --- a/main.dart
+        +++ b/main.dart
+        @@ -9,4 +9,4 @@
+         String greet(User user) {
+             final suffix = user.id == 1 ? "!" : ".";
+        -    return "Hello, ${user.name}$suffix";
+        +    return "Hi, ${user.name}$suffix";
+         }
+        @@ -15,4 +15,4 @@
+             final users = [
+        -        User(1, "Ada", ["swift", "cli"]),
+        +        User(1, "Ada", ["swift", "terminal"]),
+                 User(2, "Linus", ["kernel"]),
+             ];
+        """
+    )
+
+    private static let lua = LanguageDemo(
+        id: .lua,
+        sample: """
+        local users = {
+            { id = 1, name = "Ada", tags = { "swift", "cli" } },
+            { id = 2, name = "Linus", tags = { "kernel" } },
+        }
+
+        local function greet(user)
+            local suffix = user.id == 1 and "!" or "."
+            return "Hello, " .. user.name .. suffix
+        end
+
+        local function label(user)
+            return string.format("%s (#%d)", user.name, user.id)
+        end
+
+        for _, user in ipairs(users) do
+            print(greet(user))
+            print(label(user))
+        end
+        """,
+        highlightLines: [6...8, 15...15],
+        patch: """
+        diff --git a/user.lua b/user.lua
+        index 555eeee..666ffff 100644
+        --- a/user.lua
+        +++ b/user.lua
+        @@ -6,4 +6,4 @@
+         local function greet(user)
+             local suffix = user.id == 1 and "!" or "."
+        -    return "Hello, " .. user.name .. suffix
+        +    return "Hi, " .. user.name .. suffix
+         end
+        @@ -11,3 +11,3 @@
+         local function label(user)
+        -    return string.format("%s (#%d)", user.name, user.id)
+        +    return string.format("%s [%d]", user.name, user.id)
+         end
+        """
+    )
+
+    private static let bash = LanguageDemo(
+        id: .bash,
+        sample: """
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        users=("Ada" "Linus")
+
+        greet() {
+            local name="$1"
+            local suffix="."
+            if [[ "$name" == "Ada" ]]; then
+                suffix="!"
+            fi
+            echo "Hello, $name$suffix"
+        }
+
+        for user in "${users[@]}"; do
+            greet "$user"
+        done
+        """,
+        highlightLines: [7...10, 15...15],
+        patch: """
+        diff --git a/greet.sh b/greet.sh
+        index 777aaaa..888bbbb 100755
+        --- a/greet.sh
+        +++ b/greet.sh
+        @@ -3,4 +3,4 @@
+         
+        -users=("Ada" "Linus")
+        +users=("Ada" "Grace")
+         
+         greet() {
+        @@ -8,5 +8,5 @@
+             local suffix="."
+             if [[ "$name" == "Ada" ]]; then
+                 suffix="!"
+             fi
+        -    echo "Hello, $name$suffix"
+        +    echo "Hi, $name$suffix"
+         }
+        """
+    )
+
+    private static let sql = LanguageDemo(
+        id: .sql,
+        sample: """
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            role TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        INSERT INTO users (id, name, role) VALUES
+            (1, 'Ada', 'admin'),
+            (2, 'Linus', 'member');
+
+        SELECT u.id, u.name, u.role
+        FROM users u
+        WHERE u.role <> 'guest'
+        ORDER BY u.id DESC;
+        """,
+        highlightLines: [1...3, 12...12],
+        patch: """
+        diff --git a/users.sql b/users.sql
+        index 999cccc..000dddd 100644
+        --- a/users.sql
+        +++ b/users.sql
+        @@ -1,4 +1,4 @@
+         CREATE TABLE users (
+             id INTEGER PRIMARY KEY,
+        -    name TEXT NOT NULL,
+        +    name TEXT NOT NULL UNIQUE,
+             role TEXT NOT NULL,
+        @@ -12,4 +12,4 @@
+         SELECT u.id, u.name, u.role
+         FROM users u
+        -WHERE u.role <> 'guest'
+        +WHERE u.role IN ('admin', 'member')
+         ORDER BY u.id DESC;
+        """
+    )
+
+    private static let css = LanguageDemo(
+        id: .css,
+        sample: """
+        :root {
+            --accent: #5f9bff;
+            --radius: 10px;
+        }
+
+        .card {
+            background: #1e1f25;
+            border-radius: var(--radius);
+            color: #f1f1f1;
+            padding: 16px;
+        }
+
+        .card a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 12px;
+            }
+        }
+        """,
+        highlightLines: [6...10, 18...18],
+        patch: """
+        diff --git a/card.css b/card.css
+        index 1230000..1231111 100644
+        --- a/card.css
+        +++ b/card.css
+        @@ -1,4 +1,4 @@
+         :root {
+        -    --accent: #5f9bff;
+        +    --accent: #6fd3ff;
+             --radius: 10px;
+         }
+        @@ -18,4 +18,4 @@
+         @media (max-width: 600px) {
+             .card {
+        -        padding: 12px;
+        +        padding: 8px;
+             }
+         }
+        """
+    )
+
+    private static let scss = LanguageDemo(
+        id: .scss,
+        sample: """
+        $accent: #5f9bff;
+        $radius: 10px;
+
+        @mixin card($bg) {
+            background: $bg;
+            border-radius: $radius;
+            padding: 16px;
+        }
+
+        .card {
+            @include card(#1e1f25);
+            color: #f1f1f1;
+
+            a {
+                color: $accent;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+        """,
+        highlightLines: [4...7, 14...15],
+        patch: """
+        diff --git a/card.scss b/card.scss
+        index 2340000..2341111 100644
+        --- a/card.scss
+        +++ b/card.scss
+        @@ -1,4 +1,4 @@
+        -$accent: #5f9bff;
+        +$accent: #6fd3ff;
+         $radius: 10px;
+
+         @mixin card($bg) {
+        @@ -4,4 +4,4 @@
+         @mixin card($bg) {
+             background: $bg;
+             border-radius: $radius;
+        -    padding: 16px;
+        +    padding: 12px;
+         }
+        """
+    )
+
+    private static let sass = LanguageDemo(
+        id: .sass,
+        sample: """
+        $accent: #5f9bff
+        $radius: 10px
+
+        =card($bg)
+            background: $bg
+            border-radius: $radius
+            padding: 16px
+
+        .card
+            +card(#1e1f25)
+            color: #f1f1f1
+
+            a
+                color: $accent
+
+                &:hover
+                    text-decoration: underline
+        """,
+        highlightLines: [4...7, 13...14],
+        patch: """
+        diff --git a/card.sass b/card.sass
+        index 3450000..3451111 100644
+        --- a/card.sass
+        +++ b/card.sass
+        @@ -1,4 +1,4 @@
+        -$accent: #5f9bff
+        +$accent: #6fd3ff
+         $radius: 10px
+
+         =card($bg)
+        @@ -4,4 +4,4 @@
+         =card($bg)
+             background: $bg
+             border-radius: $radius
+        -    padding: 16px
+        +    padding: 12px
+        """
+    )
+
+    private static let less = LanguageDemo(
+        id: .less,
+        sample: """
+        @accent: #5f9bff;
+        @radius: 10px;
+
+        .card(@bg) {
+            background: @bg;
+            border-radius: @radius;
+            padding: 16px;
+        }
+
+        .panel {
+            .card(#1e1f25);
+            color: #f1f1f1;
+
+            a:hover {
+                color: @accent;
+            }
+        }
+        """,
+        highlightLines: [4...7, 14...15],
+        patch: """
+        diff --git a/panel.less b/panel.less
+        index 4560000..4561111 100644
+        --- a/panel.less
+        +++ b/panel.less
+        @@ -1,4 +1,4 @@
+        -@accent: #5f9bff;
+        +@accent: #6fd3ff;
+         @radius: 10px;
+
+         .card(@bg) {
+        @@ -4,4 +4,4 @@
+         .card(@bg) {
+             background: @bg;
+             border-radius: @radius;
+        -    padding: 16px;
+        +    padding: 12px;
+         }
+        """
+    )
+
+    private static let html = LanguageDemo(
+        id: .html,
+        sample: """
+        <!doctype html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <title>Chroma Demo</title>
+                <link rel="stylesheet" href="app.css">
+            </head>
+            <body>
+                <header class="site-header">
+                    <h1>Chroma Demo</h1>
+                </header>
+                <main>
+                    <section id="users">
+                        <ul>
+                            <li data-id="1">Ada</li>
+                            <li data-id="2">Linus</li>
+                        </ul>
+                    </section>
+                </main>
+            </body>
+        </html>
+        """,
+        highlightLines: [9...11, 15...15],
+        patch: """
+        diff --git a/index.html b/index.html
+        index 5670000..5671111 100644
+        --- a/index.html
+        +++ b/index.html
+        @@ -4,4 +4,4 @@
+             <head>
+                 <meta charset="utf-8">
+        -        <title>Chroma Demo</title>
+        +        <title>User List</title>
+                 <link rel="stylesheet" href="app.css">
+        @@ -14,4 +14,4 @@
+                         <ul>
+        -                    <li data-id="1">Ada</li>
+        +                    <li data-id="1">Ada Lovelace</li>
+                             <li data-id="2">Linus</li>
+                         </ul>
+        """
+    )
+
+    private static let xml = LanguageDemo(
+        id: .xml,
+        sample: """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <users>
+            <user id="1">
+                <name>Ada</name>
+                <role>admin</role>
+            </user>
+            <user id="2">
+                <name>Linus</name>
+                <role>member</role>
+            </user>
+        </users>
+        """,
+        highlightLines: [3...5, 7...7],
+        patch: """
+        diff --git a/users.xml b/users.xml
+        index 6780000..6781111 100644
+        --- a/users.xml
+        +++ b/users.xml
+        @@ -3,4 +3,4 @@
+             <user id="1">
+        -        <name>Ada</name>
+        +        <name>Ada Lovelace</name>
+                 <role>admin</role>
+             </user>
+        @@ -7,4 +7,4 @@
+             <user id="2">
+                 <name>Linus</name>
+        -        <role>member</role>
+        +        <role>guest</role>
+             </user>
+        """
+    )
+
+    private static let json = LanguageDemo(
+        id: .json,
+        sample: """
+        {
+            "name": "Chroma Demo",
+            "version": 1,
+            "users": [
+                { "id": 1, "name": "Ada", "tags": ["swift", "cli"] },
+                { "id": 2, "name": "Linus", "tags": ["kernel"] }
+            ],
+            "enabled": true
+        }
+        """,
+        highlightLines: [4...6, 8...8],
+        patch: """
+        diff --git a/config.json b/config.json
+        index 7890000..7891111 100644
+        --- a/config.json
+        +++ b/config.json
+        @@ -2,4 +2,4 @@
+             "name": "Chroma Demo",
+        -    "version": 1,
+        +    "version": 2,
+             "users": [
+        @@ -5,3 +5,3 @@
+        -        { "id": 1, "name": "Ada", "tags": ["swift", "cli"] },
+        +        { "id": 1, "name": "Ada", "tags": ["swift", "terminal"] },
+                 { "id": 2, "name": "Linus", "tags": ["kernel"] }
+        """
+    )
+
+    private static let yaml = LanguageDemo(
+        id: .yaml,
+        sample: """
+        name: Chroma Demo
+        version: 1
+        users:
+          - id: 1
+            name: Ada
+            tags:
+              - swift
+              - cli
+          - id: 2
+            name: Linus
+            tags:
+              - kernel
+        enabled: true
+        """,
+        highlightLines: [4...8, 13...13],
+        patch: """
+        diff --git a/config.yaml b/config.yaml
+        index 8900000..8901111 100644
+        --- a/config.yaml
+        +++ b/config.yaml
+        @@ -1,4 +1,4 @@
+         name: Chroma Demo
+        -version: 1
+        +version: 2
+         users:
+        @@ -5,4 +5,4 @@
+             name: Ada
+             tags:
+        -      - cli
+        +      - terminal
+           - id: 2
+        """
+    )
+
+    private static let toml = LanguageDemo(
+        id: .toml,
+        sample: """
+        name = "Chroma Demo"
+        version = 1
+
+        [[users]]
+        id = 1
+        name = "Ada"
+        tags = ["swift", "cli"]
+
+        [[users]]
+        id = 2
+        name = "Linus"
+        tags = ["kernel"]
+
+        enabled = true
+        """,
+        highlightLines: [4...7, 14...14],
+        patch: """
+        diff --git a/config.toml b/config.toml
+        index 9010000..9011111 100644
+        --- a/config.toml
+        +++ b/config.toml
+        @@ -1,4 +1,4 @@
+         name = "Chroma Demo"
+        -version = 1
+        +version = 2
+
+         [[users]]
+        @@ -5,4 +5,4 @@
+         id = 1
+         name = "Ada"
+        -tags = ["swift", "cli"]
+        +tags = ["swift", "terminal"]
+
+        """
+    )
+
+    private static let markdown = LanguageDemo(
+        id: .markdown,
+        sample: """
+        # Chroma Demo
+
+        This is a **markdown** sample with `inline code`.
+
+        ## Features
+        - Fenced code blocks
+        - Lists and *emphasis*
+        - Links: [Chroma](https://example.com)
+
+        ```swift
+        struct User {
+            let id: Int
+            let name: String
+        }
+        ```
+
+        > Tip: Markdown supports blockquotes.
+        """,
+        highlightLines: [5...8, 11...13],
+        patch: """
+        diff --git a/README.md b/README.md
+        index 0120000..0121111 100644
+        --- a/README.md
+        +++ b/README.md
+        @@ -1,4 +1,4 @@
+        -# Chroma Demo
+        +# Chroma Guide
+
+         This is a **markdown** sample with `inline code`.
+
+        @@ -11,4 +11,4 @@
+         struct User {
+        -    let id: Int
+        +    let id: UUID
+             let name: String
+         }
+        """
+    )
+
+    private static let dockerfile = LanguageDemo(
+        id: .dockerfile,
+        sample: """
+        FROM swift:5.9-jammy
+
+        WORKDIR /app
+        COPY . .
+
+        RUN swift build -c release
+        RUN useradd -m appuser
+        USER appuser
+
+        CMD [".build/release/ChromaDemo", "--lang", "swift"]
+        """,
+        highlightLines: [6...8, 10...10],
+        patch: """
+        diff --git a/Dockerfile b/Dockerfile
+        index 1350000..1351111 100644
+        --- a/Dockerfile
+        +++ b/Dockerfile
+        @@ -1,4 +1,4 @@
+        -FROM swift:5.9-jammy
+        +FROM swift:5.9
+
+         WORKDIR /app
+         COPY . .
+        @@ -8,3 +8,3 @@
+         USER appuser
+
+        -CMD [".build/release/ChromaDemo", "--lang", "swift"]
+        +CMD [".build/release/ChromaDemo", "--lang", "swift", "--dark"]
+        """
+    )
+
+    private static let makefile = LanguageDemo(
+        id: .makefile,
+        sample: """
+        APP := ChromaDemo
+        SWIFT := swift
+
+        .PHONY: build test run
+
+        build:
+        \t$(SWIFT) build
+
+        test:
+        \t$(SWIFT) test
+
+        run:
+        \t$(SWIFT) run $(APP) --lang swift
+        """,
+        highlightLines: [6...7, 12...13],
+        patch: """
+        diff --git a/Makefile b/Makefile
+        index 2460000..2461111 100644
+        --- a/Makefile
+        +++ b/Makefile
+        @@ -1,4 +1,4 @@
+        -APP := ChromaDemo
+        +APP := chroma-demo
+         SWIFT := swift
+
+         .PHONY: build test run
+        @@ -12,2 +12,2 @@
+         run:
+        -\t$(SWIFT) run $(APP) --lang swift
+        +\t$(SWIFT) run $(APP) --lang swift --dark
         """
     )
 }
