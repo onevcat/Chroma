@@ -16,10 +16,17 @@ public final class Highlighter {
 
     public func highlight(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         options: HighlightOptions = .init()
     ) throws -> String {
-        guard let language = registry.language(for: language) else {
+        guard let language else {
+            return code
+        }
+
+        guard let definition = registry.language(for: language) else {
+            if options.missingLanguageHandling == .fallbackToPlainText {
+                return code
+            }
             throw Error.languageNotFound(language)
         }
 
@@ -30,11 +37,11 @@ public final class Highlighter {
             let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
             return renderer.render(code: code, tokens: tokens)
         }
-        if isMarkdown(language.id) {
-            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+        if isMarkdown(definition.id) {
+            let tokenizer = MarkdownTokenizer(rules: definition.rules, registry: registry)
             return renderer.render(code: code, tokens: tokenizer.tokenize(code))
         }
-        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
+        let tokenizer = RegexTokenizer(rules: definition.rules, fastPath: definition.fastPath)
         return renderer.render(code: code) { emit in
             tokenizer.scan(code, emit: emit)
         }
@@ -42,35 +49,46 @@ public final class Highlighter {
 
     public func tokenize(
         _ code: String,
-        language: LanguageID
+        language: LanguageID?
     ) throws -> [Token] {
-        guard let language = registry.language(for: language) else {
+        guard let language else {
+            let ns = code as NSString
+            return [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+        }
+
+        guard let definition = registry.language(for: language) else {
             throw Error.languageNotFound(language)
         }
 
-        if isMarkdown(language.id) {
-            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+        if isMarkdown(definition.id) {
+            let tokenizer = MarkdownTokenizer(rules: definition.rules, registry: registry)
             return tokenizer.tokenize(code)
         }
-        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
+        let tokenizer = RegexTokenizer(rules: definition.rules, fastPath: definition.fastPath)
         return tokenizer.tokenize(code)
     }
 
     public func tokenize(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         emit: (Token) -> Void
     ) throws {
-        guard let language = registry.language(for: language) else {
+        guard let language else {
+            let ns = code as NSString
+            emit(Token(kind: .plain, range: NSRange(location: 0, length: ns.length)))
+            return
+        }
+
+        guard let definition = registry.language(for: language) else {
             throw Error.languageNotFound(language)
         }
 
-        if isMarkdown(language.id) {
-            let tokenizer = MarkdownTokenizer(rules: language.rules, registry: registry)
+        if isMarkdown(definition.id) {
+            let tokenizer = MarkdownTokenizer(rules: definition.rules, registry: registry)
             tokenizer.scan(code, emit: emit)
             return
         }
-        let tokenizer = RegexTokenizer(rules: language.rules, fastPath: language.fastPath)
+        let tokenizer = RegexTokenizer(rules: definition.rules, fastPath: definition.fastPath)
         tokenizer.scan(code, emit: emit)
     }
 

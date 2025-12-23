@@ -87,6 +87,24 @@ let output = try Chroma.highlight(code, language: .swift)
 print(output)
 ```
 
+### Inferring Language IDs
+
+Infer a language from file names, paths, or URLs:
+
+```swift
+let language = LanguageID.fromFileName("MyFile.swift")
+let output = try Chroma.highlight(code, language: language)
+```
+
+`language` is optional; passing `nil` skips syntax highlighting and returns the original text.
+
+Fallback to plain text when the language is unavailable:
+
+```swift
+let options = HighlightOptions(missingLanguageHandling: .fallbackToPlainText)
+let output = try Chroma.highlight(code, language: "unknown", options: options)
+```
+
 ### Themes
 
 Chroma includes two built-in themes:

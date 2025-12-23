@@ -22,6 +22,11 @@ public struct LineNumberOptions: Equatable {
 }
 
 public struct HighlightOptions: Equatable {
+    public enum MissingLanguageHandling: Equatable {
+        case error
+        case fallbackToPlainText
+    }
+
     public enum DiffCodeStyle: Equatable {
         case syntax
         case plain
@@ -44,6 +49,7 @@ public struct HighlightOptions: Equatable {
     }
 
     public var theme: Theme?
+    public var missingLanguageHandling: MissingLanguageHandling
     public var diff: DiffHighlight
     public var highlightLines: LineRangeSet
     public var lineNumbers: LineNumberOptions
@@ -57,12 +63,14 @@ public struct HighlightOptions: Equatable {
 
     public init(
         theme: Theme? = nil,
+        missingLanguageHandling: MissingLanguageHandling = .error,
         diff: DiffHighlight = .auto(),
         highlightLines: LineRangeSet = .init(),
         lineNumbers: LineNumberOptions = .none,
         indent: Int = 0
     ) {
         self.theme = theme
+        self.missingLanguageHandling = missingLanguageHandling
         self.diff = diff
         self.highlightLines = highlightLines
         self.lineNumbers = lineNumbers

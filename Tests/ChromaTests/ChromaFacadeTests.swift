@@ -26,4 +26,22 @@ struct ChromaFacadeTests {
             _ = try Chroma.highlight("value", language: "unknown")
         }
     }
+
+    @Test("Chroma.highlight falls back to plain text when configured")
+    func unknownLanguageFallback() throws {
+        let code = "value"
+        let output = try Chroma.highlight(
+            code,
+            language: "unknown",
+            options: .init(missingLanguageHandling: .fallbackToPlainText)
+        )
+        #expect(output == code)
+    }
+
+    @Test("Chroma.highlight returns plain text when language is nil")
+    func nilLanguageReturnsPlainText() throws {
+        let code = "let value = 1"
+        let output = try Chroma.highlight(code, language: nil)
+        #expect(output == code)
+    }
 }
