@@ -326,16 +326,29 @@ You can also use [Rainbow's extended color modes](https://github.com/onevcat/Rai
 
 ```swift
 .tokenStyles: [
-    .keyword: .init(foreground: .bit8(226)),         // 256-color mode
-    .string: .init(foreground: .bit24(0xFF6B6B)),    // Truecolor (24-bit)
-    .comment: .init(foreground: .hex("#EA517F")),    // Hex color (auto-converted to 256-color)
+    .keyword: .init(foreground: .bit8(226)),            // 256-color mode
+    .string: .init(foreground: .bit24((255, 107, 107))), // Truecolor RGB tuple
 ]
 ```
 
-Hex colors support formats like `"#FFF"`, `"FFFFFF"`, or `0xFFFFFF`. For truecolor output with hex, specify the target mode:
+For hex colors, you can create a helper to convert hex strings to RGB:
 
 ```swift
-.comment: .init(foreground: .hex("#EA517F", to: .bit24))
+extension ColorType {
+    static func hex(_ hex: String) -> ColorType {
+        let hex = hex.replacingOccurrences(of: "#", with: "")
+        let rgb = UInt32(hex, radix: 16) ?? 0
+        let r = UInt8((rgb & 0xFF0000) >> 16)
+        let g = UInt8((rgb & 0x00FF00) >> 8)
+        let b = UInt8(rgb & 0x0000FF)
+        return .bit24((r, g, b))
+    }
+}
+
+// Usage:
+.tokenStyles: [
+    .comment: .init(foreground: .hex("#EA517F")),
+]
 ```
 
 ## Advanced
