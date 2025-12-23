@@ -1,4 +1,4 @@
-# Chroma
+![](https://github.com/user-attachments/assets/36afa20e-265c-4a00-bb54-d6a9e4954ba0)
 
 `Chroma` is a Swift package for syntax highlighting code in terminal output (TUI / CLI apps).
 
