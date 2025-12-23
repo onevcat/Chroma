@@ -1,22 +1,26 @@
 ![](https://github.com/user-attachments/assets/36afa20e-265c-4a00-bb54-d6a9e4954ba0)
 
-`Chroma` is a Swift package for syntax highlighting code in terminal output (TUI / CLI apps).
+# Chroma
 
-It takes a code string plus a language identifier (e.g. Swift / JavaScript / C#), and returns an ANSI-colored string.
-ANSI styling is generated via [`Rainbow`](https://github.com/onevcat/Rainbow).
+**Chroma** is a Swift package for syntax highlighting code in terminal output. It takes a code string plus a language identifier, and returns an ANSI-colored string ready for printing in your TUI or CLI application.
+
+ANSI styling is powered by [`Rainbow`](https://github.com/onevcat/Rainbow).
 
 ## Features
 
-- Built-in languages: Swift, Objective-C, C, C++, Java, C#, JavaScript, JSX, TypeScript, TSX, Python, Ruby, Go, Rust, Kotlin, PHP, Dart, Lua, Bash, SQL, CSS, SCSS, Sass, Less, HTML, XML, JSON, YAML, TOML, Markdown, Dockerfile, Makefile
-- Built-in themes: `Theme.dark` and `Theme.light`
-- Custom language registration (`LanguageRegistry`)
-- Custom themes (`Theme`)
-- Line highlighting via `HighlightOptions.highlightLines`
-- Line numbers via `HighlightOptions.lineNumbers`
-- Output indentation via `HighlightOptions.indent`
-- Diff highlighting (unified patch) via `HighlightOptions.diff`
+- **30+ Built-in Languages** — Includes Swift, Objective-C, C/C++, Java, C#, JavaScript/JSX, TypeScript/TSX, Python, Ruby, Go, Rust, Kotlin, PHP, Dart, Lua, Bash, SQL, CSS/SCSS/Sass/Less, HTML/XML, JSON, YAML, TOML, Markdown, Dockerfile, and Makefile. [See all languages](Sources/Chroma/BuiltInLanguages).
+
+- **High Performance** — Minimal memory footprint with fast tokenization using optimized regex-based scanning and keyword fast-path lookups.
+
+- **Flexible Highlighting** — Built-in support for line highlighting with background colors, line numbers, and output indentation.
+
+- **Diff Highlighting** — Automatic detection and rendering of unified patches with configurable styles (foreground/background) and presentation modes (compact/verbose).
+
+- **Customizable** — Register custom languages via `LanguageRegistry` and define custom themes with full control over token styles and colors.
 
 ## Usage
+
+### Quick Start
 
 ```swift
 import Chroma
@@ -24,6 +28,7 @@ import Chroma
 let code = """
 struct User {
     let id: Int
+    let name: String
 }
 """
 
@@ -31,60 +36,86 @@ let output = try Chroma.highlight(code, language: .swift)
 print(output)
 ```
 
-## Demo
+### Running the Demo
 
-This package includes a small SwiftPM executable target that prints highlighted sample code for multiple languages.
+Clone the repository and run the built-in demo to see Chroma in action:
 
 ```bash
-swift run ChromaDemo
+git clone https://github.com/onevcat/Chroma.git
+cd Chroma
+swift run ChromaDemo --lang swift
 ```
 
-## Benchmarks
-
-Benchmarks use `package-benchmark`. Install jemalloc to enable memory stats.
+To list all supported languages:
 
 ```bash
-brew install jemalloc
-swift package benchmark --target ChromaBenchmarks
+swift run ChromaDemo --list-languages
 ```
 
-On Ubuntu:
+### Installation
 
-```bash
-sudo apt-get update
-sudo apt-get install -y libjemalloc-dev
-swift package benchmark --target ChromaBenchmarks
+Add Chroma as a dependency in your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/onevcat/Chroma.git", from: "0.1.0")
+]
 ```
 
-If jemalloc is not available, run:
+Then add it to your target:
 
-```bash
-BENCHMARK_DISABLE_JEMALLOC=1 swift package benchmark --target ChromaBenchmarks
+```swift
+targets: [
+    .target(
+        name: "MyApp",
+        dependencies: ["Chroma"]
+    )
+]
+```
+
+### Basic Usage
+
+The simplest way to highlight code:
+
+```swift
+import Chroma
+
+let code = "let x = 42"
+let output = try Chroma.highlight(code, language: .swift)
+print(output)
 ```
 
 ### Themes
 
+Chroma includes two built-in themes:
+
 ```swift
-let output = try Chroma.highlight(
+// Use the dark theme (default)
+let output1 = try Chroma.highlight(code, language: .swift)
+
+// Use the light theme
+let output2 = try Chroma.highlight(
     code,
     language: .swift,
     options: .init(theme: .light)
 )
 ```
 
-### Highlight lines
+### Line Highlighting
 
-Line numbers are 1-based and include empty lines.
+Highlight specific lines with a background color:
 
 ```swift
 let output = try Chroma.highlight(
     code,
     language: .swift,
-    options: .init(highlightLines: [2...3, 6...6])
+    options: .init(highlightLines: [2...5, 10...12])
 )
 ```
 
-### Line numbers
+### Line Numbers
+
+Add line numbers to the output:
 
 ```swift
 let output = try Chroma.highlight(
@@ -94,91 +125,125 @@ let output = try Chroma.highlight(
 )
 ```
 
-### Indent output
+### Output Indentation
+
+Indent the entire output by a specified number of spaces:
 
 ```swift
 let output = try Chroma.highlight(
     code,
     language: .swift,
-    options: .init(indent: 2)
+    options: .init(indent: 4)
 )
 ```
 
-### Diff highlighting (unified patch)
+### Diff Highlighting
 
-`Chroma` can highlight `+` / `-` lines in unified patches, following the common `git diff` patch rules.
-By default it renders a compact view with `⋮` separators between hunks.
+Chroma can highlight unified patches (like `git diff` output) automatically. It detects patch format and renders additions/deletions with appropriate styling.
+
+#### Automatic Detection
 
 ```swift
 let patch = """
-diff --git a/Foo.swift b/Foo.swift
+diff --git a/File.swift b/File.swift
 index 1111111..2222222 100644
---- a/Foo.swift
-+++ b/Foo.swift
+--- a/File.swift
++++ b/File.swift
 @@ -1,3 +1,3 @@
 -let a = 1
 +let a = 2
 """
 
-let output = try Chroma.highlight(
-    patch,
-    language: .swift,
-    options: .init(diff: .patch())
-)
-print(output)
+// Automatically detected and highlighted
+let output = try Chroma.highlight(patch, language: .swift)
 ```
 
-Verbose (full patch headers):
+#### Diff Styles
+
+Configure how diffs are rendered:
 
 ```swift
-let output = try Chroma.highlight(
+// Background highlighting with syntax-colored code (default)
+let output1 = try Chroma.highlight(
     patch,
     language: .swift,
-    options: .init(diff: .patch(presentation: .verbose))
+    options: .init(diff: .patch(style: .background()))
 )
-```
 
-Foreground-only diff (plain text, no token styling):
-
-```swift
-let output = try Chroma.highlight(
+// Foreground highlighting (red/green text only)
+let output2 = try Chroma.highlight(
     patch,
     language: .swift,
     options: .init(diff: .patch(style: .foreground()))
 )
-```
 
-Foreground diff with syntax-highlighted context lines:
-
-```swift
-let output = try Chroma.highlight(
+// Foreground diff with syntax-highlighted context
+let output3 = try Chroma.highlight(
     patch,
     language: .swift,
     options: .init(diff: .patch(style: .foreground(contextCode: .syntax)))
 )
 ```
 
-Background diff without code styling:
+#### Diff Presentation
 
 ```swift
-let output = try Chroma.highlight(
+// Compact mode (default) - uses "⋮" separators between hunks
+let output1 = try Chroma.highlight(
     patch,
     language: .swift,
-    options: .init(diff: .patch(style: .background(diffCode: .plain)))
+    options: .init(diff: .patch(presentation: .compact))
+)
+
+// Verbose mode - shows full patch headers
+let output2 = try Chroma.highlight(
+    patch,
+    language: .swift,
+    options: .init(diff: .patch(presentation: .verbose))
 )
 ```
 
-## Custom languages
+### Using a Highlighter Instance
 
-`Chroma` uses a regex-based tokenizer (similar to Prism / highlight.js) so new languages can be defined by rules.
+For more control, create a `Highlighter` instance:
 
 ```swift
+import Chroma
+
+let highlighter = Highlighter(theme: .dark)
+
+let output1 = try highlighter.highlight(code1, language: .swift)
+let output2 = try highlighter.highlight(code2, language: .python)
+```
+
+### Combining Options
+
+```swift
+let output = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(
+        theme: .light,
+        highlightLines: [5...10],
+        lineNumbers: .init(start: 1),
+        indent: 2
+    )
+)
+```
+
+### Custom Languages
+
+Register custom language definitions using regex-based token rules:
+
+```swift
+import Chroma
+
 var myLang = LanguageDefinition(
     id: "my-lang",
     displayName: "MyLang",
     rules: [
         try TokenRule(kind: .comment, pattern: "#[^\\n\\r]*"),
-        try TokenRule.words(["let", "fn", "return"], kind: .keyword),
+        try TokenRule.words(["let", "fn", "return", "if", "else"], kind: .keyword),
         try TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""),
     ]
 )
@@ -190,7 +255,97 @@ let highlighter = Highlighter(registry: registry)
 let output = try highlighter.highlight("let x = 1", language: "my-lang")
 ```
 
-## Notes
+### Custom Themes
 
-- This is an intentionally lightweight, console-focused highlighter.
-- The built-in grammars are best-effort heuristics and will be refined over time.
+Define your own theme with full control over token styles:
+
+```swift
+import Chroma
+import Rainbow
+
+let customTheme = Theme(
+    name: "custom",
+    tokenStyles: [
+        .plain: .init(foreground: .named(.white)),
+        .keyword: .init(foreground: .named(.lightMagenta), styles: [.bold]),
+        .string: .init(foreground: .named(.lightGreen)),
+        .comment: .init(foreground: .named(.black), styles: [.dim]),
+    ],
+    lineHighlightBackground: .named(.lightBlack),
+    diffAddedBackground: .named(.green),
+    diffRemovedBackground: .named(.red),
+    diffAddedForeground: .named(.lightGreen),
+    diffRemovedForeground: .named(.lightRed),
+    lineNumberForeground: .named(.white)
+)
+
+let highlighter = Highlighter(theme: customTheme)
+let output = try highlighter.highlight(code, language: .swift)
+```
+
+## Advanced
+
+### Tokenizing Only
+
+To get tokens without rendering:
+
+```swift
+let tokens = try Chroma.tokenize(code, language: .swift)
+```
+
+### Streaming Tokens
+
+For large files, process tokens as they are generated:
+
+```swift
+try Chroma.tokenize(code, language: .swift) { token in
+    print(token.kind, token.range)
+}
+```
+
+### Custom Rendering
+
+Render pre-tokenized code with custom options:
+
+```swift
+let tokens = try Chroma.tokenize(code, language: .swift)
+let output = Chroma.render(
+    code,
+    tokens: tokens,
+    options: .init(theme: .light, lineNumbers: .init(start: 1))
+)
+```
+
+## Benchmarks
+
+To run performance benchmarks:
+
+```bash
+# Install jemalloc for memory tracking
+brew install jemalloc
+
+# Run benchmarks
+swift package benchmark --target ChromaBenchmarks
+```
+
+On Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libjemalloc-dev
+swift package benchmark --target ChromaBenchmarks
+```
+
+If jemalloc is not available, memory stats will be skipped:
+
+```bash
+BENCHMARK_DISABLE_JEMALLOC=1 swift package benchmark --target ChromaBenchmarks
+```
+
+## License
+
+MIT License (c) 2025 Wei Wang, [onevcat@gmail.com](mailto:onevcat@gmail.com)
+
+## Related
+
+- [`Rainbow`](https://github.com/onevcat/Rainbow) — String coloring for Swift that powers Chroma's ANSI output
