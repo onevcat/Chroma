@@ -331,26 +331,6 @@ You can also use [Rainbow's extended color modes](https://github.com/onevcat/Rai
 ]
 ```
 
-For hex colors, you can create a helper to convert hex strings to RGB:
-
-```swift
-extension ColorType {
-    static func hex(_ hex: String) -> ColorType {
-        let hex = hex.replacingOccurrences(of: "#", with: "")
-        let rgb = UInt32(hex, radix: 16) ?? 0
-        let r = UInt8((rgb & 0xFF0000) >> 16)
-        let g = UInt8((rgb & 0x00FF00) >> 8)
-        let b = UInt8(rgb & 0x0000FF)
-        return .bit24((r, g, b))
-    }
-}
-
-// Usage:
-.tokenStyles: [
-    .comment: .init(foreground: .hex("#EA517F")),
-]
-```
-
 ## Advanced
 
 ### Tokenizing Only
