@@ -190,6 +190,31 @@ let output3 = try Chroma.highlight(
 #### Diff Presentation
 
 ```swift
+let patch = """
+diff --git a/UserService.swift b/UserService.swift
+index 1111111..2222222 100644
+--- a/UserService.swift
++++ b/UserService.swift
+@@ -5,7 +5,7 @@
+     let id: Int
+     let name: String
+     let email: String
+-    let isActive: Bool
++    var isActive: Bool
+ }
+
+ struct UserService {
+@@ -14,8 +14,8 @@ struct UserService {
+         return users.filter { $0.isActive }
+     }
+
+-    func findUser(id: Int) -> User? {
++    func find(id: Int) -> User? {
+         users.first { $0.id == id }
+     }
+ }
+"""
+
 // Compact mode (default) - uses "⋮" separators between hunks
 let output1 = try Chroma.highlight(
     patch,
@@ -245,8 +270,9 @@ var myLang = LanguageDefinition(
     displayName: "MyLang",
     rules: [
         try TokenRule(kind: .comment, pattern: "#[^\\n\\r]*"),
-        try TokenRule.words(["let", "fn", "return", "if", "else"], kind: .keyword),
+        try TokenRule.words(["let", "fn", "return", "if", "else", "while"], kind: .keyword),
         try TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""),
+        try TokenRule(kind: .number, pattern: "\\b\\d+\\b"),
     ]
 )
 
@@ -254,7 +280,18 @@ let registry = LanguageRegistry.builtIn()
 registry.register(myLang)
 
 let highlighter = Highlighter(registry: registry)
-let output = try highlighter.highlight("let x = 1", language: "my-lang")
+let code = """
+# Calculate factorial
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+let result = factorial(5)
+"""
+let output = try highlighter.highlight(code, language: "my-lang")
 ```
 
 ### Custom Themes
@@ -269,9 +306,9 @@ let customTheme = Theme(
     name: "custom",
     tokenStyles: [
         .plain: .init(foreground: .named(.white)),
-        .keyword: .init(foreground: .named(.lightMagenta), styles: [.bold]),
-        .string: .init(foreground: .named(.lightGreen)),
-        .comment: .init(foreground: .named(.black), styles: [.dim]),
+        .keyword: .init(foreground: .named(.yellow), styles: [.bold]),
+        .string: .init(foreground: .named(.red)),
+        .comment: .init(foreground: .named(.lightGreen), styles: [.dim]),
     ],
     lineHighlightBackground: .named(.lightBlack),
     diffAddedBackground: .named(.green),
@@ -283,6 +320,15 @@ let customTheme = Theme(
 
 let highlighter = Highlighter(theme: customTheme)
 let output = try highlighter.highlight(code, language: .swift)
+```
+
+You can also use [Rainbow's extended color modes](https://github.com/onevcat/Rainbow?tab=readme-ov-file#ansi-256-color-mode) (256-color or truecolor) by specifying `.bit8` or `.bit24` color values:
+
+```swift
+.tokenStyles: [
+    .keyword: .init(foreground: .bit8(226)),  // 256-color mode
+    .string: .init(foreground: .bit24(0xFF6B6B)),  // Truecolor
+]
 ```
 
 ## Advanced
