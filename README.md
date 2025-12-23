@@ -8,7 +8,7 @@ ANSI styling is powered by [`Rainbow`](https://github.com/onevcat/Rainbow).
 
 ## Features
 
-- **30+ Built-in Languages** — Includes Swift, Objective-C, C/C++, Java, C#, JavaScript/JSX, TypeScript/TSX, Python, Ruby, Go, Rust, Kotlin, PHP, Dart, Lua, Bash, SQL, CSS/SCSS/Sass/Less, HTML/XML, JSON, YAML, TOML, Markdown, Dockerfile, and Makefile. [See all languages](Sources/Chroma/BuiltInLanguages).
+- **30+ Built-in Languages** — Includes almost all popular languages. [See all languages](Sources/Chroma/BuiltInLanguages).
 
 - **High Performance** — Minimal memory footprint with fast tokenization using optimized regex-based scanning and keyword fast-path lookups.
 
