@@ -39,7 +39,6 @@ final class Renderer {
         }
 
         let plan = makePlan(for: code)
-        let ns = code as NSString
         let indentPrefix = makeIndentPrefix()
         let plainStyle = styleCache.style(for: .plain)
         let lineNumberStyle = styleCache.style(for: .comment)
@@ -55,7 +54,7 @@ final class Renderer {
             var currentLine = 1
             tokenStream { token in
                 appendTokenSegments(
-                    ns,
+                    code,
                     range: token.range,
                     kind: token.kind,
                     currentLine: &currentLine,
@@ -79,7 +78,7 @@ final class Renderer {
         } else {
             tokenStream { token in
                 appendTokenSegmentsWithoutLineBackground(
-                    ns,
+                    code,
                     range: token.range,
                     kind: token.kind,
                     indentPrefix: indentPrefix,
@@ -94,7 +93,7 @@ final class Renderer {
     }
 
     private func appendTokenSegments(
-        _ ns: NSString,
+        _ code: String,
         range: NSRange,
         kind: TokenKind,
         currentLine: inout Int,
@@ -149,7 +148,7 @@ final class Renderer {
                 }
                 if pieceLength > 0 {
                     if shouldRender {
-                        let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
+                        let piece = substring(code, location: location, length: pieceLength)
                         let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
                         let style = resolvedStyle(for: kind, usePlainTextStyle: usePlainTextStyle, plainStyle: plainStyle)
                         appendLinePrefixIfNeeded(
@@ -198,7 +197,7 @@ final class Renderer {
                 if pieceLength > 0 {
                     let shouldRender = lineIsVisible(currentLine, lineVisibility: lineVisibility)
                     if shouldRender {
-                        let piece = ns.substring(with: NSRange(location: location, length: pieceLength))
+                        let piece = substring(code, location: location, length: pieceLength)
                         let background = backgroundForLine(currentLine, lineBackgrounds: lineBackgrounds)
                         let foreground = foregroundForLine(currentLine, lineForegrounds: lineForegrounds)
                         let usePlainTextStyle = plainStyleForLine(currentLine, linePlainStyles: linePlainStyles)
@@ -242,7 +241,7 @@ final class Renderer {
     }
 
     private func appendTokenSegmentsWithoutLineBackground(
-        _ ns: NSString,
+        _ code: String,
         range: NSRange,
         kind: TokenKind,
         indentPrefix: String,
@@ -252,7 +251,7 @@ final class Renderer {
     ) {
         guard range.length > 0 else { return }
         let style = resolvedStyle(for: kind, usePlainTextStyle: false, plainStyle: plainStyle)
-        let piece = ns.substring(with: range)
+        let piece = substring(code, range: range)
         if indentPrefix.isEmpty {
             writer.append(text: piece, style: style, backgroundOverride: nil)
             return
@@ -328,7 +327,7 @@ final class Renderer {
     }
 
     private func appendTextWithIndent(
-        _ text: String,
+        _ text: Substring,
         style: TextStyle,
         foregroundOverride: ColorType?,
         backgroundOverride: BackgroundColorType?,
@@ -354,14 +353,14 @@ final class Renderer {
                 if !segment.isEmpty {
                     if let foregroundOverride {
                         writer.append(
-                            text: String(segment),
+                            text: segment,
                             style: style,
                             foregroundOverride: foregroundOverride,
                             backgroundOverride: backgroundOverride
                         )
                     } else {
                         writer.append(
-                            text: String(segment),
+                            text: segment,
                             style: style,
                             backgroundOverride: backgroundOverride
                         )
@@ -388,14 +387,14 @@ final class Renderer {
                 if !segment.isEmpty {
                     if let foregroundOverride {
                         writer.append(
-                            text: String(segment),
+                            text: segment,
                             style: style,
                             foregroundOverride: foregroundOverride,
                             backgroundOverride: backgroundOverride
                         )
                     } else {
                         writer.append(
-                            text: String(segment),
+                            text: segment,
                             style: style,
                             backgroundOverride: backgroundOverride
                         )
@@ -405,6 +404,20 @@ final class Renderer {
                 break
             }
         }
+    }
+
+    @inline(__always)
+    private func substring(_ code: String, range: NSRange) -> Substring {
+        let start = String.Index(utf16Offset: range.location, in: code)
+        let end = String.Index(utf16Offset: range.location + range.length, in: code)
+        return code[start..<end]
+    }
+
+    @inline(__always)
+    private func substring(_ code: String, location: Int, length: Int) -> Substring {
+        let start = String.Index(utf16Offset: location, in: code)
+        let end = String.Index(utf16Offset: location + length, in: code)
+        return code[start..<end]
     }
 
     private struct RenderPlan {
@@ -1038,6 +1051,126 @@ private struct AnsiWriter {
         )
         result.append(prefix)
         result.append(text)
+        result.append("\u{001B}[0m")
+    }
+
+    mutating func append(text: Substring, style: TextStyle, backgroundOverride: BackgroundColorType?) {
+        if text.isEmpty {
+            return
+        }
+
+        guard isEnabled else {
+            result.append(contentsOf: text)
+            return
+        }
+
+        let color = style.foreground
+        let background = backgroundOverride ?? style.background
+        let styles = style.styles
+
+        if color == nil && background == nil && styles == nil {
+            result.append(contentsOf: text)
+            return
+        }
+
+        if let cached = prefixCache.first(where: { $0.matches(color: color, backgroundColor: background, styles: styles) }) {
+            result.append(cached.prefix)
+            result.append(contentsOf: text)
+            result.append("\u{001B}[0m")
+            return
+        }
+
+        var codes: [UInt8] = []
+        if let color { codes += color.value }
+        if let background { codes += background.value }
+        if let styles { codes += styles.flatMap { $0.value } }
+
+        if codes.isEmpty {
+            result.append(contentsOf: text)
+            return
+        }
+
+        var prefix = "\u{001B}["
+        for (index, code) in codes.enumerated() {
+            if index > 0 { prefix.append(";") }
+            prefix.append(String(code))
+        }
+        prefix.append("m")
+        prefixCache.append(
+            PrefixCacheEntry(
+                color: color,
+                backgroundColor: background,
+                styles: styles,
+                prefix: prefix
+            )
+        )
+        result.append(prefix)
+        result.append(contentsOf: text)
+        result.append("\u{001B}[0m")
+    }
+
+    mutating func append(
+        text: Substring,
+        style: TextStyle,
+        foregroundOverride: ColorType?,
+        backgroundOverride: BackgroundColorType?
+    ) {
+        guard let foregroundOverride else {
+            append(text: text, style: style, backgroundOverride: backgroundOverride)
+            return
+        }
+
+        if text.isEmpty {
+            return
+        }
+
+        guard isEnabled else {
+            result.append(contentsOf: text)
+            return
+        }
+
+        let color: ColorType? = foregroundOverride
+        let background = backgroundOverride ?? style.background
+        let styles = style.styles
+
+        if color == nil && background == nil && styles == nil {
+            result.append(contentsOf: text)
+            return
+        }
+
+        if let cached = prefixCache.first(where: { $0.matches(color: color, backgroundColor: background, styles: styles) }) {
+            result.append(cached.prefix)
+            result.append(contentsOf: text)
+            result.append("\u{001B}[0m")
+            return
+        }
+
+        var codes: [UInt8] = []
+        if let color { codes += color.value }
+        if let background { codes += background.value }
+        if let styles { codes += styles.flatMap { $0.value } }
+
+        if codes.isEmpty {
+            result.append(contentsOf: text)
+            return
+        }
+
+        var prefix = "\u{001B}["
+        for (index, code) in codes.enumerated() {
+            if index > 0 { prefix.append(";") }
+            prefix.append(String(code))
+        }
+        prefix.append("m")
+        prefixCache.append(
+            PrefixCacheEntry(
+                color: color,
+                backgroundColor: background,
+                styles: styles,
+                prefix: prefix
+            )
+        )
+        result.append(prefix)
+        result.append(contentsOf: text)
         result.append("\u{001B}[0m")
     }
 
