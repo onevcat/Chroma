@@ -322,13 +322,20 @@ let highlighter = Highlighter(theme: customTheme)
 let output = try highlighter.highlight(code, language: .swift)
 ```
 
-You can also use [Rainbow's extended color modes](https://github.com/onevcat/Rainbow?tab=readme-ov-file#ansi-256-color-mode) (256-color or truecolor) by specifying `.bit8` or `.bit24` color values:
+You can also use [Rainbow's extended color modes](https://github.com/onevcat/Rainbow?tab=readme-ov-file#ansi-256-color-mode) for more color options:
 
 ```swift
 .tokenStyles: [
-    .keyword: .init(foreground: .bit8(226)),  // 256-color mode
-    .string: .init(foreground: .bit24(0xFF6B6B)),  // Truecolor
+    .keyword: .init(foreground: .bit8(226)),         // 256-color mode
+    .string: .init(foreground: .bit24(0xFF6B6B)),    // Truecolor (24-bit)
+    .comment: .init(foreground: .hex("#EA517F")),    // Hex color (auto-converted to 256-color)
 ]
+```
+
+Hex colors support formats like `"#FFF"`, `"FFFFFF"`, or `0xFFFFFF`. For truecolor output with hex, specify the target mode:
+
+```swift
+.comment: .init(foreground: .hex("#EA517F", to: .bit24))
 ```
 
 ## Advanced
