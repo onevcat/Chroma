@@ -454,6 +454,10 @@ final class Renderer {
         }
 
         let lines = splitLines(code)
+        let lineKinds: [DiffLineKind?] = {
+            guard diffRendering != nil || options.lineNumbers.isEnabled else { return [] }
+            return lines.map(DiffDetector.kind)
+        }()
 
         var lineBackgrounds: [BackgroundColorType?] = []
         var lineForegrounds: [ColorType?] = []
@@ -467,7 +471,7 @@ final class Renderer {
             lineForegrounds = [ColorType?](repeating: nil, count: lines.count)
             linePlainStyles = Array(repeating: false, count: lines.count)
             for (index, line) in lines.enumerated() {
-                let kind = DiffDetector.kind(forLine: line)
+                let kind = lineKinds.isEmpty ? DiffDetector.kind(forLine: line) : lineKinds[index]
                 let isDiffLine: Bool = {
                     switch kind {
                     case .added?, .removed?:
@@ -508,7 +512,7 @@ final class Renderer {
             }
 
             if diffRendering.presentation == .compact {
-                let compact = makeCompactLinePlan(for: lines)
+                let compact = makeCompactLinePlan(for: lines, lineKinds: lineKinds)
                 lineVisibility = compact.visibility
                 lineSeparators = compact.separators
                 if compact.hasOverrides {
@@ -530,7 +534,7 @@ final class Renderer {
             }
         }
 
-        let lineNumbers = resolveLineNumbers(for: lines)
+        let lineNumbers = resolveLineNumbers(for: lines, lineKinds: lineKinds)
         let lineNumberWidth = lineNumberWidth(for: lineNumbers)
         let lineNumberForegrounds = resolveLineNumberForegrounds(
             for: lines,
@@ -571,23 +575,31 @@ final class Renderer {
         return locations
     }
 
-    private func resolveLineNumbers(for lines: [Substring]) -> [Int?] {
+    private func resolveLineNumbers(for lines: [Substring], lineKinds: [DiffLineKind?]) -> [Int?] {
         guard options.lineNumbers.isEnabled else { return [] }
 
-        if DiffDetector.looksLikePatch(lines: lines) {
-            return makePatchLineNumbers(for: lines)
+        if lineKinds.isEmpty {
+            if DiffDetector.looksLikePatch(lines: lines) {
+                return makePatchLineNumbers(for: lines, lineKinds: lineKinds)
+            }
+            return makeSequentialLineNumbers(for: lines, lineKinds: lineKinds, start: options.lineNumbers.start)
         }
-        return makeSequentialLineNumbers(for: lines, start: options.lineNumbers.start)
+
+        if looksLikePatch(lineKinds: lineKinds) {
+            return makePatchLineNumbers(for: lines, lineKinds: lineKinds)
+        }
+        return makeSequentialLineNumbers(for: lines, lineKinds: lineKinds, start: options.lineNumbers.start)
     }
 
-    private func makePatchLineNumbers(for lines: [Substring]) -> [Int?] {
+    private func makePatchLineNumbers(for lines: [Substring], lineKinds: [DiffLineKind?]) -> [Int?] {
         var result = [Int?](repeating: nil, count: lines.count)
         var oldLine: Int? = nil
         var newLine: Int? = nil
         var hasHunkHeader = false
 
         for (index, line) in lines.enumerated() {
-            if case .hunkHeader? = DiffDetector.kind(forLine: line) {
+            let kind = lineKinds.isEmpty ? DiffDetector.kind(forLine: line) : lineKinds[index]
+            if case .hunkHeader? = kind {
                 if let hunk = DiffDetector.hunkStartNumbers(forLine: line) {
                     oldLine = hunk.old
                     newLine = hunk.new
@@ -599,7 +611,6 @@ final class Renderer {
                 continue
             }
 
-            let kind = DiffDetector.kind(forLine: line)
             switch kind {
             case .meta?, .fileHeader?:
                 continue
@@ -624,6 +635,7 @@ final class Renderer {
         guard hasHunkHeader else {
             return makeSequentialLineNumbers(
                 for: lines,
+                lineKinds: lineKinds,
                 start: options.lineNumbers.start,
                 maskingDiffMeta: true
             )
@@ -634,6 +646,7 @@ final class Renderer {
 
     private func makeSequentialLineNumbers(
         for lines: [Substring],
+        lineKinds: [DiffLineKind?],
         start: Int,
         maskingDiffMeta: Bool = false
     ) -> [Int?] {
@@ -642,7 +655,7 @@ final class Renderer {
 
         for (index, line) in lines.enumerated() {
             if maskingDiffMeta {
-                let kind = DiffDetector.kind(forLine: line)
+                let kind = lineKinds.isEmpty ? DiffDetector.kind(forLine: line) : lineKinds[index]
                 switch kind {
                 case .meta?, .fileHeader?, .hunkHeader?:
                     continue
@@ -788,7 +801,7 @@ final class Renderer {
         return String(repeating: " ", count: width - digits) + String(number)
     }
 
-    private func makeCompactLinePlan(for lines: [Substring]) -> (visibility: [Bool], separators: [Int], hasOverrides: Bool) {
+    private func makeCompactLinePlan(for lines: [Substring], lineKinds: [DiffLineKind?]) -> (visibility: [Bool], separators: [Int], hasOverrides: Bool) {
         var visibility = [Bool](repeating: true, count: lines.count)
         var separators = [Int](repeating: 0, count: lines.count)
 
@@ -817,7 +830,7 @@ final class Renderer {
                 continue
             }
 
-            let kind = DiffDetector.kind(forLine: line)
+            let kind = lineKinds.isEmpty ? DiffDetector.kind(forLine: line) : lineKinds[index]
             switch kind {
             case .meta?, .fileHeader?:
                 visibility[index] = false
@@ -847,6 +860,18 @@ final class Renderer {
 
         let hasOverrides = visibility.contains(false) || separators.contains(where: { $0 > 0 })
         return (visibility, separators, hasOverrides)
+    }
+
+    private func looksLikePatch(lineKinds: [DiffLineKind?]) -> Bool {
+        for kind in lineKinds {
+            switch kind {
+            case .meta?, .fileHeader?, .hunkHeader?:
+                return true
+            default:
+                break
+            }
+        }
+        return false
     }
 
     private func lineIsVisible(_ line: Int, lineVisibility: [Bool]) -> Bool {
