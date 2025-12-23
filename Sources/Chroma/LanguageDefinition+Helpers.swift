@@ -5,11 +5,11 @@ public extension LanguageDefinition {
         switch kind {
         case .keyword:
             var updated = ensureFastPath()
-            updated.keywords.formUnion(words)
+            updated.appendWords(words, kind: .keyword)
             fastPath = updated
         case .type:
             var updated = ensureFastPath()
-            updated.types.formUnion(words)
+            updated.appendWords(words, kind: .type)
             fastPath = updated
         default:
             break

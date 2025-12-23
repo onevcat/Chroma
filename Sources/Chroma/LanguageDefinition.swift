@@ -18,15 +18,40 @@ public struct LanguageDefinition {
 }
 
 public struct LanguageFastPath: Equatable {
-    public var keywords: Set<String>
-    public var types: Set<String>
+    private var lookup: [String: TokenKind]
 
     public init(keywords: [String] = [], types: [String] = []) {
-        self.keywords = Set(keywords)
-        self.types = Set(types)
+        var lookup: [String: TokenKind] = [:]
+        lookup.reserveCapacity(keywords.count + types.count)
+        for word in types {
+            lookup[word] = .type
+        }
+        for word in keywords {
+            lookup[word] = .keyword
+        }
+        self.lookup = lookup
     }
 
     public var isEmpty: Bool {
-        keywords.isEmpty && types.isEmpty
+        lookup.isEmpty
+    }
+
+    func kind(for word: String) -> TokenKind? {
+        lookup[word]
+    }
+
+    mutating func appendWords(_ words: [String], kind: TokenKind) {
+        switch kind {
+        case .keyword:
+            for word in words {
+                lookup[word] = .keyword
+            }
+        case .type:
+            for word in words where lookup[word] == nil {
+                lookup[word] = .type
+            }
+        default:
+            break
+        }
     }
 }

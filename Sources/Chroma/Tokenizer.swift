@@ -211,13 +211,8 @@ final class RegexTokenizer {
             }
             let wordRange = NSRange(location: location, length: index - location)
             let word = ns.substring(with: wordRange)
-            if fastPath.keywords.contains(word) {
-                return (.keyword, wordRange)
-            }
-            if fastPath.types.contains(word) {
-                return (.type, wordRange)
-            }
-            return nil
+            guard let kind = fastPath.kind(for: word) else { return nil }
+            return (kind, wordRange)
         }
 
         func appendPlainWithFastPath(_ range: NSRange, fastPath: LanguageFastPath) {
@@ -236,10 +231,8 @@ final class RegexTokenizer {
                     }
                     let wordRange = NSRange(location: start, length: index - start)
                     let word = ns.substring(with: wordRange)
-                    if fastPath.keywords.contains(word) {
-                        appendToken(Token(kind: .keyword, range: wordRange))
-                    } else if fastPath.types.contains(word) {
-                        appendToken(Token(kind: .type, range: wordRange))
+                    if let kind = fastPath.kind(for: word) {
+                        appendToken(Token(kind: kind, range: wordRange))
                     } else {
                         appendPlainASCII(wordRange)
                     }
