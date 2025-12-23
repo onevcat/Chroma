@@ -44,7 +44,7 @@ Clone the repository and run the built-in demo to see Chroma in action:
 git clone https://github.com/onevcat/Chroma.git
 cd Chroma
 swift run ChromaDemo --lang swift
-# Or use `--light` to use the default light theme
+# Or use `--light` to apply the default light theme
 # swift run ChromaDemo --lang swift --light
 ```
 
