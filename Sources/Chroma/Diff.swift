@@ -101,6 +101,31 @@ func splitLines(_ string: String) -> [Substring] {
     return result
 }
 
+func splitLinesWithBreaks(_ string: String) -> (lines: [Substring], lineBreaks: [Int]) {
+    var lines: [Substring] = []
+    lines.reserveCapacity(64)
+    var lineBreaks: [Int] = []
+    lineBreaks.reserveCapacity(max(16, string.count / 64))
+
+    let utf16 = string.utf16
+    var startOffset = 0
+    var offset = 0
+    for value in utf16 {
+        if value == 10 {
+            let startIndex = String.Index(utf16Offset: startOffset, in: string)
+            let endIndex = String.Index(utf16Offset: offset, in: string)
+            lines.append(string[startIndex..<endIndex])
+            lineBreaks.append(offset)
+            startOffset = offset + 1
+        }
+        offset += 1
+    }
+
+    let startIndex = String.Index(utf16Offset: startOffset, in: string)
+    lines.append(string[startIndex..<string.endIndex])
+    return (lines, lineBreaks)
+}
+
 func trimmingCR(_ line: Substring) -> Substring {
     if line.hasSuffix("\r") {
         return line.dropLast()

@@ -453,7 +453,7 @@ final class Renderer {
             )
         }
 
-        let lines = splitLines(code)
+        let (lines, lineBreaksFromSplit) = splitLinesWithBreaks(code)
         let lineKinds: [DiffLineKind?] = {
             guard diffRendering != nil || options.lineNumbers.isEnabled else { return [] }
             return lines.map(DiffDetector.kind)
@@ -546,7 +546,7 @@ final class Renderer {
             hasLineOverrides = true
         }
 
-        let lineBreaks = hasLineOverrides ? lineBreakLocations(code) : []
+        let lineBreaks = hasLineOverrides ? lineBreaksFromSplit : []
         return RenderPlan(
             lineBackgrounds: lineBackgrounds,
             lineForegrounds: lineForegrounds,
@@ -559,20 +559,6 @@ final class Renderer {
             lineVisibility: lineVisibility,
             lineSeparators: lineSeparators
         )
-    }
-
-    private func lineBreakLocations(_ code: String) -> [Int] {
-        var locations: [Int] = []
-        locations.reserveCapacity(max(16, code.count / 64))
-
-        var index = 0
-        for value in code.utf16 {
-            if value == 10 {
-                locations.append(index)
-            }
-            index += 1
-        }
-        return locations
     }
 
     private func resolveLineNumbers(for lines: [Substring], lineKinds: [DiffLineKind?]) -> [Int?] {
