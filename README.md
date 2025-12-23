@@ -87,6 +87,54 @@ let output = try Chroma.highlight(code, language: .swift)
 print(output)
 ```
 
+### Auto-Detect Language from Filename
+
+Chroma can automatically detect the language from a filename or file path:
+
+```swift
+// Detect from filename
+let output1 = try Chroma.highlight(
+    code,
+    fileName: "MyFile.swift"
+)
+
+// Detect from file path
+let output2 = try Chroma.highlight(
+    code,
+    filePath: "/path/to/script.py"
+)
+
+// Detect from URL
+let output3 = try Chroma.highlight(
+    code,
+    fileURL: URL(fileURLWithPath: "/path/to/Main.kt")
+)
+```
+
+Supported extensions include `.swift`, `.kt`, `.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`, `.cpp`, `.c`, `.cs`, `.php`, `.rb`, `.dart`, `.lua`, `.sh`, `.sql`, `.css`, `.scss`, `.sass`, `.less`, `.html`, `.xml`, `.json`, `.yaml`, `.yml`, `.toml`, `.md`, and more.
+
+Special filenames like `Makefile`, `Dockerfile`, `Gemfile`, etc. are also recognized.
+
+### Fallback for Unknown Languages
+
+By default, using `fileName`/`filePath`/`fileURL` will silently fall back to plain text for unknown file types. You can control this behavior:
+
+```swift
+// Silent mode (default for file-based detection) - returns plain text
+let output1 = try Chroma.highlight(
+    code,
+    fileName: "unknown.xyz",  // Unknown extension
+    options: .init(fallbackMode: .silent)
+)
+
+// Strict mode - throws an error for unknown languages
+let output2 = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(fallbackMode: .strict)  // Default for explicit language
+)
+```
+
 ### Themes
 
 Chroma includes two built-in themes:

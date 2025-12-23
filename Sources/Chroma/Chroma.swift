@@ -14,6 +14,33 @@ public enum Chroma {
         try shared.highlight(code, language: language, options: options)
     }
 
+    /// Highlight code by detecting language from a file name.
+    public static func highlight(
+        _ code: String,
+        fileName: String,
+        options: HighlightOptions = .init(fallbackMode: .silent)
+    ) throws -> String {
+        try highlight(code, language: .fromFileName(fileName), options: options)
+    }
+
+    /// Highlight code by detecting language from a file path.
+    public static func highlight(
+        _ code: String,
+        filePath: String,
+        options: HighlightOptions = .init(fallbackMode: .silent)
+    ) throws -> String {
+        try highlight(code, language: .fromFilePath(filePath), options: options)
+    }
+
+    /// Highlight code by detecting language from a file URL.
+    public static func highlight(
+        _ code: String,
+        fileURL: URL,
+        options: HighlightOptions = .init(fallbackMode: .silent)
+    ) throws -> String {
+        try highlight(code, language: .fromFileURL(fileURL), options: options)
+    }
+
     public static func tokenize(
         _ code: String,
         language: LanguageID

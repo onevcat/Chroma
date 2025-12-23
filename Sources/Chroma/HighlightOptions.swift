@@ -43,10 +43,17 @@ public struct HighlightOptions: Equatable {
         case patch(style: DiffStyle = .background(), presentation: DiffPresentation = .compact)
     }
 
+    /// Determines behavior when a language is not found in the registry
+    public enum FallbackMode: Equatable {
+        case strict           /// Throw an error if language is not found (default)
+        case silent           /// Return plain text without highlighting if language is not found
+    }
+
     public var theme: Theme?
     public var diff: DiffHighlight
     public var highlightLines: LineRangeSet
     public var lineNumbers: LineNumberOptions
+    public var fallbackMode: FallbackMode
     public var indent: Int {
         didSet {
             if indent < 0 {
@@ -60,12 +67,14 @@ public struct HighlightOptions: Equatable {
         diff: DiffHighlight = .auto(),
         highlightLines: LineRangeSet = .init(),
         lineNumbers: LineNumberOptions = .none,
+        fallbackMode: FallbackMode = .strict,
         indent: Int = 0
     ) {
         self.theme = theme
         self.diff = diff
         self.highlightLines = highlightLines
         self.lineNumbers = lineNumbers
+        self.fallbackMode = fallbackMode
         self.indent = max(0, indent)
     }
 }

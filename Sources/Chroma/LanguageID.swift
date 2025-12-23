@@ -13,6 +13,103 @@ public struct LanguageID: Hashable, RawRepresentable, ExpressibleByStringLiteral
 }
 
 public extension LanguageID {
+    static let none: Self = "none"
+    static let plain: Self = "none"  // Alias for none
+
+    /// Detects language from a file name (e.g., "MyFile.swift" -> .swift)
+    static func fromFileName(_ fileName: String) -> LanguageID {
+        // Check for special filenames first (case-insensitive)
+        let lowerName = fileName.lowercased()
+        for (special, id) in Self.specialFileNames where lowerName == special {
+            return id
+        }
+
+        // Extract extension
+        guard let dotIndex = fileName.lastIndex(of: ".") else {
+            return .none
+        }
+        let ext = String(fileName[fileName.index(after: dotIndex)...]).lowercased()
+
+        return Self.extensionMap[ext] ?? .none
+    }
+
+    /// Detects language from a file path (extracts filename and uses fromFileName)
+    static func fromFilePath(_ path: String) -> LanguageID {
+        guard let fileName = URL(fileURLWithPath: path).lastPathComponent, !fileName.isEmpty else {
+            return .none
+        }
+        return fromFileName(fileName)
+    }
+
+    /// Detects language from a file URL
+    static func fromFileURL(_ url: URL) -> LanguageID {
+        guard let fileName = url.lastPathComponent, !fileName.isEmpty else {
+            return .none
+        }
+        return fromFileName(fileName)
+    }
+
+    /// Mapping of file extensions to LanguageID
+    private static let extensionMap: [String: LanguageID] = [
+        "swift": .swift,
+        "m": .objectiveC,
+        "h": .objectiveC,
+        "c": .c,
+        "cpp": .cpp,
+        "cc": .cpp,
+        "cxx": .cpp,
+        "c++": .cplusplus,
+        "hpp": .cpp,
+        "h++": .cplusplus,
+        "js": .javascript,
+        "jsx": .jsx,
+        "ts": .typescript,
+        "tsx": .tsx,
+        "py": .python,
+        "pyw": .python,
+        "rb": .ruby,
+        "go": .go,
+        "rs": .rust,
+        "kt": .kotlin,
+        "kts": .kotlin,
+        "java": .java,
+        "cs": .csharp,
+        "php": .php,
+        "dart": .dart,
+        "lua": .lua,
+        "sh": .bash,
+        "bash": .bash,
+        "zsh": .zsh,
+        "fish": .bash,
+        "sql": .sql,
+        "css": .css,
+        "scss": .scss,
+        "sass": .sass,
+        "less": .less,
+        "html": .html,
+        "htm": .html,
+        "xml": .xml,
+        "json": .json,
+        "yaml": .yaml,
+        "yml": .yaml,
+        "toml": .toml,
+        "md": .markdown,
+        "markdown": .markdown,
+    ]
+
+    /// Special filenames without extensions (case-insensitive comparison)
+    private static let specialFileNames: [String: LanguageID] = [
+        "makefile": .makefile,
+        "dockerfile": .dockerfile,
+        "gemfile": .ruby,
+        "rakefile": .ruby,
+        "podfile": .ruby,
+        "cartfile": .ruby,
+        "vagrantfile": .ruby,
+    ]
+}
+
+public extension LanguageID {
     static let swift: Self = "swift"
     static let objectiveC: Self = "objective-c"
     static let objc: Self = "objc"

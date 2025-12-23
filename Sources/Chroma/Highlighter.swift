@@ -20,6 +20,9 @@ public final class Highlighter {
         options: HighlightOptions = .init()
     ) throws -> String {
         guard let language = registry.language(for: language) else {
+            if options.fallbackMode == .silent || language == .none || language == .plain {
+                return renderPlain(code, options: options)
+            }
             throw Error.languageNotFound(language)
         }
 
@@ -45,6 +48,10 @@ public final class Highlighter {
         language: LanguageID
     ) throws -> [Token] {
         guard let language = registry.language(for: language) else {
+            if language == .none || language == .plain {
+                let ns = code as NSString
+                return [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+            }
             throw Error.languageNotFound(language)
         }
 
@@ -62,6 +69,11 @@ public final class Highlighter {
         emit: (Token) -> Void
     ) throws {
         guard let language = registry.language(for: language) else {
+            if language == .none || language == .plain {
+                let ns = code as NSString
+                emit(Token(kind: .plain, range: NSRange(location: 0, length: ns.length)))
+                return
+            }
             throw Error.languageNotFound(language)
         }
 
@@ -76,6 +88,14 @@ public final class Highlighter {
 
     private func isMarkdown(_ id: LanguageID) -> Bool {
         id.rawValue == LanguageID.markdown.rawValue || id.rawValue == LanguageID.md.rawValue
+    }
+
+    private func renderPlain(_ code: String, options: HighlightOptions) -> String {
+        let theme = options.theme ?? self.theme
+        let renderer = Renderer(theme: theme, options: options)
+        let ns = code as NSString
+        let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+        return renderer.render(code: code, tokens: tokens)
     }
 
     public func render(
