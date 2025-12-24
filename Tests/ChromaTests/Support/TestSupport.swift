@@ -88,7 +88,7 @@ func assertGolden(
 
 func highlightWithTestTheme(
     _ code: String,
-    language: LanguageID,
+    language: LanguageID?,
     registry: LanguageRegistry = .builtIn(),
     options: HighlightOptions = .init()
 ) throws -> String {

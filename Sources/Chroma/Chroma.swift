@@ -8,7 +8,7 @@ public enum Chroma {
     /// Convenience helper for one-off highlighting using `Chroma.shared`.
     public static func highlight(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         options: HighlightOptions = .init()
     ) throws -> String {
         try shared.highlight(code, language: language, options: options)
@@ -16,14 +16,14 @@ public enum Chroma {
 
     public static func tokenize(
         _ code: String,
-        language: LanguageID
+        language: LanguageID?
     ) throws -> [Token] {
         try shared.tokenize(code, language: language)
     }
 
     public static func tokenize(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         emit: (Token) -> Void
     ) throws {
         try shared.tokenize(code, language: language, emit: emit)

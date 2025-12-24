@@ -1,3 +1,5 @@
+import Foundation
+
 @_spi(Benchmarking)
 public struct TokenBuffer {
     fileprivate let tokens: [Token]
@@ -9,9 +11,14 @@ public struct TokenBuffer {
 public enum BenchmarkSupport {
     public static func tokenize(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         registry: LanguageRegistry = .builtIn()
     ) throws -> TokenBuffer {
+        guard let language else {
+            let ns = code as NSString
+            return TokenBuffer(tokens: [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))])
+        }
+
         guard let language = registry.language(for: language) else {
             throw Highlighter.Error.languageNotFound(language)
         }
@@ -22,10 +29,15 @@ public enum BenchmarkSupport {
 
     public static func tokenize(
         _ code: String,
-        language: LanguageID,
+        language: LanguageID?,
         registry: LanguageRegistry = .builtIn(),
         metrics: inout TokenizerMetrics
     ) throws -> TokenBuffer {
+        guard let language else {
+            let ns = code as NSString
+            return TokenBuffer(tokens: [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))])
+        }
+
         guard let language = registry.language(for: language) else {
             throw Highlighter.Error.languageNotFound(language)
         }
