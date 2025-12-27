@@ -99,5 +99,6 @@ func highlightWithTestTheme(
     if options.theme == nil {
         options.theme = theme
     }
+    options.colorMode = .always
     return try highlighter.highlight(code, language: language, options: options)
 }
