@@ -145,6 +145,26 @@ let output = try Chroma.highlight(
 )
 ```
 
+### Color Output
+
+Chroma defaults to auto-detecting ANSI output based on TTY, `TERM=dumb`, and common environment variables (`NO_COLOR`, `CHROMA_NO_COLOR`, `FORCE_COLOR`).
+
+```swift
+// Force ANSI output
+let output = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(colorMode: .always)
+)
+
+// Auto-detect for stderr output
+let output = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(colorMode: .auto(output: .stderr))
+)
+```
+
 ### Output Indentation
 
 Indent the entire output by a specified number of spaces:

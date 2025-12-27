@@ -1562,8 +1562,7 @@ struct DemoArguments {
     }
 
     var theme: ThemeChoice = .dark
-    var forceColor: Bool = false
-    var noColor: Bool = false
+    var colorMode: ColorMode = .auto(output: .stdout)
     var listLanguages: Bool = false
     var lang: String?
     var showComponents: Bool = true
@@ -1590,9 +1589,9 @@ struct DemoArguments {
             case "--light":
                 parsed.theme = .light
             case "--force-color":
-                parsed.forceColor = true
+                parsed.colorMode = .always
             case "--no-color":
-                parsed.noColor = true
+                parsed.colorMode = .never
             case "--list-languages":
                 parsed.listLanguages = true
             case "--lang":
@@ -1638,11 +1637,8 @@ struct ChromaDemo {
             let args = Array(CommandLine.arguments.dropFirst())
             let options = try DemoArguments.parse(args)
 
-            if options.noColor {
-                Rainbow.enabled = false
-            } else if options.forceColor {
-                Rainbow.enabled = true
-            }
+            let colorMode = options.colorMode
+            Rainbow.enabled = colorMode.isEnabled()
 
             let theme: Theme = (options.theme == .light) ? .light : .dark
             let registry = LanguageRegistry.builtIn()
@@ -1663,6 +1659,7 @@ struct ChromaDemo {
                 registry: registry,
                 highlighter: highlighter,
                 theme: theme,
+                colorMode: colorMode,
                 showHeader: options.showComponents
             )
         } catch DemoError.invalidArguments(let message) {
@@ -1696,6 +1693,7 @@ struct ChromaDemo {
         registry: LanguageRegistry,
         highlighter: Highlighter,
         theme: Theme,
+        colorMode: ColorMode,
         showHeader: Bool
     ) throws {
         let displayName = registry.language(for: demo.id)?.displayName ?? demo.id.rawValue
@@ -1707,7 +1705,11 @@ struct ChromaDemo {
         }
 
         printSection("Sample")
-        print(try highlighter.highlight(demo.sample, language: demo.id))
+        print(try highlighter.highlight(
+            demo.sample,
+            language: demo.id,
+            options: .init(colorMode: colorMode)
+        ))
         print("")
 
         printSection("Sample + Line Numbers + Highlights")
@@ -1715,6 +1717,7 @@ struct ChromaDemo {
             demo.sample,
             language: demo.id,
             options: .init(
+                colorMode: colorMode,
                 highlightLines: demo.highlightLines,
                 lineNumbers: .init(start: 1)
             )
@@ -1726,6 +1729,7 @@ struct ChromaDemo {
             demo.patch,
             language: demo.id,
             options: .init(
+                colorMode: colorMode,
                 diff: .patch(style: .background(diffCode: .plain), presentation: .verbose),
                 lineNumbers: .init(start: 1)
             )
@@ -1737,6 +1741,7 @@ struct ChromaDemo {
             demo.patch,
             language: demo.id,
             options: .init(
+                colorMode: colorMode,
                 diff: .patch(style: .foreground(contextCode: .plain), presentation: .compact),
                 lineNumbers: .init(start: 1)
             )

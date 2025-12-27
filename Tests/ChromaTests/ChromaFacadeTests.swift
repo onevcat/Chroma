@@ -10,7 +10,7 @@ struct ChromaFacadeTests {
         let output = try Chroma.highlight(
             "let value = 1",
             language: .swift,
-            options: .init(theme: theme)
+            options: .init(theme: theme, colorMode: .always)
         )
 
         let expected = renderExpected([

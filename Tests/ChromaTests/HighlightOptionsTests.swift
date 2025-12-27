@@ -7,6 +7,7 @@ struct HighlightOptionsTests {
     func defaults() {
         let options = HighlightOptions()
         #expect(options.theme == nil)
+        #expect(options.colorMode == .auto(output: .stdout))
         #expect(options.missingLanguageHandling == .error)
         #expect(options.diff == .auto())
         #expect(options.highlightLines == LineRangeSet())

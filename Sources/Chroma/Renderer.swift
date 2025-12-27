@@ -29,7 +29,8 @@ final class Renderer {
         estimatedSegments: Int?,
         tokenStream: (_ emit: (Token) -> Void) -> Void
     ) -> String {
-        if !Rainbow.enabled &&
+        let colorEnabled = options.colorMode.isEnabled()
+        if !colorEnabled &&
             options.highlightLines.ranges.isEmpty &&
             options.indent == 0 &&
             !options.lineNumbers.isEnabled {
@@ -46,7 +47,7 @@ final class Renderer {
         var writer = AnsiWriter(
             estimatedTextLength: code.count,
             estimatedSegments: estimatedSegments ?? max(16, code.count / 8),
-            isEnabled: Rainbow.enabled
+            isEnabled: colorEnabled
         )
 
         var atLineStart = true

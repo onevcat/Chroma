@@ -8,7 +8,7 @@ struct RendererTests {
     func appliesLineHighlight() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .none, highlightLines: [2...2])
+        let options = HighlightOptions(theme: theme, colorMode: .always, diff: .none, highlightLines: [2...2])
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\nlet b"
@@ -36,7 +36,7 @@ struct RendererTests {
     func highlightOverridesDiff() throws {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch(), highlightLines: [1...1])
+        let options = HighlightOptions(theme: theme, colorMode: .always, diff: .patch(), highlightLines: [1...1])
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "+let a = 1"
@@ -59,7 +59,7 @@ struct RendererTests {
     func diffForegroundUsesPlainStyle() throws {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch(style: .foreground()))
+        let options = HighlightOptions(theme: theme, colorMode: .always, diff: .patch(style: .foreground()))
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\n+let value = 1"
@@ -92,6 +92,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(style: .foreground(contextCode: .syntax))
         )
         let renderer = Renderer(theme: theme, options: options)
@@ -112,7 +113,11 @@ struct RendererTests {
     func diffBackgroundPlainStyle() throws {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch(style: .background(diffCode: .plain)))
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .patch(style: .background(diffCode: .plain))
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\n+let value = 1"
@@ -141,6 +146,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(style: .background(diffCode: .syntax, contextCode: .plain))
         )
         let renderer = Renderer(theme: theme, options: options)
@@ -169,7 +175,7 @@ struct RendererTests {
     func diffBackgroundDefaultSyntax() throws {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch())
+        let options = HighlightOptions(theme: theme, colorMode: .always, diff: .patch())
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\n+let b"
@@ -194,6 +200,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(presentation: .compact),
             lineNumbers: .init(start: 1)
         )
@@ -225,6 +232,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(presentation: .compact),
             lineNumbers: .init(start: 1)
         )
@@ -257,6 +265,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(presentation: .verbose),
             lineNumbers: .init(start: 1)
         )
@@ -282,7 +291,12 @@ struct RendererTests {
     func lineNumbersRender() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .none, lineNumbers: .init(start: 1))
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .none,
+            lineNumbers: .init(start: 1)
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\nlet b"
@@ -309,6 +323,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .none,
             lineNumbers: .init(start: 9),
             indent: 2
@@ -339,7 +354,12 @@ struct RendererTests {
     func lineNumbersFollowDiffHunks() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .none, lineNumbers: .init(start: 1))
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .none,
+            lineNumbers: .init(start: 1)
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = """
@@ -377,7 +397,12 @@ struct RendererTests {
     func lineNumbersUseWhiteOnDiffBackground() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch(), lineNumbers: .init(start: 1))
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .patch(),
+            lineNumbers: .init(start: 1)
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = """
@@ -416,6 +441,7 @@ struct RendererTests {
         let theme = TestThemes.stable
         let options = HighlightOptions(
             theme: theme,
+            colorMode: .always,
             diff: .patch(style: .foreground()),
             lineNumbers: .init(start: 1)
         )
@@ -453,7 +479,13 @@ struct RendererTests {
             diffRemovedForeground: .named(.red),
             lineNumberForeground: .named(.white)
         )
-        let options = HighlightOptions(theme: theme, diff: .none, highlightLines: .init(), indent: 2)
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .none,
+            highlightLines: .init(),
+            indent: 2
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\n\nlet b\n"
@@ -470,7 +502,13 @@ struct RendererTests {
     func indentAppliesLineHighlight() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .none, highlightLines: [2...2], indent: 2)
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .none,
+            highlightLines: [2...2],
+            indent: 2
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "let a\nlet b"
@@ -500,7 +538,13 @@ struct RendererTests {
     func indentAppliesDiffBackgrounds() {
         ensureRainbowEnabled()
         let theme = TestThemes.stable
-        let options = HighlightOptions(theme: theme, diff: .patch(), highlightLines: .init(), indent: 1)
+        let options = HighlightOptions(
+            theme: theme,
+            colorMode: .always,
+            diff: .patch(),
+            highlightLines: .init(),
+            indent: 1
+        )
         let renderer = Renderer(theme: theme, options: options)
 
         let code = "+let a\n-let b"
