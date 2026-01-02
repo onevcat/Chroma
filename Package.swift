@@ -17,6 +17,10 @@ let package = Package(
             name: "Chroma",
             targets: ["Chroma"]
         ),
+        .library(
+            name: "ChromaBase46Themes",
+            targets: ["ChromaBase46Themes"]
+        ),
         .executable(
             name: "ChromaDemo",
             targets: ["ChromaDemo"]
@@ -35,13 +39,23 @@ let package = Package(
                 .product(name: "Rainbow", package: "Rainbow"),
             ]
         ),
+        .target(
+            name: "ChromaBase46Themes",
+            dependencies: [
+                "Chroma",
+                .product(name: "Rainbow", package: "Rainbow"),
+            ]
+        ),
         .testTarget(
             name: "ChromaTests",
             dependencies: ["Chroma"]
         ),
         .executableTarget(
             name: "ChromaDemo",
-            dependencies: ["Chroma"]
+            dependencies: [
+                "Chroma",
+                "ChromaBase46Themes",
+            ]
         ),
         .executableTarget(
             name: "ChromaBenchmarks",

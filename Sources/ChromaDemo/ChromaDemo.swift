@@ -1,4 +1,5 @@
 import Chroma
+import ChromaBase46Themes
 import Foundation
 import Rainbow
 
@@ -119,6 +120,7 @@ enum DemoCatalog {
         for user in users {
             print(service.greet(user))
         }
+        // Demo: comment token
         """,
         highlightLines: [26...28, 38...38],
         patch: """
@@ -174,6 +176,7 @@ enum DemoCatalog {
             return @"Hi";
         }
         @end
+        // Demo: comment token
         """,
         highlightLines: [12...14, 26...26],
         patch: """
@@ -229,6 +232,7 @@ enum DemoCatalog {
             }
             return 0;
         }
+        // Demo: comment token
         """,
         highlightLines: [13...15, 27...27],
         patch: """
@@ -282,6 +286,7 @@ enum DemoCatalog {
             }
             return 0;
         }
+        // Demo: comment token
         """,
         highlightLines: [15...17, 25...25],
         patch: """
@@ -332,6 +337,7 @@ enum DemoCatalog {
         for (const label of labels) {
             console.log(label)
         }
+        // Demo: comment token
         """,
         highlightLines: [13...15, 23...23],
         patch: """
@@ -379,6 +385,7 @@ enum DemoCatalog {
                 </section>
             )
         }
+        // Demo: comment token
         """,
         highlightLines: [8...10, 15...15],
         patch: """
@@ -427,6 +434,7 @@ enum DemoCatalog {
         for (const label of labels) {
             console.log(label)
         }
+        // Demo: comment token
         """,
         highlightLines: [10...12, 20...20],
         patch: """
@@ -485,6 +493,7 @@ enum DemoCatalog {
                 </section>
             )
         }
+        // Demo: comment token
         """,
         highlightLines: [3...6, 23...23],
         patch: """
@@ -530,6 +539,7 @@ enum DemoCatalog {
 
         for user in users:
             print(greet(user))
+        # Demo: comment token
         """,
         highlightLines: [10...12, 19...19],
         patch: """
@@ -579,6 +589,7 @@ enum DemoCatalog {
         ]
 
         users.each { |user| puts greet(user) }
+        # Demo: comment token
         """,
         highlightLines: [15...17, 25...25],
         patch: """
@@ -636,6 +647,7 @@ enum DemoCatalog {
                 fmt.Println(user.Label())
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [15...17, 28...28],
         patch: """
@@ -688,6 +700,7 @@ enum DemoCatalog {
                 println!("{}", greet(&user));
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [14...16, 24...24],
         patch: """
@@ -734,6 +747,7 @@ enum DemoCatalog {
                 println(greet(user))
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [7...9, 17...17],
         patch: """
@@ -780,6 +794,7 @@ enum DemoCatalog {
                 }
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [6...8, 18...18],
         patch: """
@@ -828,6 +843,7 @@ enum DemoCatalog {
                 }
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [7...9, 19...19],
         patch: """
@@ -878,6 +894,7 @@ enum DemoCatalog {
         foreach ($users as $user) {
             echo greet($user) . PHP_EOL;
         }
+        // Demo: comment token
         """,
         highlightLines: [11...13, 21...21],
         patch: """
@@ -925,6 +942,7 @@ enum DemoCatalog {
                 print(greet(user));
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [9...11, 19...19],
         patch: """
@@ -968,6 +986,7 @@ enum DemoCatalog {
             print(greet(user))
             print(label(user))
         end
+        -- Demo: comment token
         """,
         highlightLines: [6...8, 15...15],
         patch: """
@@ -1009,6 +1028,7 @@ enum DemoCatalog {
         for user in "${users[@]}"; do
             greet "$user"
         done
+        # Demo: comment token
         """,
         highlightLines: [7...10, 15...15],
         patch: """
@@ -1051,6 +1071,7 @@ enum DemoCatalog {
         FROM users u
         WHERE u.role <> 'guest'
         ORDER BY u.id DESC;
+        -- Demo: comment token
         """,
         highlightLines: [1...3, 12...12],
         patch: """
@@ -1098,6 +1119,7 @@ enum DemoCatalog {
                 padding: 12px;
             }
         }
+        /* Demo: comment token */
         """,
         highlightLines: [6...10, 18...18],
         patch: """
@@ -1145,6 +1167,7 @@ enum DemoCatalog {
                 }
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [4...7, 14...15],
         patch: """
@@ -1188,6 +1211,7 @@ enum DemoCatalog {
 
                 &:hover
                     text-decoration: underline
+        // Demo: comment token
         """,
         highlightLines: [4...7, 13...14],
         patch: """
@@ -1230,6 +1254,7 @@ enum DemoCatalog {
                 color: @accent;
             }
         }
+        // Demo: comment token
         """,
         highlightLines: [4...7, 14...15],
         patch: """
@@ -1277,6 +1302,7 @@ enum DemoCatalog {
                 </main>
             </body>
         </html>
+        <!-- Demo: comment token -->
         """,
         highlightLines: [9...11, 15...15],
         patch: """
@@ -1313,6 +1339,7 @@ enum DemoCatalog {
                 <role>member</role>
             </user>
         </users>
+        <!-- Demo: comment token -->
         """,
         highlightLines: [3...5, 7...7],
         patch: """
@@ -1345,7 +1372,8 @@ enum DemoCatalog {
                 { "id": 1, "name": "Ada", "tags": ["swift", "cli"] },
                 { "id": 2, "name": "Linus", "tags": ["kernel"] }
             ],
-            "enabled": true
+            "enabled": true,
+            "__comment": "Demo comment"
         }
         """,
         highlightLines: [4...6, 8...8],
@@ -1382,6 +1410,7 @@ enum DemoCatalog {
             tags:
               - kernel
         enabled: true
+        # Demo: comment token
         """,
         highlightLines: [4...8, 13...13],
         patch: """
@@ -1420,6 +1449,7 @@ enum DemoCatalog {
         tags = ["kernel"]
 
         enabled = true
+        # Demo: comment token
         """,
         highlightLines: [4...7, 14...14],
         patch: """
@@ -1462,6 +1492,7 @@ enum DemoCatalog {
         ```
 
         > Tip: Markdown supports blockquotes.
+        <!-- Demo: comment token -->
         """,
         highlightLines: [5...8, 11...13],
         patch: """
@@ -1497,6 +1528,7 @@ enum DemoCatalog {
         USER appuser
 
         CMD [".build/release/ChromaDemo", "--lang", "swift"]
+        # Demo: comment token
         """,
         highlightLines: [6...8, 10...10],
         patch: """
@@ -1534,6 +1566,7 @@ enum DemoCatalog {
 
         run:
         \t$(SWIFT) run $(APP) --lang swift
+        # Demo: comment token
         """,
         highlightLines: [6...7, 12...13],
         patch: """
@@ -1561,9 +1594,15 @@ struct DemoArguments {
         case light
     }
 
-    var theme: ThemeChoice = .dark
+    enum ThemeSpecifier: Equatable {
+        case builtIn(ThemeChoice)
+        case base46(String)
+    }
+
+    var theme: ThemeSpecifier = .builtIn(.dark)
     var colorMode: ColorMode = .auto(output: .stdout)
     var listLanguages: Bool = false
+    var listThemes: Bool = false
     var lang: String?
     var showComponents: Bool = true
 
@@ -1578,22 +1617,29 @@ struct DemoArguments {
                 throw DemoError.invalidArguments("")
             case "--theme":
                 guard i + 1 < args.count else { throw DemoError.invalidArguments("Missing value for --theme.") }
-                let value = args[i + 1]
-                guard let t = ThemeChoice(rawValue: value) else {
-                    throw DemoError.invalidArguments("Invalid --theme value: \(value). Use 'dark' or 'light'.")
+                let value = args[i + 1].lowercased()
+                if let t = ThemeChoice(rawValue: value) {
+                    parsed.theme = .builtIn(t)
+                } else {
+                    parsed.theme = .base46(value)
                 }
-                parsed.theme = t
+                i += 1
+            case "--base46":
+                guard i + 1 < args.count else { throw DemoError.invalidArguments("Missing value for --base46.") }
+                parsed.theme = .base46(args[i + 1].lowercased())
                 i += 1
             case "--dark":
-                parsed.theme = .dark
+                parsed.theme = .builtIn(.dark)
             case "--light":
-                parsed.theme = .light
+                parsed.theme = .builtIn(.light)
             case "--force-color":
                 parsed.colorMode = .always
             case "--no-color":
                 parsed.colorMode = .never
             case "--list-languages":
                 parsed.listLanguages = true
+            case "--list-themes":
+                parsed.listThemes = true
             case "--lang":
                 guard i + 1 < args.count else { throw DemoError.invalidArguments("Missing value for --lang.") }
                 parsed.lang = args[i + 1].lowercased()
@@ -1617,10 +1663,12 @@ struct DemoArguments {
           swift run ChromaDemo [options]
 
         Options:
-          --theme <dark|light>   Select theme (default: dark)
+          --theme <name>         Select theme (dark/light or Base46 theme name)
+          --base46 <name>        Select Base46 theme
           --dark                 Same as --theme dark
           --light                Same as --theme light
           --list-languages       Print built-in languages and exit
+          --list-themes          Print Base46 themes and exit
           --lang <id>            Render demo for a single language (default: swift)
           --force-color          Force enable ANSI output (ignore TTY detection)
           --no-color             Disable ANSI output
@@ -1640,12 +1688,26 @@ struct ChromaDemo {
             let colorMode = options.colorMode
             Rainbow.enabled = colorMode.isEnabled()
 
-            let theme: Theme = (options.theme == .light) ? .light : .dark
+            let theme: Theme
+            switch options.theme {
+            case let .builtIn(choice):
+                theme = (choice == .light) ? .light : .dark
+            case let .base46(name):
+                guard let base46 = Base46Themes.theme(named: name) else {
+                    throw DemoError.invalidArguments("Unknown Base46 theme: \(name). Run with --list-themes to see available themes.")
+                }
+                theme = base46
+            }
             let registry = LanguageRegistry.builtIn()
             let highlighter = Highlighter(theme: theme, registry: registry)
 
             if options.listLanguages {
                 printLanguages(registry)
+                return
+            }
+
+            if options.listThemes {
+                printThemes(Base46Themes.all)
                 return
             }
 
@@ -1677,6 +1739,13 @@ struct ChromaDemo {
     private static func printLanguages(_ registry: LanguageRegistry) {
         for lang in registry.allLanguages() {
             print("\(lang.id.rawValue)\t\(lang.displayName)")
+        }
+    }
+
+    private static func printThemes(_ themes: [Theme]) {
+        let sorted = themes.sorted { $0.name < $1.name }
+        for theme in sorted {
+            print("\(theme.name)\t\(theme.appearance.rawValue)")
         }
     }
 

@@ -1,7 +1,15 @@
 import Rainbow
 
+public enum ThemeAppearance: String, Equatable {
+    case dark
+    case light
+    case unspecified
+}
+
 public struct Theme: Equatable {
     public var name: String
+    /// Declares whether the theme targets a dark or light background.
+    public var appearance: ThemeAppearance
     public var tokenStyles: [TokenKind: TextStyle]
 
     /// Background used by `HighlightOptions.highlightLines`.
@@ -24,6 +32,7 @@ public struct Theme: Equatable {
 
     public init(
         name: String,
+        appearance: ThemeAppearance = .unspecified,
         tokenStyles: [TokenKind: TextStyle],
         lineHighlightBackground: BackgroundColorType,
         diffAddedBackground: BackgroundColorType,
@@ -33,6 +42,7 @@ public struct Theme: Equatable {
         lineNumberForeground: ColorType
     ) {
         self.name = name
+        self.appearance = appearance
         self.tokenStyles = tokenStyles
         self.lineHighlightBackground = lineHighlightBackground
         self.diffAddedBackground = diffAddedBackground
@@ -70,6 +80,7 @@ extension Theme {
 public extension Theme {
     static let dark = Theme(
         name: "dark",
+        appearance: .dark,
         tokenStyles: [
             .plain: .init(),
             .keyword: .init(foreground: .named(.lightMagenta), styles: [.bold]),
@@ -92,6 +103,7 @@ public extension Theme {
 
     static let light = Theme(
         name: "light",
+        appearance: .light,
         tokenStyles: [
             .plain: .init(),
             .keyword: .init(foreground: .named(.magenta), styles: [.bold]),

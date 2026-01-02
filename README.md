@@ -121,6 +121,39 @@ let output2 = try Chroma.highlight(
 )
 ```
 
+Chroma also offers an optional `ChromaBase46Themes` module with Base46 theme presets:
+
+```swift
+import ChromaBase46Themes
+
+let theme = Base46Themes.rosepineDawn
+// Or resolve by name: Base46Themes.theme(named: "rosepine-dawn")
+let output3 = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(theme: theme)
+)
+```
+
+List all Base46 theme names:
+
+```swift
+import ChromaBase46Themes
+
+let allThemes = Base46Themes.all
+let names = allThemes.map(\.name).sorted()
+print(names.joined(separator: "\n"))
+```
+
+Filter Base46 themes by appearance:
+
+```swift
+import ChromaBase46Themes
+
+let darkThemes = Base46Themes.all.filter { $0.appearance == .dark }
+let lightThemes = Base46Themes.all.filter { $0.appearance == .light }
+```
+
 ### Line Highlighting
 
 Highlight specific lines with a background color:
