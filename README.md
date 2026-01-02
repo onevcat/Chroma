@@ -121,6 +121,19 @@ let output2 = try Chroma.highlight(
 )
 ```
 
+Chroma also offers an optional `ChromaBase46Themes` module with Base46 theme presets:
+
+```swift
+import ChromaBase46Themes
+
+let theme = Base46Themes.rosepineDawn
+let output3 = try Chroma.highlight(
+    code,
+    language: .swift,
+    options: .init(theme: theme)
+)
+```
+
 ### Line Highlighting
 
 Highlight specific lines with a background color:
