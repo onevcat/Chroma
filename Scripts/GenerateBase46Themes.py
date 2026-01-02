@@ -216,11 +216,14 @@ def load_theme(path: pathlib.Path) -> dict:
 
 def render_theme(theme: dict) -> str:
     base16_lines = []
-    for key in BASE16_KEYS:
-        base16_lines.append(f"            {key}: 0x{theme['base16'][key]:06x},")
+    for index, key in enumerate(BASE16_KEYS):
+        suffix = "," if index < len(BASE16_KEYS) - 1 else ""
+        base16_lines.append(f"            {key}: 0x{theme['base16'][key]:06x}{suffix}")
+    base30_keys = sorted(theme["base30"].keys())
     base30_lines = []
-    for key in sorted(theme["base30"].keys()):
-        base30_lines.append(f'            "{key}": 0x{theme["base30"][key]:06x},')
+    for index, key in enumerate(base30_keys):
+        suffix = "," if index < len(base30_keys) - 1 else ""
+        base30_lines.append(f'            "{key}": 0x{theme["base30"][key]:06x}{suffix}')
 
     return "\n".join(
         [
@@ -234,7 +237,7 @@ def render_theme(theme: dict) -> str:
             *base30_lines,
             "        ],",
             f"        diffAddedBackground: 0x{theme['diffAddedBackground']:06x},",
-            f"        diffRemovedBackground: 0x{theme['diffRemovedBackground']:06x},",
+            f"        diffRemovedBackground: 0x{theme['diffRemovedBackground']:06x}",
             "    ),",
         ]
     )

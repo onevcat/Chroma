@@ -22,7 +22,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xb8dceb,
             base0D: 0xa3b8ef,
             base0E: 0xf6bbe7,
-            base0F: 0xeac1c1,
+            base0F: 0xeac1c1
         ),
         base30: [
             "baby_pink": 0xeac1c1,
@@ -54,10 +54,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0xaedcb7,
             "vibrant_green": 0xbee0a8,
             "white": 0xced4df,
-            "yellow": 0xe6dfb8,
+            "yellow": 0xe6dfb8
         ],
         diffAddedBackground: 0x4d5950,
-        diffRemovedBackground: 0x625259,
+        diffRemovedBackground: 0x625259
     ),
     .init(
         name: "ashes",
@@ -78,7 +78,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x95aec7,
             base0D: 0xae95c7,
             base0E: 0xc795ae,
-            base0F: 0xc79595,
+            base0F: 0xc79595
         ),
         base30: [
             "baby_pink": 0xd09eb7,
@@ -110,10 +110,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x8fb4b5,
             "vibrant_green": 0x95c7ae,
             "white": 0xc7ccd1,
-            "yellow": 0xc7c795,
+            "yellow": 0xc7c795
         ],
         diffAddedBackground: 0x556150,
-        diffRemovedBackground: 0x6f585a,
+        diffRemovedBackground: 0x6f585a
     ),
     .init(
         name: "aylin",
@@ -134,7 +134,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x9fd4ff,
             base0D: 0x7fdbca,
             base0E: 0x9fd4ff,
-            base0F: 0xfd98b9,
+            base0F: 0xfd98b9
         ),
         base30: [
             "baby_pink": 0xf45c7f,
@@ -167,10 +167,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7fdbca,
             "vibrant_green": 0xaddb67,
             "white": 0xffffff,
-            "yellow": 0xbecf00,
+            "yellow": 0xbecf00
         ],
         diffAddedBackground: 0x627e3e,
-        diffRemovedBackground: 0x9c657b,
+        diffRemovedBackground: 0x9c657b
     ),
     .init(
         name: "ayu_dark",
@@ -191,7 +191,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xffb454,
             base0D: 0xf07174,
             base0E: 0xffb454,
-            base0F: 0xcba6f7,
+            base0F: 0xcba6f7
         ),
         base30: [
             "baby_pink": 0xff949b,
@@ -223,10 +223,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x74c5aa,
             "vibrant_green": 0xb9e75b,
             "white": 0xced4df,
-            "yellow": 0xe7c547,
+            "yellow": 0xe7c547
         ],
         diffAddedBackground: 0x4d622b,
-        diffRemovedBackground: 0x8c464d,
+        diffRemovedBackground: 0x8c464d
     ),
     .init(
         name: "ayu_light",
@@ -247,7 +247,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x4cbf99,
             base0D: 0x55b4d4,
             base0E: 0xfa8d3e,
-            base0F: 0xf2ae49,
+            base0F: 0xf2ae49
         ),
         base30: [
             "baby_pink": 0xff8282,
@@ -279,10 +279,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x74c5aa,
             "vibrant_green": 0x94e76b,
             "white": 0x26292f,
-            "yellow": 0xe6ba7e,
+            "yellow": 0xe6ba7e
         ],
         diffAddedBackground: 0xb0db9a,
-        diffRemovedBackground: 0xf4c3c3,
+        diffRemovedBackground: 0xf4c3c3
     ),
     .init(
         name: "bearded-arc",
@@ -303,7 +303,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x77aed7,
             base0D: 0x69c3ff,
             base0E: 0x22ecdb,
-            base0F: 0xb78aff,
+            base0F: 0xb78aff
         ),
         base30: [
             "baby_pink": 0xf38cec,
@@ -335,10 +335,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x12c7c4,
             "vibrant_green": 0x9bdead,
             "white": 0xabb7c1,
-            "yellow": 0xeacd61,
+            "yellow": 0xeacd61
         ],
         diffAddedBackground: 0x276b50,
-        diffRemovedBackground: 0x8d4b5e,
+        diffRemovedBackground: 0x8d4b5e
     ),
     .init(
         name: "blossom_light",
@@ -359,7 +359,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x5e908e,
             base0D: 0xb3816a,
             base0E: 0x7e8e8e,
-            base0F: 0x976153,
+            base0F: 0x976153
         ),
         base30: [
             "baby_pink": 0xb7856e,
@@ -391,10 +391,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x4b6987,
             "vibrant_green": 0x899d79,
             "white": 0x695d57,
-            "yellow": 0xa9a29f,
+            "yellow": 0xa9a29f
         ],
         diffAddedBackground: 0xe3ddd9,
-        diffRemovedBackground: 0xe5ddd9,
+        diffRemovedBackground: 0xe5ddd9
     ),
     .init(
         name: "carbonfox",
@@ -415,7 +415,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x33b1ff,
             base0D: 0xff7eb6,
             base0E: 0xbe95ff,
-            base0F: 0x78a9ff,
+            base0F: 0x78a9ff
         ),
         base30: [
             "baby_pink": 0xff7eb6,
@@ -447,10 +447,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x33b1ff,
             "vibrant_green": 0x42be65,
             "white": 0xdfdfe0,
-            "yellow": 0xffe731,
+            "yellow": 0xffe731
         ],
         diffAddedBackground: 0x208950,
-        diffRemovedBackground: 0xc94980,
+        diffRemovedBackground: 0xc94980
     ),
     .init(
         name: "catppuccin",
@@ -471,7 +471,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x89dceb,
             base0D: 0x89b4fa,
             base0E: 0xcba6f7,
-            base0F: 0xf38ba8,
+            base0F: 0xf38ba8
         ),
         base30: [
             "baby_pink": 0xffa5c3,
@@ -504,10 +504,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0xb5e8e0,
             "vibrant_green": 0xb6f4be,
             "white": 0xd9e0ee,
-            "yellow": 0xfae3b0,
+            "yellow": 0xfae3b0
         ],
         diffAddedBackground: 0x4b5e58,
-        diffRemovedBackground: 0x7a4c62,
+        diffRemovedBackground: 0x7a4c62
     ),
     .init(
         name: "chadracula-evondev",
@@ -528,7 +528,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8be9fd,
             base0D: 0x20e3b2,
             base0E: 0xff6bcb,
-            base0F: 0x7e7eb5,
+            base0F: 0x7e7eb5
         ),
         base30: [
             "baby_pink": 0xff6e6e,
@@ -563,10 +563,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "vibrant_green": 0x20e3b2,
             "violet": 0x9a86fd,
             "white": 0xf8f8f2,
-            "yellow": 0xf1fa8c,
+            "yellow": 0xf1fa8c
         ],
         diffAddedBackground: 0x30804d,
-        diffRemovedBackground: 0xc64549,
+        diffRemovedBackground: 0xc64549
     ),
     .init(
         name: "chadracula",
@@ -587,7 +587,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8be9fd,
             base0D: 0x50fa7b,
             base0E: 0xff86d3,
-            base0F: 0xf8f8f2,
+            base0F: 0xf8f8f2
         ),
         base30: [
             "baby_pink": 0xff86d3,
@@ -619,10 +619,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x92a2d4,
             "vibrant_green": 0x5dff88,
             "white": 0xf8f8f2,
-            "yellow": 0xf1fa8c,
+            "yellow": 0xf1fa8c
         ],
         diffAddedBackground: 0x397f53,
-        diffRemovedBackground: 0xb1565b,
+        diffRemovedBackground: 0xb1565b
     ),
     .init(
         name: "chadtain",
@@ -643,7 +643,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8aabac,
             base0D: 0x7797b7,
             base0E: 0x948fb1,
-            base0F: 0xac8a8c,
+            base0F: 0xac8a8c
         ),
         base30: [
             "baby_pink": 0xde878f,
@@ -675,10 +675,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7c9cbc,
             "vibrant_green": 0x9ec49f,
             "white": 0xb0b0b0,
-            "yellow": 0xc4c19e,
+            "yellow": 0xc4c19e
         ],
         diffAddedBackground: 0x48594f,
-        diffRemovedBackground: 0x5e5256,
+        diffRemovedBackground: 0x5e5256
     ),
     .init(
         name: "chocolate",
@@ -699,7 +699,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x998396,
             base0D: 0x7d92a2,
             base0E: 0xc65f5f,
-            base0F: 0xab9382,
+            base0F: 0xab9382
         ),
         base30: [
             "baby_pink": 0xdc7575,
@@ -732,10 +732,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x749689,
             "vibrant_green": 0x95ae92,
             "white": 0xcdc0ad,
-            "yellow": 0xd9b27c,
+            "yellow": 0xd9b27c
         ],
         diffAddedBackground: 0x4d564a,
-        diffRemovedBackground: 0x7c4343,
+        diffRemovedBackground: 0x7c4343
     ),
     .init(
         name: "darcula-dark",
@@ -756,7 +756,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xd3b987,
             base0D: 0xad9e7d,
             base0E: 0xd3b987,
-            base0F: 0xcc7832,
+            base0F: 0xcc7832
         ),
         base30: [
             "baby_pink": 0xf70067,
@@ -790,10 +790,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6897bb,
             "vibrant_green": 0x98be65,
             "white": 0xeeeeee,
-            "yellow": 0xffc24b,
+            "yellow": 0xffc24b
         ],
         diffAddedBackground: 0x44503e,
-        diffRemovedBackground: 0x83303d,
+        diffRemovedBackground: 0x83303d
     ),
     .init(
         name: "dark_horizon",
@@ -814,7 +814,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xf09483,
             base0D: 0x32d5e3,
             base0E: 0x6be4e6,
-            base0F: 0xd75271,
+            base0F: 0xd75271
         ),
         base30: [
             "baby_pink": 0xa72e5b,
@@ -847,10 +847,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x749689,
             "vibrant_green": 0xb9e75b,
             "white": 0xffffff,
-            "yellow": 0xfdb830,
+            "yellow": 0xfdb830
         ],
         diffAddedBackground: 0x4e6128,
-        diffRemovedBackground: 0x8f4354,
+        diffRemovedBackground: 0x8f4354
     ),
     .init(
         name: "decay",
@@ -871,7 +871,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xe26c7c,
             base0D: 0x86aaec,
             base0E: 0xc68aee,
-            base0F: 0x9cd1ff,
+            base0F: 0x9cd1ff
         ),
         base30: [
             "baby_pink": 0xc79bf0,
@@ -903,10 +903,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7ddac5,
             "vibrant_green": 0x87eab8,
             "white": 0xdee1e6,
-            "yellow": 0xecd3a0,
+            "yellow": 0xecd3a0
         ],
         diffAddedBackground: 0x385b4e,
-        diffRemovedBackground: 0x7c444e,
+        diffRemovedBackground: 0x7c444e
     ),
     .init(
         name: "default-dark",
@@ -927,7 +927,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x86c1b9,
             base0D: 0x7cafc2,
             base0E: 0xba8baf,
-            base0F: 0xa16946,
+            base0F: 0xa16946
         ),
         base30: [
             "baby_pink": 0xd59593,
@@ -959,10 +959,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6cb598,
             "vibrant_green": 0xabcb56,
             "white": 0xf8f8f8,
-            "yellow": 0xf7ca88,
+            "yellow": 0xf7ca88
         ],
         diffAddedBackground: 0x606a44,
-        diffRemovedBackground: 0xaa4642,
+        diffRemovedBackground: 0xaa4642
     ),
     .init(
         name: "default-light",
@@ -983,7 +983,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7bbbb3,
             base0D: 0x71a8bd,
             base0E: 0xb481a8,
-            base0F: 0x966241,
+            base0F: 0x966241
         ),
         base30: [
             "baby_pink": 0xae77a1,
@@ -1015,10 +1015,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x70b5ad,
             "vibrant_green": 0x70b5ad,
             "white": 0x181818,
-            "yellow": 0xf1a02e,
+            "yellow": 0xf1a02e
         ],
         diffAddedBackground: 0x93a956,
-        diffRemovedBackground: 0xc78683,
+        diffRemovedBackground: 0xc78683
     ),
     .init(
         name: "doomchad",
@@ -1039,7 +1039,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x66c4ff,
             base0D: 0xdc8ef3,
             base0E: 0x48a6e6,
-            base0F: 0xc85a50,
+            base0F: 0xc85a50
         ),
         base30: [
             "baby_pink": 0xff7665,
@@ -1071,10 +1071,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x4db5bd,
             "vibrant_green": 0xa9cf76,
             "white": 0xbbc2cf,
-            "yellow": 0xecbe7b,
+            "yellow": 0xecbe7b
         ],
         diffAddedBackground: 0x414c3f,
-        diffRemovedBackground: 0x673e3f,
+        diffRemovedBackground: 0x673e3f
     ),
     .init(
         name: "eldritch",
@@ -1095,7 +1095,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x04d1f9,
             base0D: 0x7081d0,
             base0E: 0xa48cf2,
-            base0F: 0xf16c75,
+            base0F: 0xf16c75
         ),
         base30: [
             "baby_pink": 0xf265b5,
@@ -1127,10 +1127,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x33c57f,
             "vibrant_green": 0x00fa82,
             "white": 0xebfafa,
-            "yellow": 0xf1fc79,
+            "yellow": 0xf1fc79
         ],
         diffAddedBackground: 0x205849,
-        diffRemovedBackground: 0x773d4a,
+        diffRemovedBackground: 0x773d4a
     ),
     .init(
         name: "embark",
@@ -1151,7 +1151,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xaaffe4,
             base0D: 0x91ddff,
             base0E: 0xa1efd3,
-            base0F: 0xffb378,
+            base0F: 0xffb378
         ),
         base30: [
             "baby_pink": 0xff5458,
@@ -1183,10 +1183,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0xaaffe4,
             "vibrant_green": 0x62d196,
             "white": 0xcbe3e7,
-            "yellow": 0xffb378,
+            "yellow": 0xffb378
         ],
         diffAddedBackground: 0x527072,
-        diffRemovedBackground: 0x905a75,
+        diffRemovedBackground: 0x905a75
     ),
     .init(
         name: "everblush",
@@ -1207,7 +1207,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x6cbfbf,
             base0D: 0x67b0e8,
             base0E: 0xc47fd5,
-            base0F: 0xef7d7d,
+            base0F: 0xef7d7d
         ),
         base30: [
             "baby_pink": 0xf48383,
@@ -1240,10 +1240,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x9bdead,
             "vibrant_green": 0x86d988,
             "white": 0xdadada,
-            "yellow": 0xe5c76b,
+            "yellow": 0xe5c76b
         ],
         diffAddedBackground: 0x4d704c,
-        diffRemovedBackground: 0x995455,
+        diffRemovedBackground: 0x995455
     ),
     .init(
         name: "everforest",
@@ -1264,7 +1264,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xe69875,
             base0D: 0xa7c080,
             base0E: 0xe67e80,
-            base0F: 0xd699b6,
+            base0F: 0xd699b6
         ),
         base30: [
             "baby_pink": 0xce8196,
@@ -1296,10 +1296,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x69a59d,
             "vibrant_green": 0xa7c080,
             "white": 0xd3c6aa,
-            "yellow": 0xdbbc7f,
+            "yellow": 0xdbbc7f
         ],
         diffAddedBackground: 0x476056,
-        diffRemovedBackground: 0x775156,
+        diffRemovedBackground: 0x775156
     ),
     .init(
         name: "everforest_light",
@@ -1320,7 +1320,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xef615e,
             base0D: 0x87a060,
             base0E: 0xc85552,
-            base0F: 0xc85552,
+            base0F: 0xc85552
         ),
         base30: [
             "baby_pink": 0xce8196,
@@ -1352,10 +1352,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x69a59d,
             "vibrant_green": 0x87a060,
             "white": 0x272f35,
-            "yellow": 0xdfa000,
+            "yellow": 0xdfa000
         ],
         diffAddedBackground: 0x9cc364,
-        diffRemovedBackground: 0xe4a89e,
+        diffRemovedBackground: 0xe4a89e
     ),
     .init(
         name: "falcon",
@@ -1376,7 +1376,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xb4b4b9,
             base0D: 0xffc552,
             base0E: 0x8bccbf,
-            base0F: 0xdfdfe5,
+            base0F: 0xdfdfe5
         ),
         base30: [
             "baby_pink": 0xff8e78,
@@ -1410,10 +1410,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "vibrant_green": 0xb9e75b,
             "white": 0xf8f8ff,
             "white2": 0xdfdfe5,
-            "yellow": 0xffc552,
+            "yellow": 0xffc552
         ],
         diffAddedBackground: 0x5d797f,
-        diffRemovedBackground: 0xbc571c,
+        diffRemovedBackground: 0xbc571c
     ),
     .init(
         name: "flex-light",
@@ -1434,7 +1434,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x3aa99f,
             base0D: 0x4385be,
             base0E: 0xd0a215,
-            base0F: 0x008080,
+            base0F: 0x008080
         ),
         base30: [
             "baby_pink": 0xd574a6,
@@ -1466,10 +1466,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x008080,
             "vibrant_green": 0x66800b,
             "white": 0x2a2929,
-            "yellow": 0xd0a215,
+            "yellow": 0xd0a215
         ],
         diffAddedBackground: 0x879a39,
-        diffRemovedBackground: 0xd76357,
+        diffRemovedBackground: 0xd76357
     ),
     .init(
         name: "flexoki-light",
@@ -1490,7 +1490,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x24837b,
             base0D: 0x205ea6,
             base0E: 0xad8301,
-            base0F: 0x519aba,
+            base0F: 0x519aba
         ),
         base30: [
             "baby_pink": 0xce5d97,
@@ -1522,10 +1522,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0x879a39,
             "white": 0x2a2929,
-            "yellow": 0xad8301,
+            "yellow": 0xad8301
         ],
         diffAddedBackground: 0x799028,
-        diffRemovedBackground: 0xc76d64,
+        diffRemovedBackground: 0xc76d64
     ),
     .init(
         name: "flexoki",
@@ -1546,7 +1546,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x3aa99f,
             base0D: 0x4385be,
             base0E: 0xd0a215,
-            base0F: 0x519aba,
+            base0F: 0x519aba
         ),
         base30: [
             "baby_pink": 0xd36da1,
@@ -1578,10 +1578,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0x7e9f0e,
             "white": 0xcecdc3,
-            "yellow": 0xd0a215,
+            "yellow": 0xd0a215
         ],
         diffAddedBackground: 0x596429,
-        diffRemovedBackground: 0xa23e35,
+        diffRemovedBackground: 0xa23e35
     ),
     .init(
         name: "flouromachine",
@@ -1602,7 +1602,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xff8b39,
             base0D: 0xffcc00,
             base0E: 0xfc199a,
-            base0F: 0x40dbfc,
+            base0F: 0x40dbfc
         ),
         base30: [
             "baby_pink": 0xfc199a,
@@ -1634,10 +1634,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x61e2ff,
             "vibrant_green": 0x72f1b8,
             "white": 0xffffff,
-            "yellow": 0xffcc00,
+            "yellow": 0xffcc00
         ],
         diffAddedBackground: 0x406a62,
-        diffRemovedBackground: 0xae3846,
+        diffRemovedBackground: 0xae3846
     ),
     .init(
         name: "gatekeeper",
@@ -1658,7 +1658,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x29adff,
             base0D: 0xc54bcf,
             base0E: 0xff4394,
-            base0F: 0xffccaa,
+            base0F: 0xffccaa
         ),
         base30: [
             "baby_pink": 0xff86b7,
@@ -1690,10 +1690,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x0b925c,
             "vibrant_green": 0x10f766,
             "white": 0xcccdd1,
-            "yellow": 0xfff024,
+            "yellow": 0xfff024
         ],
         diffAddedBackground: 0x087732,
-        diffRemovedBackground: 0xc81853,
+        diffRemovedBackground: 0xc81853
     ),
     .init(
         name: "github_dark",
@@ -1714,7 +1714,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x83caff,
             base0D: 0x6ab1f0,
             base0E: 0xff7f8d,
-            base0F: 0x85e89d,
+            base0F: 0x85e89d
         ),
         base30: [
             "baby_pink": 0xffa198,
@@ -1746,10 +1746,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x39c5cf,
             "vibrant_green": 0x85e89d,
             "white": 0xd3dbe3,
-            "yellow": 0xffdf5d,
+            "yellow": 0xffdf5d
         ],
         diffAddedBackground: 0x386c43,
-        diffRemovedBackground: 0x89515a,
+        diffRemovedBackground: 0x89515a
     ),
     .init(
         name: "github_light",
@@ -1770,7 +1770,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8263eb,
             base0D: 0x005cc5,
             base0E: 0xde2c2e,
-            base0F: 0x044289,
+            base0F: 0x044289
         ),
         base30: [
             "baby_pink": 0xea4aaa,
@@ -1802,10 +1802,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x22839b,
             "vibrant_green": 0x28a745,
             "white": 0x24292e,
-            "yellow": 0xdbab09,
+            "yellow": 0xdbab09
         ],
         diffAddedBackground: 0x79a696,
-        diffRemovedBackground: 0xea7c7d,
+        diffRemovedBackground: 0xea7c7d
     ),
     .init(
         name: "gruvbox",
@@ -1826,7 +1826,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8ec07c,
             base0D: 0x83a598,
             base0E: 0xd3869b,
-            base0F: 0xd65d0e,
+            base0F: 0xd65d0e
         ),
         base30: [
             "baby_pink": 0xcc241d,
@@ -1858,10 +1858,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x749689,
             "vibrant_green": 0xa9b665,
             "white": 0xebdbb2,
-            "yellow": 0xd79921,
+            "yellow": 0xd79921
         ],
         diffAddedBackground: 0x5c5d27,
-        diffRemovedBackground: 0x9c3a2f,
+        diffRemovedBackground: 0x9c3a2f
     ),
     .init(
         name: "gruvbox_light",
@@ -1882,7 +1882,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x427b58,
             base0D: 0x076678,
             base0E: 0x8f3f71,
-            base0F: 0xd65d0e,
+            base0F: 0xd65d0e
         ),
         base30: [
             "baby_pink": 0xaf3a03,
@@ -1914,10 +1914,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x749689,
             "vibrant_green": 0x7f7a14,
             "white": 0x504945,
-            "yellow": 0xd79921,
+            "yellow": 0xd79921
         ],
         diffAddedBackground: 0xbab16b,
-        diffRemovedBackground: 0xe4a164,
+        diffRemovedBackground: 0xe4a164
     ),
     .init(
         name: "gruvchad",
@@ -1938,7 +1938,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x86b17f,
             base0D: 0x7daea3,
             base0E: 0xd3869b,
-            base0F: 0xd65d0e,
+            base0F: 0xd65d0e
         ),
         base30: [
             "baby_pink": 0xce8196,
@@ -1970,10 +1970,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x749689,
             "vibrant_green": 0xa9b665,
             "white": 0xc7b89d,
-            "yellow": 0xd6b676,
+            "yellow": 0xd6b676
         ],
         diffAddedBackground: 0x415142,
-        diffRemovedBackground: 0x713f3d,
+        diffRemovedBackground: 0x713f3d
     ),
     .init(
         name: "hiberbee",
@@ -1994,7 +1994,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x409cff,
             base0D: 0x7fdbca,
             base0E: 0xee7762,
-            base0F: 0x0e9c9e,
+            base0F: 0x0e9c9e
         ),
         base30: [
             "baby_pink": 0xff2a7b,
@@ -2029,10 +2029,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "turquoise": 0x0e9c9e,
             "vibrant_green": 0x98dd2e,
             "white": 0xfffefd,
-            "yellow": 0xffb900,
+            "yellow": 0xffb900
         ],
         diffAddedBackground: 0x415a17,
-        diffRemovedBackground: 0x7d4238,
+        diffRemovedBackground: 0x7d4238
     ),
     .init(
         name: "horizon",
@@ -2053,7 +2053,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xb877db,
             base0D: 0x59c2ff,
             base0E: 0xb877db,
-            base0F: 0xf09383,
+            base0F: 0xf09383
         ),
         base30: [
             "baby_pink": 0xff007c,
@@ -2085,10 +2085,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x21bfc2,
             "vibrant_green": 0x21bfc2,
             "white": 0xd5d8da,
-            "yellow": 0xfac29a,
+            "yellow": 0xfac29a
         ],
         diffAddedBackground: 0x227359,
-        diffRemovedBackground: 0xa8445e,
+        diffRemovedBackground: 0xa8445e
     ),
     .init(
         name: "jabuti",
@@ -2109,7 +2109,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xff7eb6,
             base0D: 0x3fc6de,
             base0E: 0xbe95ff,
-            base0F: 0x8b8da9,
+            base0F: 0x8b8da9
         ),
         base30: [
             "baby_pink": 0xff8cbe,
@@ -2142,10 +2142,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x09deda,
             "vibrant_green": 0x08bdba,
             "white": 0xd9e0ee,
-            "yellow": 0xe1c697,
+            "yellow": 0xe1c697
         ],
         diffAddedBackground: 0x31665c,
-        diffRemovedBackground: 0x894a5f,
+        diffRemovedBackground: 0x894a5f
     ),
     .init(
         name: "jellybeans",
@@ -2166,7 +2166,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x99ad6a,
             base0D: 0x8fa5cd,
             base0E: 0xe18be1,
-            base0F: 0xcf6a4c,
+            base0F: 0xcf6a4c
         ),
         base30: [
             "baby_pink": 0xda7557,
@@ -2198,10 +2198,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x668799,
             "vibrant_green": 0xc2cea6,
             "white": 0xe8e8d3,
-            "yellow": 0xfad07a,
+            "yellow": 0xfad07a
         ],
         diffAddedBackground: 0x5f6a45,
-        diffRemovedBackground: 0x9b523d,
+        diffRemovedBackground: 0x9b523d
     ),
     .init(
         name: "kanagawa-dragon",
@@ -2222,7 +2222,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8ea4a2,
             base0D: 0x8ba4b0,
             base0E: 0xa292a3,
-            base0F: 0x9e9b93,
+            base0F: 0x9e9b93
         ),
         base30: [
             "baby_pink": 0xa292a3,
@@ -2255,10 +2255,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x949fb5,
             "vibrant_green": 0x8a9a7b,
             "white": 0xadada4,
-            "yellow": 0xc4b28a,
+            "yellow": 0xc4b28a
         ],
         diffAddedBackground: 0x454a3e,
-        diffRemovedBackground: 0x643f3d,
+        diffRemovedBackground: 0x643f3d
     ),
     .init(
         name: "kanagawa",
@@ -2279,7 +2279,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7fb4ca,
             base0D: 0x7e9cd8,
             base0E: 0x9c86bf,
-            base0F: 0xd8616b,
+            base0F: 0xd8616b
         ),
         base30: [
             "baby_pink": 0xd27e99,
@@ -2311,10 +2311,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7aa89f,
             "vibrant_green": 0xa3c677,
             "white": 0xdcd7ba,
-            "yellow": 0xff9e3b,
+            "yellow": 0xff9e3b
         ],
         diffAddedBackground: 0x4f5c43,
-        diffRemovedBackground: 0x86444d,
+        diffRemovedBackground: 0x86444d
     ),
     .init(
         name: "material-darker",
@@ -2335,7 +2335,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xc3e88d,
             base0D: 0x82aaff,
             base0E: 0xc792ea,
-            base0F: 0xf07178,
+            base0F: 0xf07178
         ),
         base30: [
             "baby_pink": 0xffadff,
@@ -2367,10 +2367,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0xabcf76,
             "vibrant_green": 0xc3e88d,
             "white": 0xeeffff,
-            "yellow": 0xffcb6b,
+            "yellow": 0xffcb6b
         ],
         diffAddedBackground: 0x697951,
-        diffRemovedBackground: 0xb1595e,
+        diffRemovedBackground: 0xb1595e
     ),
     .init(
         name: "material-deep-ocean",
@@ -2391,7 +2391,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x89ddff,
             base0D: 0x82aaff,
             base0E: 0xc792ea,
-            base0F: 0xf07178,
+            base0F: 0xf07178
         ),
         base30: [
             "baby_pink": 0xf6aaae,
@@ -2423,10 +2423,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x80cbc4,
             "vibrant_green": 0x81bf27,
             "white": 0xeeffff,
-            "yellow": 0xffcb6b,
+            "yellow": 0xffcb6b
         ],
         diffAddedBackground: 0x6f8357,
-        diffRemovedBackground: 0xc25e65,
+        diffRemovedBackground: 0xc25e65
     ),
     .init(
         name: "material-lighter",
@@ -2447,7 +2447,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x39adb5,
             base0D: 0x6182b8,
             base0E: 0x7c4dff,
-            base0F: 0xe53935,
+            base0F: 0xe53935
         ),
         base30: [
             "baby_pink": 0xff5370,
@@ -2479,10 +2479,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x39adb5,
             "vibrant_green": 0xa7c67a,
             "white": 0x435862,
-            "yellow": 0xf59717,
+            "yellow": 0xf59717
         ],
         diffAddedBackground: 0xaac87f,
-        diffRemovedBackground: 0xf2acaa,
+        diffRemovedBackground: 0xf2acaa
     ),
     .init(
         name: "melange",
@@ -2503,7 +2503,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xebc06d,
             base0D: 0xebc06d,
             base0E: 0xe49b5d,
-            base0F: 0x8e733f,
+            base0F: 0x8e733f
         ),
         base30: [
             "baby_pink": 0xce9bcb,
@@ -2536,10 +2536,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x697893,
             "vibrant_green": 0x99d59d,
             "white": 0xece1d7,
-            "yellow": 0xe3b865,
+            "yellow": 0xe3b865
         ],
         diffAddedBackground: 0x61706e,
-        diffRemovedBackground: 0xa25949,
+        diffRemovedBackground: 0xa25949
     ),
     .init(
         name: "midnight_breeze",
@@ -2560,7 +2560,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x39c5cf,
             base0D: 0x58a6ff,
             base0E: 0xbc8cff,
-            base0F: 0x85e89d,
+            base0F: 0x85e89d
         ),
         base30: [
             "baby_pink": 0xffa3a0,
@@ -2593,10 +2593,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x39c5cf,
             "vibrant_green": 0x57d27d,
             "white": 0xc9d1d9,
-            "yellow": 0xffdf5d,
+            "yellow": 0xffdf5d
         ],
         diffAddedBackground: 0x306d3c,
-        diffRemovedBackground: 0x99484b,
+        diffRemovedBackground: 0x99484b
     ),
     .init(
         name: "mito-laser",
@@ -2617,7 +2617,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x2aa198,
             base0D: 0x268bd2,
             base0E: 0x6c71c4,
-            base0F: 0xff047d,
+            base0F: 0xff047d
         ),
         base30: [
             "baby_pink": 0xff1d8a,
@@ -2649,10 +2649,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x74c5aa,
             "vibrant_green": 0xb2c62d,
             "white": 0xeee8d5,
-            "yellow": 0xb58900,
+            "yellow": 0xb58900
         ],
         diffAddedBackground: 0x6b7713,
-        diffRemovedBackground: 0xda0774,
+        diffRemovedBackground: 0xda0774
     ),
     .init(
         name: "monekai",
@@ -2673,7 +2673,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xa1efe4,
             base0D: 0x66d9ef,
             base0E: 0xf92672,
-            base0F: 0xcc6633,
+            base0F: 0xcc6633
         ),
         base30: [
             "baby_pink": 0xf98385,
@@ -2705,10 +2705,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x34bfd0,
             "vibrant_green": 0x99c366,
             "white": 0xf5f4f1,
-            "yellow": 0xe6c181,
+            "yellow": 0xe6c181
         ],
         diffAddedBackground: 0x68824a,
-        diffRemovedBackground: 0xbb5e64,
+        diffRemovedBackground: 0xbb5e64
     ),
     .init(
         name: "monochrome",
@@ -2729,7 +2729,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xdfdfda,
             base0D: 0xced4df,
             base0E: 0xdad4c3,
-            base0F: 0xced4df,
+            base0F: 0xced4df
         ),
         base30: [
             "baby_pink": 0xeca8a8,
@@ -2761,10 +2761,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6484a4,
             "vibrant_green": 0xeff6ab,
             "white": 0xd8dee9,
-            "yellow": 0xffe6b5,
+            "yellow": 0xffe6b5
         ],
         diffAddedBackground: 0x595c33,
-        diffRemovedBackground: 0x7e4c4c,
+        diffRemovedBackground: 0x7e4c4c
     ),
     .init(
         name: "mountain",
@@ -2785,7 +2785,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x91b2b3,
             base0D: 0xa5a0c2,
             base0E: 0xac8aac,
-            base0F: 0xb39193,
+            base0F: 0xb39193
         ),
         base30: [
             "baby_pink": 0xbb999b,
@@ -2817,10 +2817,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x8fb4b5,
             "vibrant_green": 0x99bb9a,
             "white": 0xf0f0f0,
-            "yellow": 0xaca98a,
+            "yellow": 0xaca98a
         ],
         diffAddedBackground: 0x576b58,
-        diffRemovedBackground: 0x776162,
+        diffRemovedBackground: 0x776162
     ),
     .init(
         name: "nano-light",
@@ -2841,7 +2841,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x673ab7,
             base0D: 0x263238,
             base0E: 0x37474f,
-            base0F: 0x8497a0,
+            base0F: 0x8497a0
         ),
         base30: [
             "baby_pink": 0xb55dc4,
@@ -2878,10 +2878,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "tintred": 0xbf616a,
             "vibrant_green": 0x75c279,
             "white": 0x37474f,
-            "yellow": 0xd0b22b,
+            "yellow": 0xd0b22b
         ],
         diffAddedBackground: 0x66bb6a,
-        diffRemovedBackground: 0xd5979c,
+        diffRemovedBackground: 0xd5979c
     ),
     .init(
         name: "neofusion",
@@ -2902,7 +2902,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xfd5e3a,
             base0D: 0x35b5ff,
             base0E: 0x66def9,
-            base0F: 0x008da3,
+            base0F: 0x008da3
         ),
         base30: [
             "baby_pink": 0xfc9487,
@@ -2934,10 +2934,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x66def9,
             "vibrant_green": 0x5f6e29,
             "white": 0x66def9,
-            "yellow": 0xfd5e3a,
+            "yellow": 0xfd5e3a
         ],
         diffAddedBackground: 0x047c62,
-        diffRemovedBackground: 0x975e5c,
+        diffRemovedBackground: 0x975e5c
     ),
     .init(
         name: "nightfox",
@@ -2958,7 +2958,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7ad4d6,
             base0D: 0x86abdc,
             base0E: 0x9d79d6,
-            base0F: 0xc0c8d5,
+            base0F: 0xc0c8d5
         ),
         base30: [
             "baby_pink": 0xe26886,
@@ -2990,10 +2990,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x5cc6c8,
             "vibrant_green": 0x6ad4d6,
             "white": 0xcdcecf,
-            "yellow": 0xdbc074,
+            "yellow": 0xdbc074
         ],
         diffAddedBackground: 0x48605f,
-        diffRemovedBackground: 0x91415a,
+        diffRemovedBackground: 0x91415a
     ),
     .init(
         name: "nightlamp",
@@ -3014,7 +3014,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7aacaa,
             base0D: 0xb58385,
             base0E: 0x8e9cb4,
-            base0F: 0x90a0a0,
+            base0F: 0x90a0a0
         ),
         base30: [
             "baby_pink": 0xd6b3bd,
@@ -3046,10 +3046,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7aacaa,
             "vibrant_green": 0x94ad91,
             "white": 0xe0d6bd,
-            "yellow": 0xccb89c,
+            "yellow": 0xccb89c
         ],
         diffAddedBackground: 0x434d47,
-        diffRemovedBackground: 0x5d454a,
+        diffRemovedBackground: 0x5d454a
     ),
     .init(
         name: "nightowl",
@@ -3070,7 +3070,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xaad2ff,
             base0D: 0x82aaff,
             base0E: 0xc792ea,
-            base0F: 0xf78c6c,
+            base0F: 0xf78c6c
         ),
         base30: [
             "baby_pink": 0xff6cca,
@@ -3102,10 +3102,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x96ceb4,
             "vibrant_green": 0x22da6e,
             "white": 0xd6deeb,
-            "yellow": 0xffcb8b,
+            "yellow": 0xffcb8b
         ],
         diffAddedBackground: 0x137255,
-        diffRemovedBackground: 0x8a584e,
+        diffRemovedBackground: 0x8a584e
     ),
     .init(
         name: "nord",
@@ -3126,7 +3126,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x81a1c1,
             base0D: 0x81a1c1,
             base0E: 0x81a1c1,
-            base0F: 0xb48ead,
+            base0F: 0xb48ead
         ),
         base30: [
             "baby_pink": 0xde878f,
@@ -3158,10 +3158,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6484a4,
             "vibrant_green": 0xafca98,
             "white": 0xabb2bf,
-            "yellow": 0xebcb8b,
+            "yellow": 0xebcb8b
         ],
         diffAddedBackground: 0x667564,
-        diffRemovedBackground: 0xa85a63,
+        diffRemovedBackground: 0xa85a63
     ),
     .init(
         name: "obsidian-ember",
@@ -3182,7 +3182,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xeeeeee,
             base0D: 0xeeeeee,
             base0E: 0xffffff,
-            base0F: 0xeeeeee,
+            base0F: 0xeeeeee
         ),
         base30: [
             "baby_pink": 0xde878f,
@@ -3214,10 +3214,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x729cff,
             "vibrant_green": 0x76c793,
             "white": 0xd3d3d3,
-            "yellow": 0xffcc00,
+            "yellow": 0xffcc00
         ],
         diffAddedBackground: 0x394666,
-        diffRemovedBackground: 0x6d3737,
+        diffRemovedBackground: 0x6d3737
     ),
     .init(
         name: "oceanic-light",
@@ -3238,7 +3238,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x5b9c90,
             base0D: 0x526f93,
             base0E: 0x896a98,
-            base0F: 0x9a806d,
+            base0F: 0x9a806d
         ),
         base30: [
             "baby_pink": 0xff8282,
@@ -3270,10 +3270,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x1abc9c,
             "vibrant_green": 0x9fab4e,
             "white": 0x26292f,
-            "yellow": 0xfdb830,
+            "yellow": 0xfdb830
         ],
         diffAddedBackground: 0x6ea69e,
-        diffRemovedBackground: 0xca8b94,
+        diffRemovedBackground: 0xca8b94
     ),
     .init(
         name: "oceanic-next",
@@ -3294,7 +3294,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x5aaeae,
             base0D: 0x6699cc,
             base0E: 0xc594c5,
-            base0F: 0xec5f67,
+            base0F: 0xec5f67
         ),
         base30: [
             "baby_pink": 0xff7d85,
@@ -3326,10 +3326,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x50a4a4,
             "vibrant_green": 0xb9e75b,
             "white": 0xd8dee9,
-            "yellow": 0xfac863,
+            "yellow": 0xfac863
         ],
         diffAddedBackground: 0x455f54,
-        diffRemovedBackground: 0x87464e,
+        diffRemovedBackground: 0x87464e
     ),
     .init(
         name: "one_light",
@@ -3350,7 +3350,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x0070a8,
             base0D: 0x4078f2,
             base0E: 0xa626a4,
-            base0F: 0x986801,
+            base0F: 0x986801
         ),
         base30: [
             "baby_pink": 0xf07178,
@@ -3382,10 +3382,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0x7eca9c,
             "white": 0x54555b,
-            "yellow": 0xc18401,
+            "yellow": 0xc18401
         ],
         diffAddedBackground: 0x60aa5f,
-        diffRemovedBackground: 0xe27d73,
+        diffRemovedBackground: 0xe27d73
     ),
     .init(
         name: "onedark",
@@ -3406,7 +3406,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x56b6c2,
             base0D: 0x61afef,
             base0E: 0xc678dd,
-            base0F: 0xbe5046,
+            base0F: 0xbe5046
         ),
         base30: [
             "baby_pink": 0xde8c92,
@@ -3438,10 +3438,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0x7eca9c,
             "white": 0xabb2bf,
-            "yellow": 0xe7c787,
+            "yellow": 0xe7c787
         ],
         diffAddedBackground: 0x415041,
-        diffRemovedBackground: 0x6b4048,
+        diffRemovedBackground: 0x6b4048
     ),
     .init(
         name: "onenord",
@@ -3462,7 +3462,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x97b7d7,
             base0D: 0x81a1c1,
             base0E: 0xb48ead,
-            base0F: 0xd57780,
+            base0F: 0xd57780
         ),
         base30: [
             "baby_pink": 0xde878f,
@@ -3494,10 +3494,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6484a4,
             "vibrant_green": 0xafca98,
             "white": 0xd8dee9,
-            "yellow": 0xebcb8b,
+            "yellow": 0xebcb8b
         ],
         diffAddedBackground: 0x505c55,
-        diffRemovedBackground: 0x754f5a,
+        diffRemovedBackground: 0x754f5a
     ),
     .init(
         name: "onenord_light",
@@ -3518,7 +3518,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x5b7b9b,
             base0D: 0x3f5f7f,
             base0E: 0x8d6786,
-            base0F: 0xa3454e,
+            base0F: 0xa3454e
         ),
         base30: [
             "baby_pink": 0xae5059,
@@ -3550,10 +3550,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x395979,
             "vibrant_green": 0x809b69,
             "white": 0x2a303c,
-            "yellow": 0xc18401,
+            "yellow": 0xc18401
         ],
         diffAddedBackground: 0x98ac8f,
-        diffRemovedBackground: 0xc19da7,
+        diffRemovedBackground: 0xc19da7
     ),
     .init(
         name: "oxocarbon",
@@ -3574,7 +3574,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xff7eb6,
             base0D: 0x42be65,
             base0E: 0xbe95ff,
-            base0F: 0x82cfff,
+            base0F: 0x82cfff
         ),
         base30: [
             "baby_pink": 0xff7eb6,
@@ -3607,10 +3607,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0xb5e8e0,
             "vibrant_green": 0x08bdba,
             "white": 0xf2f4f8,
-            "yellow": 0xfae3b0,
+            "yellow": 0xfae3b0
         ],
         diffAddedBackground: 0x34874b,
-        diffRemovedBackground: 0xc94980,
+        diffRemovedBackground: 0xc94980
     ),
     .init(
         name: "palenight",
@@ -3631,7 +3631,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x89ddff,
             base0D: 0x82aaff,
             base0E: 0xc792ea,
-            base0F: 0xff5370,
+            base0F: 0xff5370
         ),
         base30: [
             "baby_pink": 0x606475,
@@ -3663,10 +3663,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x89ffe6,
             "vibrant_green": 0x96e88d,
             "white": 0xffffff,
-            "yellow": 0xffcb6b,
+            "yellow": 0xffcb6b
         ],
         diffAddedBackground: 0x596757,
-        diffRemovedBackground: 0x91505c,
+        diffRemovedBackground: 0x91505c
     ),
     .init(
         name: "pastelDark",
@@ -3687,7 +3687,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xabb9e0,
             base0D: 0xa3b8ef,
             base0E: 0xc2a2e3,
-            base0F: 0xe88e9b,
+            base0F: 0xe88e9b
         ),
         base30: [
             "baby_pink": 0xfca2aa,
@@ -3719,10 +3719,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x92dbb6,
             "vibrant_green": 0x9ce5c0,
             "white": 0xb5bcc9,
-            "yellow": 0xfbdf90,
+            "yellow": 0xfbdf90
         ],
         diffAddedBackground: 0x4a6a60,
-        diffRemovedBackground: 0x89555d,
+        diffRemovedBackground: 0x89555d
     ),
     .init(
         name: "pastelbeans",
@@ -3743,7 +3743,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xc0e9ff,
             base0D: 0xbbdaff,
             base0E: 0xff9da4,
-            base0F: 0x888888,
+            base0F: 0x888888
         ),
         base30: [
             "baby_pink": 0xffd3f3,
@@ -3775,10 +3775,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x668799,
             "vibrant_green": 0xc2cea6,
             "white": 0xe8e8d3,
-            "yellow": 0xf5d595,
+            "yellow": 0xf5d595
         ],
         diffAddedBackground: 0x5a654b,
-        diffRemovedBackground: 0x825558,
+        diffRemovedBackground: 0x825558
     ),
     .init(
         name: "penumbra_dark",
@@ -3799,7 +3799,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xd68b47,
             base0D: 0x7a9bec,
             base0E: 0xbe85d1,
-            base0F: 0xa1a641,
+            base0F: 0xa1a641
         ),
         base30: [
             "baby_pink": 0xe18163,
@@ -3831,10 +3831,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x00a6c8,
             "vibrant_green": 0x50b584,
             "white": 0xfffdfb,
-            "yellow": 0xc1ad4b,
+            "yellow": 0xc1ad4b
         ],
         diffAddedBackground: 0x3c6855,
-        diffRemovedBackground: 0x81535f,
+        diffRemovedBackground: 0x81535f
     ),
     .init(
         name: "penumbra_light",
@@ -3855,7 +3855,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x22839b,
             base0D: 0x4380bc,
             base0E: 0xac78bd,
-            base0F: 0xca7081,
+            base0F: 0xca7081
         ),
         base30: [
             "baby_pink": 0xca736c,
@@ -3888,10 +3888,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x22839b,
             "vibrant_green": 0x46a473,
             "white": 0x3e4044,
-            "yellow": 0x92963a,
+            "yellow": 0x92963a
         ],
         diffAddedBackground: 0xbcdbc5,
-        diffRemovedBackground: 0xeecbc9,
+        diffRemovedBackground: 0xeecbc9
     ),
     .init(
         name: "poimandres",
@@ -3912,7 +3912,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x89ddff,
             base0D: 0xadd7ff,
             base0E: 0x91b4d5,
-            base0F: 0xffffff,
+            base0F: 0xffffff
         ),
         base30: [
             "baby_pink": 0xfae4fc,
@@ -3946,10 +3946,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x5de4c7,
             "vibrant_green": 0x71bbab,
             "white": 0xe4f0fb,
-            "yellow": 0xfffac2,
+            "yellow": 0xfffac2
         ],
         diffAddedBackground: 0x314e4f,
-        diffRemovedBackground: 0x653c58,
+        diffRemovedBackground: 0x653c58
     ),
     .init(
         name: "radium",
@@ -3970,7 +3970,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x37d99e,
             base0D: 0x5fb0fc,
             base0E: 0xc397d8,
-            base0F: 0xe87979,
+            base0F: 0xe87979
         ),
         base30: [
             "baby_pink": 0xff8e8e,
@@ -4002,10 +4002,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x63b3ad,
             "vibrant_green": 0x79dcaa,
             "white": 0xd4d4d5,
-            "yellow": 0xffe59e,
+            "yellow": 0xffe59e
         ],
         diffAddedBackground: 0x20654f,
-        diffRemovedBackground: 0x8b4546,
+        diffRemovedBackground: 0x8b4546
     ),
     .init(
         name: "rosepine-dawn",
@@ -4026,7 +4026,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x286983,
             base0D: 0x907aa9,
             base0E: 0xea9d34,
-            base0F: 0xa39ead,
+            base0F: 0xa39ead
         ),
         base30: [
             "baby_pink": 0xeb6f92,
@@ -4058,10 +4058,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x3e8fb0,
             "vibrant_green": 0x3e8fb0,
             "white": 0x575279,
-            "yellow": 0xea9d34,
+            "yellow": 0xea9d34
         ],
         diffAddedBackground: 0xb1c4c8,
-        diffRemovedBackground: 0xddb7bd,
+        diffRemovedBackground: 0xddb7bd
     ),
     .init(
         name: "rosepine",
@@ -4082,7 +4082,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x9ccfd8,
             base0D: 0xc4a7e7,
             base0E: 0xf6c177,
-            base0F: 0x524f67,
+            base0F: 0x524f67
         ),
         base30: [
             "baby_pink": 0xf5799c,
@@ -4114,10 +4114,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x6aadc8,
             "vibrant_green": 0xb5f3bd,
             "white": 0xe0def4,
-            "yellow": 0xf6c177,
+            "yellow": 0xf6c177
         ],
         diffAddedBackground: 0x587162,
-        diffRemovedBackground: 0xa4516d,
+        diffRemovedBackground: 0xa4516d
     ),
     .init(
         name: "rxyhn",
@@ -4138,7 +4138,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x6791c9,
             base0D: 0x79aaeb,
             base0E: 0xc488ec,
-            base0F: 0xf16269,
+            base0F: 0xf16269
         ),
         base30: [
             "baby_pink": 0xee6a70,
@@ -4170,10 +4170,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7acfe4,
             "vibrant_green": 0x8cd7aa,
             "white": 0xd9d7d6,
-            "yellow": 0xecd28b,
+            "yellow": 0xecd28b
         ],
         diffAddedBackground: 0x466e5b,
-        diffRemovedBackground: 0xa6484d,
+        diffRemovedBackground: 0xa6484d
     ),
     .init(
         name: "scaryforest",
@@ -4194,7 +4194,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7ebdae,
             base0D: 0x77beb4,
             base0E: 0x8c9f87,
-            base0F: 0x7a8d76,
+            base0F: 0x7a8d76
         ),
         base30: [
             "baby_pink": 0xab7d7d,
@@ -4227,10 +4227,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x88bdaa,
             "vibrant_green": 0x78b573,
             "white": 0xdde5e0,
-            "yellow": 0xc0b283,
+            "yellow": 0xc0b283
         ],
         diffAddedBackground: 0x587457,
-        diffRemovedBackground: 0x2b7a61,
+        diffRemovedBackground: 0x2b7a61
     ),
     .init(
         name: "seoul256_dark",
@@ -4251,7 +4251,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x97bcbc,
             base0D: 0x96bbdc,
             base0E: 0xdfbdbc,
-            base0F: 0xb0b0b0,
+            base0F: 0xb0b0b0
         ),
         base30: [
             "baby_pink": 0xffbeb0,
@@ -4284,10 +4284,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7fb7bd,
             "vibrant_green": 0x97bb98,
             "white": 0xdfe0e0,
-            "yellow": 0xe0bb71,
+            "yellow": 0xe0bb71
         ],
         diffAddedBackground: 0x5b6a5b,
-        diffRemovedBackground: 0x766161,
+        diffRemovedBackground: 0x766161
     ),
     .init(
         name: "seoul256_light",
@@ -4308,7 +4308,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x67a9aa,
             base0D: 0x5f87ae,
             base0E: 0x875f87,
-            base0F: 0xd8865f,
+            base0F: 0xd8865f
         ),
         base30: [
             "baby_pink": 0xd0a39f,
@@ -4341,10 +4341,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x5f8787,
             "vibrant_green": 0x93b2b2,
             "white": 0x4e4e4e,
-            "yellow": 0xaf8760,
+            "yellow": 0xaf8760
         ],
         diffAddedBackground: 0xa6b9a6,
-        diffRemovedBackground: 0xceacac,
+        diffRemovedBackground: 0xceacac
     ),
     .init(
         name: "solarized_dark",
@@ -4365,7 +4365,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x2aa198,
             base0D: 0x268bd2,
             base0E: 0x6c71c4,
-            base0F: 0xd33682,
+            base0F: 0xd33682
         ),
         base30: [
             "baby_pink": 0xeb413e,
@@ -4397,10 +4397,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0xb2c62d,
             "white": 0xabb2bf,
-            "yellow": 0xb58900,
+            "yellow": 0xb58900
         ],
         diffAddedBackground: 0x204529,
-        diffRemovedBackground: 0x622e33,
+        diffRemovedBackground: 0x622e33
     ),
     .init(
         name: "solarized_light",
@@ -4421,7 +4421,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x2aa198,
             base0D: 0x268bd2,
             base0E: 0x6c71c4,
-            base0F: 0xd33682,
+            base0F: 0xd33682
         ),
         base30: [
             "baby_pink": 0xff6e64,
@@ -4453,10 +4453,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x2aa198,
             "vibrant_green": 0xb58900,
             "white": 0x002b36,
-            "yellow": 0xb58900,
+            "yellow": 0xb58900
         ],
         diffAddedBackground: 0xe2e1af,
-        diffRemovedBackground: 0xf8d8c7,
+        diffRemovedBackground: 0xf8d8c7
     ),
     .init(
         name: "solarized_osaka",
@@ -4477,7 +4477,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xc94c16,
             base0D: 0x268bd2,
             base0E: 0x849900,
-            base0F: 0xc94c16,
+            base0F: 0xc94c16
         ),
         base30: [
             "baby_pink": 0x575ea2,
@@ -4509,10 +4509,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0xbad600,
             "white": 0x9eabac,
-            "yellow": 0xb28500,
+            "yellow": 0xb28500
         ],
         diffAddedBackground: 0x394c0e,
-        diffRemovedBackground: 0x812425,
+        diffRemovedBackground: 0x812425
     ),
     .init(
         name: "starlight",
@@ -4533,7 +4533,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xff4d51,
             base0D: 0x24acd4,
             base0E: 0xf2affd,
-            base0F: 0x9b9b9b,
+            base0F: 0x9b9b9b
         ),
         base30: [
             "baby_pink": 0xff007c,
@@ -4565,10 +4565,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x21bfc2,
             "vibrant_green": 0x21bfc2,
             "white": 0xe6e6e6,
-            "yellow": 0xe3c401,
+            "yellow": 0xe3c401
         ],
         diffAddedBackground: 0x3a7e19,
-        diffRemovedBackground: 0xd22a51,
+        diffRemovedBackground: 0xd22a51
     ),
     .init(
         name: "sunrise_breeze",
@@ -4589,7 +4589,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x2c9ab7,
             base0D: 0x0969da,
             base0E: 0x8250df,
-            base0F: 0x85e89d,
+            base0F: 0x85e89d
         ),
         base30: [
             "baby_pink": 0xe87c7c,
@@ -4625,10 +4625,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "todo": 0xd4a72c,
             "vibrant_green": 0x2ea043,
             "white": 0x1b1f23,
-            "yellow": 0xbb8009,
+            "yellow": 0xbb8009
         ],
         diffAddedBackground: 0x85e89d,
-        diffRemovedBackground: 0xd74e4e,
+        diffRemovedBackground: 0xd74e4e
     ),
     .init(
         name: "sweetpastel",
@@ -4649,7 +4649,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xf8b3cc,
             base0D: 0xa3cbe7,
             base0E: 0xceace8,
-            base0F: 0xe5a3a1,
+            base0F: 0xe5a3a1
         ),
         base30: [
             "baby_pink": 0xffc0eb,
@@ -4681,10 +4681,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x94d2cf,
             "vibrant_green": 0x9edabe,
             "white": 0xffdede,
-            "yellow": 0xece3b1,
+            "yellow": 0xece3b1
         ],
         diffAddedBackground: 0x617862,
-        diffRemovedBackground: 0x8d696a,
+        diffRemovedBackground: 0x8d696a
     ),
     .init(
         name: "tokyodark",
@@ -4705,7 +4705,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xa485dd,
             base0D: 0x95c561,
             base0E: 0xa485dd,
-            base0F: 0xf3627a,
+            base0F: 0xf3627a
         ),
         base30: [
             "baby_pink": 0xfd7c94,
@@ -4737,10 +4737,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x519aba,
             "vibrant_green": 0x95c561,
             "white": 0xa0a8cd,
-            "yellow": 0xd7a65f,
+            "yellow": 0xd7a65f
         ],
         diffAddedBackground: 0x41503d,
-        diffRemovedBackground: 0x733b4b,
+        diffRemovedBackground: 0x733b4b
     ),
     .init(
         name: "tokyonight",
@@ -4761,7 +4761,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xb4f9f8,
             base0D: 0x2ac3de,
             base0E: 0xbb9af7,
-            base0F: 0xf7768e,
+            base0F: 0xf7768e
         ),
         base30: [
             "baby_pink": 0xde8c92,
@@ -4793,10 +4793,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x1abc9c,
             "vibrant_green": 0x73daca,
             "white": 0xc0caf5,
-            "yellow": 0xe0af68,
+            "yellow": 0xe0af68
         ],
         diffAddedBackground: 0x42513b,
-        diffRemovedBackground: 0x6f3e4e,
+        diffRemovedBackground: 0x6f3e4e
     ),
     .init(
         name: "tomorrow_night",
@@ -4817,7 +4817,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x8abeb7,
             base0D: 0x81a2be,
             base0E: 0xb294bb,
-            base0F: 0xa3685a,
+            base0F: 0xa3685a
         ),
         base30: [
             "baby_pink": 0xff6e79,
@@ -4849,10 +4849,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x8abdb6,
             "vibrant_green": 0xa3b991,
             "white": 0xc5c8c2,
-            "yellow": 0xd7bd8d,
+            "yellow": 0xd7bd8d
         ],
         diffAddedBackground: 0x555e52,
-        diffRemovedBackground: 0x874a4b,
+        diffRemovedBackground: 0x874a4b
     ),
     .init(
         name: "tundra",
@@ -4873,7 +4873,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xbae6fd,
             base0D: 0xbae6fd,
             base0E: 0xfca5a5,
-            base0F: 0x9ca3af,
+            base0F: 0x9ca3af
         ),
         base30: [
             "baby_pink": 0xfecdd3,
@@ -4905,10 +4905,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x719bd3,
             "vibrant_green": 0xb5e8b0,
             "white": 0xffffff,
-            "yellow": 0xe8d4b0,
+            "yellow": 0xe8d4b0
         ],
         diffAddedBackground: 0x627f6b,
-        diffRemovedBackground: 0x9c6b72,
+        diffRemovedBackground: 0x9c6b72
     ),
     .init(
         name: "vesper",
@@ -4929,7 +4929,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x838383,
             base0D: 0xffc799,
             base0E: 0xfbadff,
-            base0F: 0xff8080,
+            base0F: 0xff8080
         ),
         base30: [
             "baby_pink": 0xffc799,
@@ -4961,10 +4961,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x99ffe4,
             "vibrant_green": 0x99ffe4,
             "white": 0xffffff,
-            "yellow": 0xffc799,
+            "yellow": 0xffc799
         ],
         diffAddedBackground: 0x55887b,
-        diffRemovedBackground: 0xc16363,
+        diffRemovedBackground: 0xc16363
     ),
     .init(
         name: "vscode_dark",
@@ -4985,7 +4985,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x9cdcfe,
             base0D: 0xdcdcaa,
             base0E: 0xc586c0,
-            base0F: 0xe9e9e9,
+            base0F: 0xe9e9e9
         ),
         base30: [
             "baby_pink": 0xea696f,
@@ -5018,10 +5018,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x4294d6,
             "vibrant_green": 0xbfd8b2,
             "white": 0xdee1e6,
-            "yellow": 0xd7ba7d,
+            "yellow": 0xd7ba7d
         ],
         diffAddedBackground: 0x356e56,
-        diffRemovedBackground: 0x955050,
+        diffRemovedBackground: 0x955050
     ),
     .init(
         name: "vscode_light",
@@ -5042,7 +5042,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x007acc,
             base0D: 0x0000ff,
             base0E: 0x0064c1,
-            base0F: 0x6f6f6f,
+            base0F: 0x6f6f6f
         ),
         base30: [
             "baby_pink": 0xa31515,
@@ -5074,10 +5074,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x16825d,
             "vibrant_green": 0x098658,
             "white": 0x343434,
-            "yellow": 0x795e26,
+            "yellow": 0x795e26
         ],
         diffAddedBackground: 0x49a549,
-        diffRemovedBackground: 0xff5757,
+        diffRemovedBackground: 0xff5757
     ),
     .init(
         name: "wombat",
@@ -5098,7 +5098,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x7eb6bc,
             base0D: 0x88b8f6,
             base0E: 0xff8f7e,
-            base0F: 0xdc8c64,
+            base0F: 0xdc8c64
         ),
         base30: [
             "baby_pink": 0xf58eff,
@@ -5130,10 +5130,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x7eb6bc,
             "vibrant_green": 0x95e454,
             "white": 0xe4e0d7,
-            "yellow": 0xefdeab,
+            "yellow": 0xefdeab
         ],
         diffAddedBackground: 0x55693f,
-        diffRemovedBackground: 0x89554c,
+        diffRemovedBackground: 0x89554c
     ),
     .init(
         name: "yoru",
@@ -5154,7 +5154,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0x6791c9,
             base0D: 0x709ad2,
             base0E: 0xc58cec,
-            base0F: 0xe8646a,
+            base0F: 0xe8646a
         ),
         base30: [
             "baby_pink": 0xee6a70,
@@ -5187,10 +5187,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x70b8ca,
             "vibrant_green": 0x81c19b,
             "white": 0xedeff0,
-            "yellow": 0xecd28b,
+            "yellow": 0xecd28b
         ],
         diffAddedBackground: 0x537e66,
-        diffRemovedBackground: 0xc15056,
+        diffRemovedBackground: 0xc15056
     ),
     .init(
         name: "zenburn",
@@ -5211,7 +5211,7 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             base0C: 0xe0cf9f,
             base0D: 0x7cb8bb,
             base0E: 0xdc8cc3,
-            base0F: 0xdca3a3,
+            base0F: 0xdca3a3
         ),
         base30: [
             "baby_pink": 0xdc8cc3,
@@ -5243,10 +5243,10 @@ let base46ThemeData: [Base46ThemeDefinition] = [
             "teal": 0x93e0e3,
             "vibrant_green": 0x5f7f5f,
             "white": 0xffffff,
-            "yellow": 0xe0cf9f,
+            "yellow": 0xe0cf9f
         ],
         diffAddedBackground: 0x566e56,
-        diffRemovedBackground: 0x796363,
+        diffRemovedBackground: 0x796363
     ),
 ]
 
