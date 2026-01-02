@@ -77,6 +77,8 @@ def adjust_background_for_contrast(
     # Adjust diff background toward the theme background until the
     # foreground contrast meets the target. This keeps the hue family
     # of base30 colors while avoiding low-contrast text (common in light themes).
+    # foreground: base16 base05 (default text color)
+    # base_background: base16 base00 (editor background)
     bg_rgb = hex_to_rgb(background)
     fg_rgb = hex_to_rgb(foreground)
     base_rgb = hex_to_rgb(base_background)
@@ -85,6 +87,7 @@ def adjust_background_for_contrast(
         return background
 
     if contrast_ratio(base_rgb, fg_rgb) < target:
+        # If even the background itself fails contrast, bail out to base00.
         return base_background
 
     # Binary search on the blend factor to reach the contrast target
@@ -101,7 +104,12 @@ def adjust_background_for_contrast(
     return rgb_to_hex(blend(bg_rgb, base_rgb, high))
 
 
-def parse_table(source: str, table_name: str) -> dict[str, int]:
+def parse_table(
+    source: str,
+    table_name: str,
+    references: dict[str, int] | None = None,
+    reference_prefix: str | None = None,
+) -> dict[str, int]:
     entries: dict[str, int] = {}
     lines = source.splitlines()
     start_index = None
@@ -119,6 +127,16 @@ def parse_table(source: str, table_name: str) -> dict[str, int]:
         if match:
             key, hex_value = match.groups()
             entries[key] = int(hex_value, 16)
+            continue
+        if references and reference_prefix:
+            ref_match = re.search(
+                rf"([A-Za-z0-9_]+)\s*=\s*{re.escape(reference_prefix)}([A-Za-z0-9_]+)",
+                line,
+            )
+            if ref_match:
+                key, ref_key = ref_match.groups()
+                if ref_key in references:
+                    entries[key] = references[ref_key]
     return entries
 
 
@@ -157,8 +175,13 @@ def infer_appearance(base16: dict[str, int]) -> str:
 
 def load_theme(path: pathlib.Path) -> dict:
     source = path.read_text()
-    base16 = parse_table(source, "M.base_16")
     base30 = parse_table(source, "M.base_30")
+    base16 = parse_table(
+        source,
+        "M.base_16",
+        references=base30,
+        reference_prefix="M.base_30.",
+    )
     appearance = parse_appearance(source) or infer_appearance(base16)
     missing = [key for key in BASE16_KEYS if key not in base16]
     if missing:
