@@ -18,6 +18,12 @@ ANSI styling is powered by [`Rainbow`](https://github.com/onevcat/Rainbow).
 
 - **Customizable** — Register custom languages via `LanguageRegistry` and define custom themes with full control over token styles and colors.
 
+
+
+https://github.com/user-attachments/assets/5c96666f-1916-41d0-b7ad-f445b7b389bb
+
+
+
 ## Usage
 
 ### Quick Start
