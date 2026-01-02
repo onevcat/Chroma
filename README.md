@@ -121,7 +121,8 @@ let output2 = try Chroma.highlight(
 )
 ```
 
-Chroma also offers an optional `ChromaBase46Themes` module with Base46 theme presets:
+Chroma also offers an optional `ChromaBase46Themes` module with Base46 theme presets
+([all themes](Sources/ChromaBase46Themes/Base46ThemeAccessors.swift)):
 
 ```swift
 import ChromaBase46Themes
