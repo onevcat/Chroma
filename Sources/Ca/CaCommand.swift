@@ -3,9 +3,12 @@ import Foundation
 
 @main
 struct CaCommand: AsyncParsableCommand {
+    static let version = "0.1.0"
+
     static let configuration = CommandConfiguration(
         commandName: "ca",
-        abstract: "A Chroma-powered cat replacement with syntax highlighting."
+        abstract: "A Chroma-powered cat replacement with syntax highlighting.",
+        version: version
     )
 
     @Argument(help: "Files to display. Use '-' to read from stdin.")
