@@ -60,6 +60,28 @@ To list all supported languages:
 swift run ChromaDemo --list-languages
 ```
 
+### Running ca (Experimental)
+
+`ca` is an experimental Chroma-powered `cat` replacement:
+
+```bash
+swift run ca Sources/Chroma/Highlighter.swift
+```
+
+Config file path: `~/.config/ca/config.json`
+
+```json
+{
+    "theme": {
+        "name": "tokyonight",
+        "appearance": "auto"
+    },
+    "lineNumbers": true,
+    "paging": "auto",
+    "headers": true
+}
+```
+
 ### Installation
 
 Add Chroma as a dependency in your `Package.swift`:
