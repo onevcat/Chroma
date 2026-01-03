@@ -1,4 +1,4 @@
-![](https://github.com/user-attachments/assets/36afa20e-265c-4a00-bb54-d6a9e4954ba0)
+![](https://github.com/user-attachments/assets/db80219a-fbd7-4b45-af76-61402f50f753)
 
 # Chroma
 
