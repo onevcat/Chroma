@@ -18,7 +18,12 @@ enum Terminal {
 
     static func size() -> TerminalSize? {
         var ws = winsize()
-        if ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 {
+#if os(Linux)
+        let request = UInt(TIOCGWINSZ)
+#else
+        let request = TIOCGWINSZ
+#endif
+        if ioctl(STDOUT_FILENO, request, &ws) == 0 {
             let rows = Int(ws.ws_row)
             let columns = Int(ws.ws_col)
             if rows > 0 && columns > 0 {
