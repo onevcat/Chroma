@@ -83,5 +83,6 @@ let package = Package(
                 .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
             ]
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
