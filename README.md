@@ -64,6 +64,12 @@ swift run ChromaDemo --list-languages
 
 `ca` is an experimental Chroma-powered `cat` replacement:
 
+Install via Homebrew (tap):
+
+```bash
+brew install onevcat/tap/ca
+```
+
 ```bash
 swift run ca Sources/Chroma/Highlighter.swift
 ```

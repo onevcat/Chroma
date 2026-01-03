@@ -1,0 +1,78 @@
+name: Update Homebrew formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-tap:
+    runs-on: ubuntu-22.04
+    environment: homebrew-release
+    permissions:
+      contents: read
+    steps:
+      - name: Compute tarball metadata
+        id: tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ github.event.release.tag_name }}"
+          URL="https://github.com/onevcat/Chroma/archive/refs/tags/${TAG}.tar.gz"
+          SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tap
+        uses: actions/checkout@v4
+        with:
+          repository: onevcat/homebrew-tap
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
+
+      - name: Update formula
+        env:
+          TAP_URL: ${{ steps.tarball.outputs.url }}
+          TAP_SHA: ${{ steps.tarball.outputs.sha }}
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          path = pathlib.Path("tap/Formula/ca.rb")
+          text = path.read_text()
+          url = os.environ["TAP_URL"]
+          sha = os.environ["TAP_SHA"]
+          text = re.sub(r'^\s*url\s+".*"\s*$', f'  url "{url}"', text, flags=re.M)
+          text = re.sub(r'^\s*sha256\s+".*"\s*$', f'  sha256 "{sha}"', text, flags=re.M)
+          path.write_text(text)
+          PY
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          TAG: ${{ steps.tarball.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd tap
+          BRANCH="chroma-${TAG}"
+          if gh pr view --repo onevcat/homebrew-tap --head "onevcat:${BRANCH}" >/dev/null 2>&1; then
+            echo "PR already exists for ${BRANCH}."
+            exit 0
+          fi
+          git checkout -b "$BRANCH"
+          if git diff --quiet; then
+            echo "No formula changes detected."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -am "Update ca to ${TAG}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --repo onevcat/homebrew-tap \
+            --title "Update ca to ${TAG}" \
+            --body-file - <<EOF
+          Automated update from Chroma release ${TAG}.
+          EOF
