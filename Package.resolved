@@ -1,4 +1,5 @@
 {
+  "originHash" : "c1d80200f88119effde84b1c627db1b232c2e0fa24e3ddd88b11522b1197465a",
   "pins" : [
     {
       "identity" : "hdrhistogram-swift",
@@ -77,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-configuration",
       "state" : {
-        "revision" : "3528deb75256d7dcbb0d71fa75077caae0a8c749",
-        "version" : "1.0.0"
+        "revision" : "9d5e40727efd060fb9b41b69932738f478abaa43",
+        "version" : "0.2.0"
       }
     },
     {
@@ -127,5 +128,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

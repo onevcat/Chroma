@@ -33,7 +33,11 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/onevcat/Rainbow.git", from: "4.2.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.4.0"),
-        .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0"),
+        .package(
+            url: "https://github.com/apple/swift-configuration",
+            from: "0.2.0",
+            traits: ["JSONSupport"]
+        ),
         .package(url: "https://github.com/ordo-one/package-benchmark", from: "1.20.0"),
     ],
     targets: [

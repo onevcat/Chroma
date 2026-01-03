@@ -20,11 +20,11 @@ struct CaConfigLoader {
     private func loadWithConfiguration() async -> CaConfig {
         let rawPath = filePathOverride ?? defaultConfigPath()
         let filePath = expandTilde(rawPath)
+        if !FileManager.default.fileExists(atPath: filePath) {
+            return .default
+        }
         do {
-            let provider = try await FileProvider<JSONSnapshot>(
-                filePath: FilePath(filePath),
-                allowMissing: true
-            )
+            let provider = try await JSONProvider(filePath: FilePath(filePath))
             let reader = ConfigReader(provider: provider)
             return CaConfig(
                 theme: .init(
