@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -25,9 +25,19 @@ let package = Package(
             name: "ChromaDemo",
             targets: ["ChromaDemo"]
         ),
+        .executable(
+            name: "ca",
+            targets: ["Ca"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/onevcat/Rainbow.git", from: "4.2.1"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.4.0"),
+        .package(
+            url: "https://github.com/apple/swift-configuration",
+            from: "0.2.0",
+            traits: ["JSONSupport"]
+        ),
         .package(url: "https://github.com/ordo-one/package-benchmark", from: "1.20.0"),
     ],
     targets: [
@@ -58,6 +68,15 @@ let package = Package(
             ]
         ),
         .executableTarget(
+            name: "Ca",
+            dependencies: [
+                "Chroma",
+                "ChromaBase46Themes",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Configuration", package: "swift-configuration"),
+            ]
+        ),
+        .executableTarget(
             name: "ChromaBenchmarks",
             dependencies: [
                 "Chroma",
@@ -68,5 +87,6 @@ let package = Package(
                 .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
             ]
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
