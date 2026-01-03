@@ -8,16 +8,12 @@ struct CaConfigLoader {
     func load() async -> CaConfig {
 #if os(macOS)
         if #available(macOS 15, *) {
-            return await loadWithConfiguration()
+            // Continue to load below.
+        } else {
+            Diagnostics.printError("Config loading requires macOS 15 or newer. Using defaults.")
+            return .default
         }
-        return .default
-#else
-        return await loadWithConfiguration()
 #endif
-    }
-
-    @available(macOS 15, *)
-    private func loadWithConfiguration() async -> CaConfig {
         let rawPath = filePathOverride ?? defaultConfigPath()
         let filePath = expandTilde(rawPath)
         if !FileManager.default.fileExists(atPath: filePath) {

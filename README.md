@@ -68,6 +68,7 @@ swift run ChromaDemo --list-languages
 swift run ca Sources/Chroma/Highlighter.swift
 ```
 
+On macOS, `ca` requires macOS 15 or newer.
 Config file path: `~/.config/ca/config.json`
 
 ```json
