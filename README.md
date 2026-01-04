@@ -71,13 +71,13 @@ brew install onevcat/tap/ca
 ```
 
 ```bash
-swift run ca Sources/Chroma/Highlighter.swift
+ca Sources/Chroma/Highlighter.swift
 ```
 
 It supports multiple files:
 
 ```bash
-swift run ca Sources/Chroma/*.swift
+ca Sources/Chroma/*.swift
 ```
 
 On macOS, `ca` requires macOS 15 or newer.
