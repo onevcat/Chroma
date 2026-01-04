@@ -50,6 +50,15 @@ let package = Package(
             ]
         ),
         .target(
+            name: "CaCore",
+            dependencies: [
+                "Chroma",
+                "ChromaBase46Themes",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Configuration", package: "swift-configuration"),
+            ]
+        ),
+        .target(
             name: "ChromaBase46Themes",
             dependencies: [
                 "Chroma",
@@ -59,6 +68,10 @@ let package = Package(
         .testTarget(
             name: "ChromaTests",
             dependencies: ["Chroma"]
+        ),
+        .testTarget(
+            name: "CaTests",
+            dependencies: ["CaCore", "Chroma"]
         ),
         .executableTarget(
             name: "ChromaDemo",
@@ -70,10 +83,7 @@ let package = Package(
         .executableTarget(
             name: "Ca",
             dependencies: [
-                "Chroma",
-                "ChromaBase46Themes",
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "Configuration", package: "swift-configuration"),
+                "CaCore",
             ]
         ),
         .executableTarget(
