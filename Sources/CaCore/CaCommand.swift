@@ -1,11 +1,10 @@
 import ArgumentParser
 import Foundation
 
-@main
-struct CaCommand: AsyncParsableCommand {
-    static let version = "0.1.1"
+package struct CaCommand: AsyncParsableCommand {
+    package static let version = "0.1.1"
 
-    static let configuration = CommandConfiguration(
+    package static let configuration = CommandConfiguration(
         commandName: "ca",
         abstract: "A Chroma-powered cat replacement with syntax highlighting.",
         version: version
@@ -29,7 +28,9 @@ struct CaCommand: AsyncParsableCommand {
     @Option(help: "Config file path (default: ~/.config/ca/config.json).")
     var config: String?
 
-    mutating func run() async throws {
+    package init() {}
+
+    package mutating func run() async throws {
         let loader = CaConfigLoader(filePathOverride: config)
         var effectiveConfig = await loader.load()
 

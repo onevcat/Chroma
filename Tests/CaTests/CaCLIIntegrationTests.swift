@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-@testable import Ca
 
 @Suite("ca CLI integration")
 struct CaCLIIntegrationTests {

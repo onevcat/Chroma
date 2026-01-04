@@ -1,6 +1,6 @@
 import Chroma
 import Testing
-@testable import Ca
+@testable import CaCore
 
 @Suite("ThemeResolver")
 struct ThemeResolverTests {

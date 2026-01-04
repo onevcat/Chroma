@@ -1,7 +1,7 @@
 import Chroma
 import Foundation
 import Testing
-@testable import Ca
+@testable import CaCore
 
 @Suite("InputCollector")
 struct InputCollectorTests {

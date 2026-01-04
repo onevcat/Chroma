@@ -1,5 +1,5 @@
 import Testing
-@testable import Ca
+@testable import CaCore
 
 @Suite("CaError")
 struct CaErrorTests {
