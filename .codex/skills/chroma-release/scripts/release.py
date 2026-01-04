@@ -142,7 +142,7 @@ def main() -> int:
     if not changelog_path.exists():
         die("CHANGELOG.md not found.")
 
-    cli_path = Path("Sources/Ca/CaCommand.swift")
+    cli_path = Path("Sources/CaCore/CaCommand.swift")
     current_cli_version = read_cli_version(cli_path)
     if current_cli_version == version:
         die(f"CLI version already set to {version}.")
