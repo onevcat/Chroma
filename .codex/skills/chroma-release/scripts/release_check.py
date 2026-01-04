@@ -61,7 +61,7 @@ def main() -> int:
     if args.require_clean:
         require_clean()
 
-    cli_version = read_cli_version(Path("Sources/Ca/CaCommand.swift"))
+    cli_version = read_cli_version(Path("Sources/CaCore/CaCommand.swift"))
     if cli_version != version:
         die(f"CLI version mismatch: expected {version}, found {cli_version}.")
 
