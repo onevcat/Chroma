@@ -79,17 +79,20 @@ def update_changelog(path: Path, version: str, date: str, notes_lines: list[str]
     except ValueError:
         die("CHANGELOG.md missing exact '## [Unreleased]' heading.")
 
-    tail = lines[idx + 1 :]
-    while tail and not tail[0].strip():
-        tail.pop(0)
+    next_idx = len(lines)
+    for i in range(idx + 1, len(lines)):
+        if lines[i].startswith("## ["):
+            next_idx = i
+            break
 
-    new_lines = (
-        lines[: idx + 1]
-        + ["", f"## [{version}] - {date}"]
-        + notes_lines
-        + [""]
-        + tail
-    )
+    insert_lines = []
+    if lines[:next_idx] and lines[:next_idx][-1].strip():
+        insert_lines.append("")
+    insert_lines += [f"## [{version}] - {date}"]
+    insert_lines += notes_lines
+    insert_lines.append("")
+
+    new_lines = lines[:next_idx] + insert_lines + lines[next_idx:]
     path.write_text("\n".join(new_lines) + "\n")
 
 
@@ -125,6 +128,9 @@ def main() -> int:
 
     if not args.allow_dirty:
         ensure_clean()
+
+    if args.skip_tag and not args.skip_release:
+        die("--skip-tag requires --skip-release (gh may create the tag automatically).")
 
     if not args.skip_tag:
         ensure_tag_missing(version)

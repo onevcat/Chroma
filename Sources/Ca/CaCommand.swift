@@ -3,7 +3,7 @@ import Foundation
 
 @main
 struct CaCommand: AsyncParsableCommand {
-    static let version = "0.1.0"
+    static let version = "0.1.1"
 
     static let configuration = CommandConfiguration(
         commandName: "ca",
