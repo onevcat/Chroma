@@ -60,6 +60,10 @@ let package = Package(
             name: "ChromaTests",
             dependencies: ["Chroma"]
         ),
+        .testTarget(
+            name: "CaTests",
+            dependencies: ["Ca", "Chroma"]
+        ),
         .executableTarget(
             name: "ChromaDemo",
             dependencies: [
