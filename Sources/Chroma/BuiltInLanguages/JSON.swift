@@ -5,6 +5,7 @@ extension BuiltInLanguages {
         let keywords = ["true", "false", "null"]
 
         var rules: [TokenRule] = []
+        rules.append(try! TokenRule(kind: .property, pattern: "\"(?:\\\\.|[^\"\\\\])*\"(?=\\s*:)"))
         rules.append(try! TokenRule(kind: .string, pattern: "\"(?:\\\\.|[^\"\\\\])*\""))
         rules.append(try! TokenRule(kind: .number, pattern: "\\b-?\\d+(?:\\.\\d+)?\\b"))
         rules.append(wordRule(kind: .keyword, words: keywords))

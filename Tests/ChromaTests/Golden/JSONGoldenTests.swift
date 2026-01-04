@@ -10,7 +10,7 @@ struct JSONGoldenTests {
             language: .json,
             expected: [
                 ExpectedToken(.punctuation, "{"),
-                ExpectedToken(.string, "\"name\""),
+                ExpectedToken(.property, "\"name\""),
                 ExpectedToken(.punctuation, ":"),
                 ExpectedToken.plain(" "),
                 ExpectedToken(.string, "\"Ada\""),
@@ -26,7 +26,7 @@ struct JSONGoldenTests {
             language: .json,
             expected: [
                 ExpectedToken(.punctuation, "{"),
-                ExpectedToken(.string, "\"count\""),
+                ExpectedToken(.property, "\"count\""),
                 ExpectedToken(.punctuation, ":"),
                 ExpectedToken.plain(" "),
                 ExpectedToken(.number, "3"),
