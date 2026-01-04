@@ -67,14 +67,10 @@ struct CaCommand: AsyncParsableCommand {
         case .never:
             write(lines)
         case .always:
-            if let pager = Pager(lines: lines) {
-                pager.run()
-            } else {
-                write(lines)
-            }
+            page(lines: lines)
         case .auto:
-            if shouldPage(lines: lines), let pager = Pager(lines: lines) {
-                pager.run()
+            if shouldPage(lines: lines) {
+                page(lines: lines)
             } else {
                 write(lines)
             }
@@ -84,6 +80,21 @@ struct CaCommand: AsyncParsableCommand {
     private func shouldPage(lines: [String]) -> Bool {
         guard Terminal.isInteractive, let size = Terminal.size() else { return false }
         return lines.count > size.rows
+    }
+
+    private func page(lines: [String]) {
+        Diagnostics.printDebug("paging mode engaged; lines=\(lines.count), interactive=\(Terminal.isInteractive)")
+        if let pager = ExternalPager(lines: lines), pager.run() {
+            Diagnostics.printDebug("external pager finished")
+            return
+        }
+        Diagnostics.printDebug("falling back to internal pager")
+        if let pager = Pager(lines: lines) {
+            pager.run()
+        } else {
+            Diagnostics.printDebug("internal pager unavailable; writing to stdout")
+            write(lines)
+        }
     }
 
     private func write(_ lines: [String]) {
