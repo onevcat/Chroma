@@ -59,4 +59,58 @@ struct ConfigRulesIntegrationTests {
             }
         }
     }
+
+    @Test("CLI flags override per-extension rules")
+    func cliFlagsOverrideRules() throws {
+        let executable = try locateCaExecutable()
+        try withTemporaryDirectory { root in
+            let configURL = root.appendingPathComponent("config.json")
+            try writeFile(
+                at: configURL,
+                contents: """
+                {
+                  "lineNumbers": true,
+                  "paging": "never",
+                  "rules": [
+                    { "match": { "ext": ["md"] }, "set": { "lineNumbers": false } }
+                  ]
+                }
+                """
+            )
+
+            let mdURL = root.appendingPathComponent("README.md")
+            try writeFile(at: mdURL, contents: "# Title\n")
+
+            let swiftURL = root.appendingPathComponent("Sample.swift")
+            try writeFile(at: swiftURL, contents: "let value = 1\n")
+
+            // Force-enable line numbers for Markdown via CLI.
+            do {
+                let result = try runCaNonTTY(
+                    executable: executable,
+                    arguments: ["--config", configURL.path, "--line-numbers", mdURL.path],
+                    environment: makeCleanEnvironment()
+                )
+                #expect(result.exitCode == 0)
+
+                let firstLine = String(result.output.split(separator: "\n", omittingEmptySubsequences: false).first ?? "")
+                let trimmed = firstLine.trimmingCharacters(in: .whitespaces)
+                #expect(trimmed.hasPrefix("1 # Title"))
+            }
+
+            // Force-disable line numbers for Swift via CLI.
+            do {
+                let result = try runCaNonTTY(
+                    executable: executable,
+                    arguments: ["--config", configURL.path, "--no-line-numbers", swiftURL.path],
+                    environment: makeCleanEnvironment()
+                )
+                #expect(result.exitCode == 0)
+
+                let firstLine = result.output.split(separator: "\n", omittingEmptySubsequences: false).first
+                #expect(firstLine?.first?.isNumber != true)
+                #expect(firstLine?.contains("let value = 1") == true)
+            }
+        }
+    }
 }
