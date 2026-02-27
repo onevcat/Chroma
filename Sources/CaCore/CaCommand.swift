@@ -32,28 +32,46 @@ package struct CaCommand: AsyncParsableCommand {
 
     package mutating func run() async throws {
         let loader = CaConfigLoader(filePathOverride: config)
-        var effectiveConfig = await loader.load()
+        let baseConfig = await loader.load()
 
-        if let theme {
-            effectiveConfig.theme.name = theme
-        }
+        // Output-level overrides (global)
+        var outputConfig = baseConfig
         if let paging {
-            effectiveConfig.paging = paging
-        }
-        if let lineNumbers {
-            effectiveConfig.lineNumbers = lineNumbers
+            outputConfig.paging = paging
         }
         if let headers {
-            effectiveConfig.headers = headers
+            outputConfig.headers = headers
         }
+
+        // Render-level overrides (force to all inputs; highest precedence)
+        let forcedThemeName = theme
+        let forcedLineNumbers = lineNumbers
 
         do {
             let inputs = try InputCollector().collect(paths: paths)
-            let theme = ThemeResolver().resolve(using: effectiveConfig)
-            let highlighter = HighlighterService(theme: theme, lineNumbers: effectiveConfig.lineNumbers)
-            let documents = try inputs.map { try highlighter.render($0) }
-            let lines = OutputComposer().compose(documents: documents, showHeaders: effectiveConfig.headers)
-            output(lines: lines, paging: effectiveConfig.paging)
+
+            let resolver = ThemeResolver()
+            var documents: [HighlightedDocument] = []
+            documents.reserveCapacity(inputs.count)
+
+            for input in inputs {
+                var perFileConfig = outputConfig.effectiveConfig(for: input)
+
+                // CLI flags override everything (including per-file rules)
+                if let forcedThemeName {
+                    perFileConfig.theme.name = forcedThemeName
+                }
+                if let forcedLineNumbers {
+                    perFileConfig.lineNumbers = forcedLineNumbers
+                }
+
+                let theme = resolver.resolve(using: perFileConfig)
+                let highlighter = HighlighterService(theme: theme, lineNumbers: perFileConfig.lineNumbers)
+                documents.append(try highlighter.render(input))
+            }
+
+            let lines = OutputComposer().compose(documents: documents, showHeaders: outputConfig.headers)
+            output(lines: lines, paging: outputConfig.paging)
         } catch let error as CaError {
             Diagnostics.printError(error.description)
             throw ExitCode.failure

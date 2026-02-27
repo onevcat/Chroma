@@ -80,7 +80,6 @@ It supports multiple files:
 ca Sources/Chroma/*.swift
 ```
 
-On macOS, `ca` requires macOS 15 or newer.
 Config file path: `~/.config/ca/config.json`
 
 ```json
@@ -94,6 +93,19 @@ Config file path: `~/.config/ca/config.json`
     "headers": true
 }
 ```
+
+You can also add per-extension overrides via `rules`:
+
+```json
+{
+    "lineNumbers": true,
+    "rules": [
+        { "match": { "ext": ["md"] }, "set": { "lineNumbers": false } }
+    ]
+}
+```
+
+Precedence: CLI flags > rules (last match wins) > top-level config defaults.
 
 ### Installation
 
