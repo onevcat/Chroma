@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-27
+### Added
+- Support per-extension config overrides via `rules` in `~/.config/ca/config.json`.
+
+### Changed
+- Load `ca` config via `Codable`/`JSONDecoder` (supports structured config and removes the `swift-configuration` dependency).
+
+### Fixed
+- Fix release check CLI path.
+
 ## [0.2.0] - 2026-01-04
 ### Added
 - Highlight JSON keys as properties in the built-in JSON highlighter.
