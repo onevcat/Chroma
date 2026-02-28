@@ -113,4 +113,71 @@ struct ConfigRulesIntegrationTests {
             }
         }
     }
+
+
+    @Test("Per-extension diff override")
+    func perExtensionDiffOverride() throws {
+        let executable = try locateCaExecutable()
+        try withTemporaryDirectory { root in
+            let patch = """
+            diff --git a/Foo.swift b/Foo.swift
+            index 1111111..2222222 100644
+            --- a/Foo.swift
+            +++ b/Foo.swift
+            @@ -1,1 +1,1 @@
+            -let a = 1
+            +let a = 2
+            """
+
+            let patchURL = root.appendingPathComponent("change.patch")
+            try writeFile(at: patchURL, contents: patch + "\n")
+
+            // Case 1: diff disabled for .patch via rules.
+            do {
+                let configURL = root.appendingPathComponent("config_rules.json")
+                try writeFile(
+                    at: configURL,
+                    contents: """
+                    {
+                      "paging": "never",
+                      "diff": "auto",
+                      "rules": [
+                        { "match": { "ext": ["patch"] }, "set": { "diff": "none" } }
+                      ]
+                    }
+                    """
+                )
+
+                let result = try runCaNonTTY(
+                    executable: executable,
+                    arguments: ["--config", configURL.path, patchURL.path],
+                    environment: makeCleanEnvironment()
+                )
+                #expect(result.exitCode == 0)
+                #expect(result.output.contains("index 1111111..2222222 100644"))
+            }
+
+            // Case 2: diff enabled by default (auto) should hide meta lines like `index` in compact mode.
+            do {
+                let configURL = root.appendingPathComponent("config_default.json")
+                try writeFile(
+                    at: configURL,
+                    contents: """
+                    {
+                      "paging": "never",
+                      "diff": "auto"
+                    }
+                    """
+                )
+
+                let result = try runCaNonTTY(
+                    executable: executable,
+                    arguments: ["--config", configURL.path, patchURL.path],
+                    environment: makeCleanEnvironment()
+                )
+                #expect(result.exitCode == 0)
+                #expect(!result.output.contains("index 1111111..2222222 100644"))
+            }
+        }
+    }
 }

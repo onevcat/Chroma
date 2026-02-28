@@ -30,6 +30,7 @@ struct CaConfig: Equatable {
 
         struct Overrides: Equatable {
             var lineNumbers: Bool?
+            var diff: DiffMode?
             var themeName: String?
             var themeAppearance: ThemeAppearancePreference?
         }
@@ -42,6 +43,9 @@ struct CaConfig: Equatable {
             if let lineNumbers = overrides.lineNumbers {
                 config.lineNumbers = lineNumbers
             }
+            if let diff = overrides.diff {
+                config.diff = diff
+            }
             if let name = overrides.themeName {
                 config.theme.name = name
             }
@@ -53,6 +57,7 @@ struct CaConfig: Equatable {
 
     var theme: ThemeSelection
     var lineNumbers: Bool
+    var diff: DiffMode
     var paging: PagingMode
     var headers: Bool
     var rules: [Rule]
@@ -60,6 +65,7 @@ struct CaConfig: Equatable {
     static let `default` = CaConfig(
         theme: .init(name: nil, appearance: .auto),
         lineNumbers: true,
+        diff: .auto,
         paging: .auto,
         headers: true,
         rules: []
@@ -77,6 +83,15 @@ struct CaConfig: Equatable {
     }
 }
 
+
+
+enum DiffMode: String, CaseIterable, Codable {
+    case auto
+    case none
+    case patch
+}
+
+extension DiffMode: ExpressibleByArgument {}
 enum ThemeAppearancePreference: String, Codable {
     case auto
     case dark

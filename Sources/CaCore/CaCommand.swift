@@ -66,7 +66,7 @@ package struct CaCommand: AsyncParsableCommand {
                 }
 
                 let theme = resolver.resolve(using: perFileConfig)
-                let highlighter = HighlighterService(theme: theme, lineNumbers: perFileConfig.lineNumbers)
+                let highlighter = HighlighterService(theme: theme, lineNumbers: perFileConfig.lineNumbers, diff: perFileConfig.diff)
                 documents.append(try highlighter.render(input))
             }
 
