@@ -19,15 +19,43 @@ public final class Highlighter {
         language: LanguageID?,
         options: HighlightOptions = .init()
     ) throws -> String {
-        guard let language else {
-            return code
+        let diffRendering = options.diffRendering(for: code)
+        let needsRenderingWithoutLanguage = diffRendering != nil ||
+            !options.highlightLines.ranges.isEmpty ||
+            options.indent > 0 ||
+            options.lineNumbers.isEnabled
+
+        // If the input looks like a patch, prefer diff rendering even when `language` is nil.
+        // When possible, infer a language from patch headers (e.g. `+++ b/Foo.swift`) and render
+        // syntax-highlighted diff. Otherwise render a plain-text diff.
+        var effectiveLanguage = language
+        if effectiveLanguage == nil, diffRendering != nil {
+            effectiveLanguage = DiffDetector.inferLanguageID(fromPatch: code)
         }
 
-        guard let definition = registry.language(for: language) else {
-            if options.missingLanguageHandling == .fallbackToPlainText {
+        if effectiveLanguage == nil {
+            guard needsRenderingWithoutLanguage else {
                 return code
             }
-            throw Error.languageNotFound(language)
+            let theme = options.theme ?? self.theme
+            let renderer = Renderer(theme: theme, options: options)
+            let ns = code as NSString
+            let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+            return renderer.render(code: code, tokens: tokens)
+        }
+
+        guard let definition = registry.language(for: effectiveLanguage!) else {
+            if options.missingLanguageHandling == .fallbackToPlainText {
+                guard needsRenderingWithoutLanguage else {
+                    return code
+                }
+                let theme = options.theme ?? self.theme
+                let renderer = Renderer(theme: theme, options: options)
+                let ns = code as NSString
+                let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+                return renderer.render(code: code, tokens: tokens)
+            }
+            throw Error.languageNotFound(effectiveLanguage!)
         }
 
         let theme = options.theme ?? self.theme
