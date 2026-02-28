@@ -93,6 +93,31 @@ struct HighlighterOutputTests {
         #expect(!output.contains(unexpectedHeader))
     }
 
+
+    @Test("Diff highlighting works when language is nil (infer from patch headers)")
+    func diffHighlightingNilLanguageInfersLanguage() throws {
+        let patch = """
+        diff --git a/Foo.swift b/Foo.swift
+        --- a/Foo.swift
+        +++ b/Foo.swift
+        @@ -1,1 +1,1 @@
+        -let a = 1
+        +let a = 2
+        """
+
+        let output = try highlightWithTestTheme(
+            patch,
+            language: nil,
+            options: .init(diff: .patch())
+        )
+
+        // Should still do diff rendering, and also infer language to enable syntax coloring.
+        let expectedAdded = renderExpected([
+            ExpectedToken(.keyword, "let", background: TestThemes.stable.diffAddedBackground)
+        ])
+        #expect(output.contains(expectedAdded))
+    }
+
     @Test("Language aliases resolve in the built-in registry")
     func languageAliases() throws {
         #expect(throws: Never.self) {

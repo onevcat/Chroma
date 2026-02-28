@@ -19,15 +19,57 @@ public final class Highlighter {
         language: LanguageID?,
         options: HighlightOptions = .init()
     ) throws -> String {
-        guard let language else {
-            return code
+        func renderPlain(_ code: String, options: HighlightOptions) -> String {
+            let theme = options.theme ?? self.theme
+            let renderer = Renderer(theme: theme, options: options)
+            let ns = code as NSString
+            let tokens = [Token(kind: .plain, range: NSRange(location: 0, length: ns.length))]
+            return renderer.render(code: code, tokens: tokens)
         }
 
-        guard let definition = registry.language(for: language) else {
-            if options.missingLanguageHandling == .fallbackToPlainText {
+        // If the caller does not provide a language, we still want diff/line-number rendering
+        // when the input looks like a patch.
+        if language == nil {
+            let needsNonDiffRendering =
+                !options.highlightLines.ranges.isEmpty ||
+                options.indent > 0 ||
+                options.lineNumbers.isEnabled
+
+            let diffRendering = options.diffRendering(for: code)
+            let needsRenderingWithoutLanguage = needsNonDiffRendering || diffRendering != nil
+
+            guard needsRenderingWithoutLanguage else {
                 return code
             }
-            throw Error.languageNotFound(language)
+
+            // Avoid an extra diff auto-detection pass in Renderer by forcing `.patch` when we
+            // already know this is a diff.
+            var renderOptions = options
+            if let diffRendering {
+                renderOptions.diff = .patch(style: diffRendering.style, presentation: diffRendering.presentation)
+            }
+
+            var effectiveLanguage: LanguageID? = nil
+            if diffRendering != nil {
+                effectiveLanguage = DiffDetector.inferLanguageID(fromPatch: code)
+            }
+
+            if effectiveLanguage == nil {
+                return renderPlain(code, options: renderOptions)
+            }
+
+            // Continue with inferred language.
+            return try highlight(code, language: effectiveLanguage, options: renderOptions)
+        }
+
+        let effectiveLanguage = language!
+
+        guard let definition = registry.language(for: effectiveLanguage) else {
+            if options.missingLanguageHandling == .fallbackToPlainText {
+                // Preserve diff/line-number rendering even when language definitions are missing.
+                return renderPlain(code, options: options)
+            }
+            throw Error.languageNotFound(effectiveLanguage)
         }
 
         let theme = options.theme ?? self.theme
