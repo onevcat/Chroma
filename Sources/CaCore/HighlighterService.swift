@@ -10,15 +10,28 @@ struct HighlighterService {
     private let highlighter: Highlighter
     private let options: HighlightOptions
 
-    init(theme: Theme, lineNumbers: Bool) {
+    init(theme: Theme, lineNumbers: Bool, diff: DiffMode) {
         self.highlighter = Highlighter(theme: theme)
         self.options = HighlightOptions(
             colorMode: .auto(output: .stdout),
             missingLanguageHandling: .fallbackToPlainText,
+            diff: Self.mapDiff(diff),
             lineNumbers: lineNumbers ? LineNumberOptions() : .none
         )
     }
 
+
+
+    private static func mapDiff(_ mode: DiffMode) -> HighlightOptions.DiffHighlight {
+        switch mode {
+        case .auto:
+            return .auto()
+        case .none:
+            return .none
+        case .patch:
+            return .patch()
+        }
+    }
     func render(_ input: InputFile) throws -> HighlightedDocument {
         let output = try highlighter.highlight(
             input.content,

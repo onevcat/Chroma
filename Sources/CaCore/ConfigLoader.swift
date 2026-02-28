@@ -26,6 +26,7 @@ struct CaConfigLoader {
 private struct CaConfigFile: Decodable {
     var theme: Theme?
     var lineNumbers: Bool?
+    var diff: DiffMode?
     var paging: PagingMode?
     var headers: Bool?
     var rules: [Rule]?
@@ -71,10 +72,12 @@ private struct CaConfigFile: Decodable {
 
         struct Set: Decodable {
             var lineNumbers: Bool?
+            var diff: DiffMode?
             var theme: Theme?
 
             enum CodingKeys: String, CodingKey {
                 case lineNumbers
+                case diff
                 case theme
             }
         }
@@ -99,6 +102,9 @@ private struct CaConfigFile: Decodable {
         if let lineNumbers {
             config.lineNumbers = lineNumbers
         }
+        if let diff {
+            config.diff = diff
+        }
         if let paging {
             config.paging = paging
         }
@@ -112,6 +118,7 @@ private struct CaConfigFile: Decodable {
                     match: .init(ext: Set(rule.match.ext.map { $0.lowercased() })),
                     overrides: .init(
                         lineNumbers: rule.set.lineNumbers,
+                        diff: rule.set.diff,
                         themeName: rule.set.theme?.name,
                         themeAppearance: rule.set.theme?.appearance
                     )
