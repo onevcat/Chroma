@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-28
+### Added
+- Add `diff` mode switch to `ca` config (`auto`/`none`/`patch`), including per-extension overrides via `rules`.
+
+### Fixed
+- Render unified diff for patch inputs even when the language cannot be inferred (e.g. `*.patch`), with best-effort language inference from patch headers.
+
 ## [0.3.0] - 2026-02-27
 ### Added
 - Support per-extension config overrides via `rules` in `~/.config/ca/config.json`.

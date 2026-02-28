@@ -2,7 +2,7 @@ import ArgumentParser
 import Foundation
 
 package struct CaCommand: AsyncParsableCommand {
-    package static let version = "0.3.0"
+    package static let version = "0.3.1"
 
     package static let configuration = CommandConfiguration(
         commandName: "ca",
